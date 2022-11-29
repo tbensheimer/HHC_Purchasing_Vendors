@@ -15,11 +15,11 @@
 
                 <form action="#" id="notif-form">
                     <div class="quill-div mb-4">
-                   @* <div id="notification-input-div">
+                        @* <div id="notification-input-div">
                     </div>*@
                         <BlazoredTextEditor @ref="@Quill">
                             <ToolbarContent>
-                                 <select class="ql-font">
+                                <select class="ql-font">
                                     <option selected=""></option>
                                     <option value="serif"></option>
                                     <option value="monospace"></option>
@@ -32,7 +32,7 @@
                                     <option value="4"></option>
                                     <option value="5"></option>
                                 </select>
-                                  <select class="ql-align">
+                                <select class="ql-align">
                                     <option selected=""></option>
                                     <option value="center"></option>
                                     <option value="right"></option>
@@ -50,8 +50,8 @@
                                 <span class="ql-formats">
                                     <button class="ql-list" value="ordered"></button>
                                     <button class="ql-list" value="bullet"></button>
-                                    </span>
-                                  
+                                </span>
+
 
                                 <span class="ql-formats">
                                     <button class="ql-link"></button>
@@ -60,19 +60,20 @@
                             </ToolbarContent>
                             <EditorContent>
                                 <p>To Company,</p>
-                                <br/>
-                                <br/>
-                                <br/>
-                                <br/>
-                                <br/>
-                                <br/>
+                                <br />
+                                <br />
+                                <br />
+                                <br />
+                                <br />
+                                <br />
                                 <p>Thank you,</p>
                                 <p>Health and Hospital Corporation</p>
+                                <p>Purchasing Department</p>
                                 <p>Marion County Health Department</p>
-                                
+
                             </EditorContent>
                         </BlazoredTextEditor>
-                        </div>
+                    </div>
 
                     <br />
 
@@ -103,10 +104,10 @@
                     @if (tab1)
                     {
                         <div class="tabcontent mb-4">
-                            
+
                             <div class="create-account-container mb-4">
                                 <p class="when fw-bold mb-3">When would you like to send the notification?</p>
-                                <input type="radio" id="immediate" name="send" class="mb-3"/>
+                                <input type="radio" id="immediate" name="send" class="mb-3" />
                                 <label for="immediate">Immediately</label><br>
                                 <input type="radio" id="repeat7" value="repeat-7-days" name="send" class="mb-3" />
                                 <label for="repeat7">Every 7 days after first notification</label><br>
@@ -189,7 +190,7 @@
                                             Select All
                                         </label>
                                     </li>
-                                    
+
                                     @if (FilteredCategories is not null)
                                     {
                                         @foreach (var cat in FilteredCategories)
@@ -206,7 +207,9 @@
                                                         </label>
                                                         <br />
                                                     </li>
-                                                } else {
+                                                }
+                                                else
+                                                {
                                                     <li class="catLi">
                                                         <label id="key" for="@cat.Category_Name">
                                                             <input @key="cat.Id" @onclick="() => HandleCategoryChange(cat.Id)" class="form-check-input cat-check" id="@cat.Category_Name"
@@ -242,21 +245,35 @@
                                             Select All
                                         </label>
                                     </li>
-                                        @if(RelatedCompanies is not null && Companies is not null)
+                                    @if (RelatedCompanies is not null && Companies is not null)
+                                    {
+                                        @foreach (var rcompany in RelatedCompanies)
                                         {
-                                            @foreach(var rcompany in RelatedCompanies)
+                                            @foreach (var company in Companies.Where(comp => comp.Id == rcompany.CompanyId))
                                             {
-                                                @foreach(var company in Companies.Where(comp => comp.Id == rcompany.CompanyId))
+                                                if (company.Is_Checked)
                                                 {
-                                            <li>
-                                                <label for="company-checkbox">
-                                                    <input type="checkbox" class="form-check-input" id="company-checkbox" />
-                                                        @company.Name
-                                                </label>
-                                            </li>
+                                                    <li>
+                                                        <label for="company-checkbox">
+                                                            <input @onclick="() => HandleCompanyChange(company.Id)" @key="company.Id" checked type="checkbox" class="form-check-input" id="company-checkbox" />
+                                                            @company.Name
+                                                        </label>
+                                                    </li>
+                                                }
+                                                else
+                                                {
+
+
+                                                    <li>
+                                                        <label for="company-checkbox">
+                                                            <input @onclick="() => HandleCompanyChange(company.Id)" @key="company.Id" type="checkbox" class="form-check-input" id="company-checkbox" />
+                                                            @company.Name
+                                                        </label>
+                                                    </li>
                                                 }
                                             }
                                         }
+                                    }
                                 </ul>
 
                             </div>
@@ -286,9 +303,9 @@
                 </thead>
                 <tbody>
                     <tr>
-                    <td>HP Inc, Lambo</td>
-                    <td>August 21, 2022</td>
-                    <td>"Please send supplies to us asap.</td>
+                        <td>HP Inc, Lambo</td>
+                        <td>August 21, 2022</td>
+                        <td>"Please send supplies to us asap.</td>
                     </tr>
                     <tr>
                         <td>HP Inc, Lambo</td>
@@ -357,6 +374,8 @@
 
 
     private Company[]? Companies { get; set; }
+    private Company? Company { get; set; }
+    private List<Company> SelectedCompanies = new List<Company>();
     // private Notifications? Notification { get; set; }
 
     public Notifications? Notifs { get; set; }
@@ -389,6 +408,13 @@
             await context.SaveChangesAsync();
         }
 
+        foreach (var comp in Companies)
+        {
+            comp.Is_Checked = false;
+            context.Update(comp);
+            await context.SaveChangesAsync();
+        }
+
         await LoadData();
     }
 
@@ -400,7 +426,7 @@
 
     protected async override Task OnAfterRenderAsync(bool firstRender)
     {
-        if(firstRender)
+        if (firstRender)
         {
             //  await JS.InvokeVoidAsync("blazorInterop.quillFunction", "notification-input-div");
 
@@ -414,6 +440,9 @@
         using var context = ContextFactory.CreateDbContext();
 
         Types = await context.Business_Types.OrderBy(type => type.Type_Name).ToArrayAsync();
+
+        Companies = await context.Companies.ToArrayAsync();
+
 
         Companies = await context.Companies
         .Where(comp => comp.Is_Deleted == false)
@@ -613,12 +642,12 @@
 
                 foreach (var company in CompanyTypesCats)
                 {
-                    foreach(var cat in CheckedCategories.Where(cat => cat.Id == company.Category_Id)) 
+                    foreach (var cat in CheckedCategories.Where(cat => cat.Id == company.Category_Id))
                     {
-                       if(!RelatedCompanies.Any(comp => comp.CompanyId == company.CompanyId))
-                       {
+                        if (!RelatedCompanies.Any(comp => comp.CompanyId == company.CompanyId))
+                        {
                             RelatedCompanies.Add(company); //This allows to add company back in if they have other categories that were checked
-                       }
+                        }
                     }
                 }
             }
@@ -626,6 +655,27 @@
 
 
         await LoadCategories();
+        await LoadData();
+    }
+
+    private async Task HandleCompanyChange(int CompanyId)
+    {
+        using var context = ContextFactory.CreateDbContext();
+        Company = await context.Companies.FirstOrDefaultAsync(comp => comp.Id == CompanyId);
+        Company.Is_Checked = !Company.Is_Checked;
+        context.Update(Company);
+        await context.SaveChangesAsync();
+
+        if (Company.Is_Checked )
+        {
+            SelectedCompanies.Add(Company);
+        }
+
+        if (!Company.Is_Checked)
+        {
+            SelectedCompanies.RemoveAll(comp => comp.Id == CompanyId);
+        }
+
         await LoadData();
     }
 

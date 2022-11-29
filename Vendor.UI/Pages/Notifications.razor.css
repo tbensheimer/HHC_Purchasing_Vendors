@@ -6,7 +6,7 @@
     overflow: hidden;
     background-color: #eff4f8;
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
 }
 
     .tab button {

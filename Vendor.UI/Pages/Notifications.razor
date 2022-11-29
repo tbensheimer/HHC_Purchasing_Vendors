@@ -1,5 +1,6 @@
 ﻿@page "/notifications"
 @using System.Net.Mail
+@using System.Net
 @using System.Net.Mime
 @inject IDbContextFactory<VendorDataDbContext> ContextFactory
 @inject IJSRuntime JS
@@ -69,7 +70,7 @@
                                 <p>Thank you,</p>
                                 <p>Health and Hospital Corporation - Purchasing Department</p>
                                 <p>Marion County Health Department</p>
-
+                                <img src="/indianapolis.jpg" cid="imageIdentifier" >
                             </EditorContent>
                         </BlazoredTextEditor>
                     </div>
@@ -79,28 +80,28 @@
 
                     <div class="tab mt-4">
                         <button type="button" @onclick="(e => DisplayTab(1))" class="@((tab1) ? "active" : "")">
-                            <i alt="user icon" class="fa-regular fa-envelope"></i><br />
+                            <span alt="user icon" class="oi oi-envelope-closed"></span><br />
                             <span class="d-none d-sm-inline">Send</span>
                         </button>
 
                         <button type="button" @onclick="(e => DisplayTab(2))" class="@((tab2) ? "active" : "")">
-                            <i alt="building icon" class="fa-regular fa-list"></i><br />
+                            <span alt="building icon" class="oi oi-paperclip"></span><br />
                             <span class="d-none d-sm-inline">Types</span>
                         </button>
 
                         <button type="button" @onclick="(e => DisplayTab(3))" class="@((tab3) ? "active" : "")">
-                            <i alt="address-book icon" class="fa-regular fa-briefcase"></i><br />
+                            <span alt="address-book icon" class="oi oi-briefcase"></span><br />
                             <span class="d-none d-sm-inline">Categories</span>
                         </button>
 
-                        <button type="button" @onclick="(e => DisplayTab(4))" class="@((tab4) ? "active" : "")">
+                      @*  <button type="button" @onclick="(e => DisplayTab(4))" class="@((tab4) ? "active" : "")">
                             <i alt="address-book icon" class="fa-regular fa-building"></i><br />
                             <span class="d-none d-sm-inline">Companies</span>
-                        </button>
+                        </button>*@
 
                     </div>
 
-                    @if (tab1)
+                    @*@if (tab1)
                     {
                         <div class="tabcontent mb-4">
 
@@ -125,8 +126,8 @@
 
                         </div>
 
-                    }
-                    @if (tab2)
+                    }*@
+                    @if (tab1)
                     {
                         <div class="tabcontent mb-4">
                             <div class="create-account-container mb-4">
@@ -170,11 +171,11 @@
                                 </ul>
 
                             </div>
-                            <button type="button" class="btn btn-primary btn-sm" @onclick="() => NextButtonClick(2)">Next</button>
+                            <button type="button" class="btn btn-primary btn-sm" @onclick="() => NextButtonClick(1)">Next</button>
 
                         </div>
                     }
-                    @if (tab3)
+                    @if (tab2)
                     {
                         <div class="tabcontent mb-4">
                             <div class="create-account-container mb-4">
@@ -223,11 +224,11 @@
                                 </ul>
 
                             </div>
-                            <button type="button" class="btn btn-primary btn-sm" @onclick="() => NextButtonClick(3)">Next</button>
+                            <button type="button" class="btn btn-primary btn-sm" @onclick="() => NextButtonClick(2)">Next</button>
 
                         </div>
                     }
-                    @if (tab4)
+                    @if (tab3)
                     {
 
                         <div class="tabcontent mb-4">
@@ -289,38 +290,24 @@
 
     @if (PrevNotifs)
     {
+       
         <h2 class="title notif-title mt-4">Previous Notifications</h2>
 
         <div class="previous-notifs-group pt-2 mt-1">
             <table class="prev-notif table dt-responsive nowrap w-100 mt-3" id="basic-datatable">
                 <thead>
                     <tr>
+                        <th>Subject</th>
+                        <th>Contents</th>
                         <th>Sent To:</th>
                         <th>Date Sent:</th>
-                        <th>Content</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>HP Inc, Lambo</td>
-                        <td>August 21, 2022</td>
-                        <td>"Please send supplies to us asap.</td>
-                    </tr>
-                    <tr>
-                        <td>HP Inc, Lambo</td>
-                        <td>August 21, 2022</td>
-                        <td>"Please send supplies to us asap.</td>
-                    </tr>
-                    <tr>
-                        <td>HP Inc, Lambo</td>
-                        <td>August 21, 2022</td>
-                        <td>"Please send supplies to us asap.</td>
-                    </tr>
-                    <tr>
-                        <td>HP Inc, Lambo</td>
-                        <td>August 21, 2022</td>
-                        <td>"Please send supplies to us asap.</td>
-                    </tr>
+                    @foreach (var notifs in NotifsHistory)
+                    {
+
+                    }
                 </tbody>
             </table>
 
@@ -375,9 +362,9 @@
     private Company[]? Companies { get; set; }
     private Company? Company { get; set; }
     private List<Company> SelectedCompanies = new List<Company>();
-    // private Notifications? Notification { get; set; }
+    private Notifications[]? NotifsHistory {get; set;}
+    private Notification_Recipient[]? NotifsRec { get; set; }
 
-    public Notifications? Notifs { get; set; }
 
     public bool IsChecked { get; set; }
     public bool SendReoccuring { get; set; }
@@ -392,6 +379,8 @@
         Categories = await context.Business_Categories.OrderBy(cat => cat.Category_Name).ToArrayAsync();
         CompanyTypesCats = await context.Company_Types_Categories.ToArrayAsync();
         Companies = await context.Companies.ToArrayAsync();
+     //   NotifsHistory = await context.NotificationsList.ToArrayAsync();
+        NotifsRec = await context.Notification_Recipients.ToArrayAsync();
 
         foreach (var type in Types)
         {
@@ -427,9 +416,8 @@
     {
         if (firstRender)
         {
-            //  await JS.InvokeVoidAsync("blazorInterop.quillFunction", "notification-input-div");
 
-            //   await JS.InvokeAsync<IJSObjectReference>("blazorInterop.datatableFunction", "#basic-datatable");
+            await JS.InvokeAsync<IJSObjectReference>("DataTablesAdd", "#basic-datatable");
 
         }
     }
@@ -514,7 +502,7 @@
             QuillContent = await this.Quill.GetHTML();
             StateHasChanged();
 
-
+    
 
             var sClient = new SmtpClient("SMTP.HHCORP.ORG");
             var message = new MailMessage();
@@ -522,38 +510,27 @@
             sClient.Port = 25;
             sClient.UseDefaultCredentials = false;
 
+            AlternateView altView = AlternateView.CreateAlternateViewFromString(QuillContent, null, MediaTypeNames.Text.Html);
+            LinkedResource linkresource = new LinkedResource("C:\\Users\tbensheimer\\Desktop\\indianapolis.jpg");
+            linkresource.ContentId = "imageIdentifier";
+            altView.LinkedResources.Add(linkresource);
 
-            //string filename = "Report1";
-
-            //string fileurl = Server.MapPath("..");
-            //fileurl = fileurl + @"\mailserver\pdf\generated\" + filename + ".pdf";
-
-
-            //if (!string.IsNullOrEmpty(fileurl))
-            //{
-            //    Attachment attachment = new Attachment(fileurl, MediaTypeNames.Application.Pdf);
-            //    ContentDisposition disposition = attachment.ContentDisposition;
-            //    disposition.CreationDate = File.GetCreationTime(fileurl);
-            //    disposition.ModificationDate = File.GetLastWriteTime(fileurl);
-            //    disposition.ReadDate = File.GetLastAccessTime(fileurl);
-            //    disposition.FileName = Path.GetFileName(fileurl);
-            //    disposition.Size = new FileInfo(fileurl).Length;
-            //    disposition.DispositionType = DispositionTypeNames.Attachment;
-            //    message.Attachments.Add(attachment);
-            //}
 
             message.To.Add(new MailAddress("tbensheimer@gmail.com"));
             message.From = new MailAddress("test@hhcorp.org");
             message.Subject = "Test Subject";
-            message.Body = QuillContent;
+            message.AlternateViews.Add(altView);
             message.IsBodyHtml = true;
 
 
 
             sClient.Send(message);
+            
 
         }
     }
+
+   
 
     private async Task HandleTypeChange(int TypeId)
     {

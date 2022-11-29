@@ -11,8 +11,7 @@
     <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
     <link href="css/site.css" rel="stylesheet" />
     <link href="Vendor.UI.styles.css" rel="stylesheet" />
-@*    <link href="BlazorDataTable.styles.css" rel="stylesheet" /> 
-*@
+
    <component type="typeof(HeadOutlet)" render-mode="ServerPrerendered" />
     <link href="//cdn.datatables.net/1.11.5/css/dataTables.bootstrap4.min.css" rel="stylesheet" />
 
@@ -60,7 +59,7 @@
             $(function() {
                 $(table).DataTable();
             });
-            },2000);
+            },3000);
 
         }
 
@@ -70,7 +69,7 @@
             $(function() {
                 $(table).DataTable().destroy();
             })
-            }, 2000);
+            }, 3000);
            
         }
     </script>

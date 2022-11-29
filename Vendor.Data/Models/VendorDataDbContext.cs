@@ -21,7 +21,7 @@ namespace Vendor.Data.Models
         public DbSet<Business_Types> Business_Types { get; set; } = default!;
 
         public DbSet<Company_Types_Categories> Company_Types_Categories { get; set; } = default!;
-        public DbSet<Notifications> Notifications { get; set; } = default!;
+        public DbSet<Notifications> NotificationsList { get; set; } = default!;
         public DbSet<Notification_Recipient> Notification_Recipients { get; set; } = default!;
 
 

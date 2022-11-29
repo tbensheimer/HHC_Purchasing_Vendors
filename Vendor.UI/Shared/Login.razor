@@ -1,0 +1,53 @@
+﻿@page "/login"
+
+<h3>Login</h3>
+
+
+<main class="main">
+    <form class="form">
+
+        <div class="logo-container">
+            <img src="HHC logo.PNG" alt="HHC logo" class="logo" />
+        </div>
+
+        <h1 class="title fs-4 mb-3 fw-bold">Vendor Registration Portal</h1>
+        <h2 class="prompt fs-6 mb-4">Enter your network email and password.</h2>
+
+        <div class="input-group mb-3">
+            <label for="email" class="label-email" hidden>Email</label>
+            <span class="input-group-text"><i alt="user icon" class="fa-solid fa-user"></i></span>
+            <input id="email" type="text" class="email-input form-control" placeholder="Enter your email" name="email" />
+        </div>
+
+        <div class="input-group">
+            <label for="password" class="label-password" hidden>Password</label>
+            <span class="input-group-text"><i alt="lock icon" class="fa-solid fa-lock"></i></span>
+            <input class="password-input form-control" id="password" type="password" placeholder="Enter your password" name="password" />
+        </div>
+        <a class="forgot-pass text-muted mb-2"><small>Forgot Password?</small></a>
+
+
+        <div class="input-group mb-3 hidden passcode-group">
+            <label for="duo" class="label-duo" hidden>Passcode</label>
+            <span class="input-group-text"><i al="key icon" class="fa-solid fa-key"></i></span>
+            <input id="duo" type="text" class="pass duo-input form-control" placeholder="Enter Passcode" name="passcode" />
+        </div>
+
+        <button type="submit" class="btn btn-success btn-block col-10"><span><i alt="Login icon" class="fa-solid fa-right-to-bracket"></i></span> Log In</button>
+        <a class="passcode text-muted mb-3"><small>Use Passcode</small></a>
+        <div class="alert hidden text-center"></div>
+        <br />
+
+        <p class="register-prompt">Don't have an account? <a class="register-link" href="/Vendor Register/index.html">Register Here</a></p>
+
+    </form>
+
+    <div class="img-container">
+        <img src="indianapolis.jpg" alt="Downtown Indianapolis image" class="img" />
+    </div>
+
+</main>
+
+@code {
+
+}

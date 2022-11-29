@@ -1,0 +1,166 @@
+﻿@page "/category-list/type/{TypeId:int}"
+@inject IDbContextFactory<VendorDataDbContext> ContextFactory
+@inject IJSRuntime JS
+@inject StateContainer StateContainer
+@inject NavigationManager NavigationManager
+
+
+@if (Type is not null)
+{
+    <h3>Categories for Type: <strong>@Type.Type_Name</strong></h3>
+}
+
+
+@if(CatList is not null)
+{
+    <table class="table table-hover">
+        <thead>
+            <tr>
+            <th>Category</th>
+            <th>#</th>
+            </tr>
+        </thead>
+        <tbody>
+
+            @foreach(var cat in CatList)
+            {
+                <tr>
+                    <td>
+                        <label for="@cat.Id" hidden>@cat.Category_Name</label>
+                        <input type="text" class="form-control" name="@cat.Category_Name" @bind-value="@cat.Category_Name" id="@cat.Id" />
+                    </td>
+                    <td>
+                        <button @onclick="() => HandleCatRemove(cat.Id)" class="fw-bold btn btn-danger btn-sm">Remove Category</button>
+                    </td>
+                </tr>
+            }
+
+            <tr class="input-row">
+                <td>
+                    <EditForm Model="@BCat">
+                        <label for="input-cat" hidden>Add Category</label>
+                        <InputText @bind-Value="@InputCat" id="input-cat" type="text" name="input-cat" class="form-control" placeholder=" Add a Category" />
+                    </EditForm>
+
+                </td>
+                <td><button @onclick="() => HandleCatAdd()" type="button" class="fw-bold btn btn-primary btn-sm">Add Type</button></td>
+            </tr>
+
+        </tbody>
+    </table>
+
+    <button @onclick="() => HandleCategorySave()" type="button" class="btn btn-success btn-sm fw-bold mb-4">Save Changes</button>
+}
+
+<div>
+   <div class="panel type-cat-panel">
+    <div class="layout">
+      <h2 class="notif-header fs-4 fw-bold title">Vendor Types</h2>
+      <p class="notif-description desc">Manage vendor types that companies can subscribe to</p>
+      </div>
+      <span class="briefcase"><i alt="briefcase icon" class="fa-solid fa-briefcase fa-2x"></i></span>
+        <a @onclick="@HandleNavigationTypeList" class="stretched-link"></a>
+        </div>
+
+    <div class="panel home-panel mb-4 mt-4">
+        <div class="layout">
+            <h2 class="home-header fs-4 fw-bold title">Home Page</h2>
+            <p class="home-description desc">Go back to home page to do various tasks</p>
+        </div>
+        <span class="house"><i alt="house icon" class="fa-solid fa-house fa-2x"></i></span>
+        <a href="/" class="stretched-link"></a>
+    </div>
+    </div>
+
+@code {
+
+    [Parameter]
+    public int TypeId { get; set; }
+
+    public Business_Categories[]? CatList { get; set; }
+
+    public Business_Categories? BCat = new Business_Categories();
+
+    public Business_Categories? Category { get; set; }
+
+    public Business_Types? Type { get; set; }
+
+    private string? InputCat { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await LoadData();   
+    }
+
+    private async Task LoadData()
+    {
+        using var context = ContextFactory.CreateDbContext();
+
+        CatList = await context.Business_Categories.Where(cat => cat.Type_Id == TypeId).ToArrayAsync();
+        Type = await context.Business_Types.FirstOrDefaultAsync(type => type.Id == TypeId);
+
+    }
+
+
+    private async Task HandleCatRemove(int CatId)
+    {
+        using var context = ContextFactory.CreateDbContext();
+        var dbCat = await context.Business_Categories.FirstOrDefaultAsync(cat => cat.Id == CatId);
+
+        if (dbCat is not null && CatList is not null)
+        {
+            var isOk = await JS.InvokeAsync<bool>("confirm", $"Are you sure you want to remove the category {dbCat.Category_Name}?");
+
+            if (isOk)
+            {
+                context.Business_Categories.Remove(dbCat);
+                await context.SaveChangesAsync();
+                await LoadData();
+            }
+        }
+    }
+
+    private async Task HandleCatAdd()
+    {
+        using var context = ContextFactory.CreateDbContext();
+
+        if (InputCat is not null)
+        {
+            Category = new Business_Categories();
+            Category.Type_Id = TypeId;
+            Category.Category_Name = InputCat;
+            context.Business_Categories.Add(Category);
+            await context.SaveChangesAsync();
+            await LoadData();
+            InputCat = null;
+        }
+    }
+
+    private async Task HandleCategorySave()
+    {
+        using var context = ContextFactory.CreateDbContext();
+        if (CatList is not null)
+        {
+            foreach (var cat in CatList)
+            {
+                var dbCat = context.Business_Categories.FirstOrDefault(c => c.Id == cat.Id);
+                if (dbCat is not null && cat.Category_Name != "")
+                {
+                    dbCat.Category_Name = cat.Category_Name;
+                    context.Update(dbCat);
+                    await context.SaveChangesAsync();
+                    await LoadData();
+
+                }
+            }
+        }
+
+    }
+
+    private void HandleNavigationTypeList()
+    {
+        NavigationManager.NavigateTo($"/types-and-categories-list/{StateContainer.TypeListPage}");
+    }
+
+
+}

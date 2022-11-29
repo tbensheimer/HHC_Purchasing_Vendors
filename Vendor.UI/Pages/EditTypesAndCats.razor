@@ -1,0 +1,461 @@
+﻿@page "/edit/company-types-and-categories/{CompanyId:int}"
+@inject IDbContextFactory<VendorDataDbContext> ContextFactory
+@inject IJSRuntime JS
+@inject NavigationManager NavigationManager
+@inject StateContainer StateContainer
+
+<div class="main">
+    <p class="cat-title fs-5 fw-bold">Selected Categories:</p>
+    <div class="current-categories">
+
+        @if (CurrentCompanyCategories is not null && Categories is not null && Types is not null)
+        {
+            @foreach (var cat in CurrentCompanyCategories.OrderBy(cat => cat.Type_Id))
+            {
+                @foreach (var type in Types.Where(type => type.Id == cat.Type_Id))
+                {
+                    @foreach (var category in Categories.Where(category => category.Id == cat.Category_Id))
+                    {
+                        <div class="current-types-cats">
+                            <p><strong>@type.Type_Name:</strong> @category.Category_Name</p>
+                            <button @onclick="() => HandleCategoryRemove(category.Id)" class="btn btn-outline-danger btn-sm" type="button">Remove</button>
+                        </div>
+                        if(CategoryError is not null)
+                        {
+                            <div class="alert alert-danger">@CategoryError</div>
+                        }
+                    }
+
+                }
+
+            }
+        } else 
+        {
+            <div>Loading...</div>
+        }
+    </div>
+
+
+    <div class="types-categories-group mb-4">
+        @if (Company is not null)
+        {
+            <h3 class="prompt fs-3 fw-bold mb-4">Add More Types and Categories to the Company:</h3>
+        }
+        <p class="fw-bold">
+            Please check all types and categories that relate to the company.
+            Click save when done.
+        </p>
+        <div class="layout">
+            <div class="search-view-type">
+                <div class="input-group mb-3">
+                    <label for="search" hidden>Search Type </label>
+                    <input type="text" id="search" placeholder=" Search Type... "
+                           @onkeyup="@FilterKeyUp" @bind-value="@FilterTypeString" class="type-search-input form-control mb-3" />
+                    <button class="btn btn-sm btn-secondary" type="button" @onclick="ButtonFilterClick">Filter</button>
+                </div>
+
+
+                <div class="types mt-3">
+                    <p class="types-title fs-5 fw-bold">Type</p>
+
+                    <ul class="type-data">
+                        @if (QueryableTypes is not null)
+                        {
+                            @foreach (var type in QueryableTypes)
+                            {
+                                @if (type.Is_Checked)
+                                {
+                                    <li class="typeLi">
+                                    <label id="key" for="@type.Type_Name">
+                                        <input @key="@type.Id" checked id="@type.Type_Name" value="@type.Is_Checked" @onchange="() => HandleTypeChange(type.Id)" class="form-check-input type-check"
+                                       Name="TypeCheckbox" type="checkbox" /> @type.Type_Name
+                                    </label>
+                                    <br />
+                                </li>
+                                } else
+                                {
+                                <li class="typeLi">
+                                    <label id="key" for="@type.Type_Name">
+                                        <input @key="@type.Id" value="@type.Is_Checked" id="@type.Type_Name" @onchange="() => HandleTypeChange(type.Id)" class="form-check-input type-check"
+                                       Name="TypeCheckbox" type="checkbox" /> @type.Type_Name
+                                    </label>
+                                    <br />
+                                </li>
+                                }
+                            }
+
+                        }
+                    </ul>
+
+                </div>
+            </div>
+
+            <div class="view-search-type">
+                <div class="input-group mb-3">
+                    <label for="search-cat" hidden>Search Category</label>
+                    <input type="text" id="search-cat" placeholder=" Search Category... "
+                           @onkeyup="@FilterKeyUp" @bind-value="@FilterCategoryString" class="category-search-input form-control mb-3" />
+                    <button class="btn btn-sm btn-secondary" type="button" @onclick="@ButtonFilterClick">Filter</button>
+                </div>
+
+
+
+
+                <div class="categories mt-3">
+
+                    <p class="cat-title fs-5 fw-bold">Categories:</p>
+
+                    <ul class="cat-data">
+                        @if (QueryableCategories is not null)
+                        {
+                            @foreach (var cat in QueryableCategories)
+                            {
+                                @foreach (var type in CheckedTypes.Where(type => type.Id == cat.Type_Id))
+                                {
+                                    @if (cat.Is_Checked)
+                                    {
+                                        <li class="catLi">
+                                            <label id="key" for="@cat.Category_Name">
+                                                <input @key="@cat.Id" checked value="@cat.Is_Checked" @onchange="() => HandleCategoryChange(cat.Id)" class="form-check-input cat-check" id="@cat.Category_Name"
+                                       name="@cat.Category_Name" type="checkbox" /><strong> @type.Type_Name:</strong> @cat.Category_Name
+                                            </label>
+                                            <br />
+                                        </li>
+                                    } else {
+                                        <li class="catLi">
+                                            <label id="key" for="@cat.Category_Name">
+                                                <input @key="cat.Id" value="@cat.Is_Checked" @onchange="() => HandleCategoryChange(cat.Id)" class="form-check-input cat-check" id="@cat.Category_Name"
+                                       name="@cat.Category_Name" type="checkbox" /><strong> @type.Type_Name:</strong> @cat.Category_Name
+                                            </label>
+                                            <br />
+                                        </li>
+                                    }
+                                }
+                            }
+                        }
+                    </ul>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <button type="button" @onclick="() => HandleTypesCatsSubmit()" class="save-btn btn btn-success mb-3">Save Types and Changes</button>
+
+
+    <div class="panel company-panel mt-4">
+        <div class="panel-layout">
+            <h2 class="company-header fs-4 fw-bold title">Companies/Vendors</h2>
+            <p class="company-description desc">Manage companies that have registered</p>
+        </div>
+        <span class="building"><i alt="building icon" class="fa-solid fa-building fa-2x"></i></span>
+        <a @onclick="@HandleNavigationCompanyList" class="stretched-link"></a>
+    </div>
+
+    <div class="panel home-panel mb-4 mt-4">
+        <div class="panel-layout">
+            <h2 class="home-header fs-4 fw-bold title">Home Page</h2>
+            <p class="home-description desc">Go back to home page to do various tasks</p>
+        </div>
+        <span class="house"><i alt="house icon" class="fa-solid fa-house fa-2x"></i></span>
+        <a href="/" class="stretched-link"></a>
+    </div>
+</div>
+
+
+@code {
+    [Parameter]
+    public int CompanyId { get; set; }
+
+    public Company? Company { get; set; }
+    public Business_Types? Type { get; set; }
+    public Business_Categories? Category { get; set; }
+    private DateTime SignUpDate { get; set; }
+    public Company_Types_Categories? CompanyTypeAndCat { get; set; }
+    public List<Company_Types_Categories>? CompanyCategories = new List<Company_Types_Categories>();
+
+    private Company_Types_Categories[]? CurrentCompanyCategories { get; set; }
+    private Company_Types_Categories[]? CurrentCompanyTypes { get; set; }
+    private Company_Types_Categories? CategoryRemove { get; set; }
+
+    private List<Business_Categories> FilteredCategories = new List<Business_Categories>();
+
+    private string? FilterTypeString { get; set; }
+    private string? FilterCategoryString { get; set; }
+
+    public Business_Types[]? Types { get; set; }
+    public Business_Types[]? QueryableTypes { get; set; }
+    public List<Business_Categories>? QueryableCategories = new List<Business_Categories>();
+
+
+    public Business_Categories[]? Categories { get; set; }
+
+
+    private List<Authorized_Contacts>? Contacts = new List<Authorized_Contacts>();
+    private List<Business_Types> CheckedTypes = new List<Business_Types>();
+    private List<Business_Categories> CheckedCategories = new List<Business_Categories>();
+    private List<Business_Categories> FilteredCheckedCategories = new List<Business_Categories>();
+
+    private string? CategoryError { get; set; }
+    private int? CurrentCategoryCount { get; set; }
+
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = ContextFactory.CreateDbContext();
+        Company = await context.Companies.FirstOrDefaultAsync(comp => comp.Id == CompanyId);
+        Types = await context.Business_Types.OrderBy(type => type.Type_Name).ToArrayAsync();
+        Categories = await context.Business_Categories.OrderBy(cat => cat.Category_Name).ToArrayAsync();
+
+        foreach (var type in Types)
+        {
+            type.Is_Checked = false;
+            context.Update(type);
+            await context.SaveChangesAsync();
+        }
+
+        foreach (var cat in Categories)
+        {
+            cat.Is_Checked = false;
+            context.Update(cat);
+            await context.SaveChangesAsync();
+        }
+
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        using var context = ContextFactory.CreateDbContext();
+
+        CurrentCompanyCategories = await context.Company_Types_Categories.Where(comp => comp.CompanyId == CompanyId).ToArrayAsync();
+        CurrentCategoryCount = await context.Company_Types_Categories.Where(comp => comp.CompanyId == CompanyId).CountAsync();
+
+        if (CurrentCategoryCount > 1)
+        {
+            CategoryError = null;
+        }
+
+        IQueryable<Business_Types> TypeQuery = context.Business_Types;
+        TypeQuery = AddTypeFilter(TypeQuery);
+        QueryableTypes = await TypeQuery.OrderBy(type => type.Type_Name).ToArrayAsync();
+
+
+        if (!string.IsNullOrWhiteSpace(FilterCategoryString) && QueryableCategories is not null)
+        {
+            QueryableCategories.Clear();
+            foreach (var cat in FilteredCategories.Where(cat => cat.Category_Name != null && cat.Category_Name.ToLower().Contains(this.FilterCategoryString.ToLower())))
+            {
+                QueryableCategories.Add(cat);
+            }
+        }
+        else if (string.IsNullOrWhiteSpace(FilterCategoryString) && QueryableCategories is not null)
+        {
+            QueryableCategories.Clear();
+            foreach (var cat in FilteredCategories)
+            {
+                QueryableCategories.Add(cat);
+            }
+        }
+
+    }
+
+
+
+    private async Task HandleTypeChange(int TypeId)
+    {
+        using var context = ContextFactory.CreateDbContext();
+        Type = await context.Business_Types.FirstOrDefaultAsync(type => type.Id == TypeId);
+        Type.Is_Checked = !Type.Is_Checked;
+        context.Update(Type);
+        await context.SaveChangesAsync();
+
+        if (Type.Is_Checked)
+        {
+            if (Type is not null)
+            {
+                CheckedTypes.Add(Type);
+            }
+        }
+
+        if (!Type.Is_Checked)
+        {
+            if (Type is not null)
+            {
+                CheckedTypes.RemoveAll(type => type.Id == TypeId);
+            }
+        }
+
+        await LoadCategories();
+        await LoadData();
+    }
+
+    private async Task LoadCategories()
+    {
+        using var context = ContextFactory.CreateDbContext();
+
+        FilteredCategories.Clear();
+
+        foreach (var type in CheckedTypes)
+        {
+            var CatList = await context.Business_Categories.ToArrayAsync();
+
+            foreach (var cat in CatList)
+            {
+                if (cat.Type_Id == type.Id && type.Is_Checked)
+                {
+                    FilteredCategories.Add(cat);
+                }
+            }
+
+        }
+    }
+
+
+
+
+    private async Task HandleCategoryChange(int CatId)
+    {
+        using var context = ContextFactory.CreateDbContext();
+        Category = await context.Business_Categories.FirstOrDefaultAsync(cat => cat.Id == CatId);
+        Category.Is_Checked = !Category.Is_Checked;
+        context.Update(Category);
+        await context.SaveChangesAsync();
+
+        if (Category.Is_Checked)
+        {
+            if (Category is not null)
+            {
+                CheckedCategories.Add(Category);
+            }
+        }
+
+        if (!Category.Is_Checked)
+        {
+            if (Category is not null)
+            {
+                CheckedCategories.RemoveAll(cat => cat.Id == CatId);
+            }
+        }
+        await LoadCategories();
+        await LoadData();
+    }
+
+    private async Task HandleTypesCatsSubmit()
+    {
+       
+        foreach (var cat in CheckedCategories)
+        {
+
+            if (CurrentCompanyCategories is not null)
+            {
+
+                if (!CurrentCompanyCategories.Any(category => category.Category_Id == cat.Id))  //doesn't add already included categories into database
+                {
+                    FilteredCheckedCategories.Add(cat);
+                }
+
+            }
+        }
+        foreach (var cat in FilteredCheckedCategories)
+        {
+            using var context = ContextFactory.CreateDbContext();
+
+            if (Company is not null)
+            {
+                CompanyTypeAndCat = new();
+                CompanyTypeAndCat.CompanyId = Company.Id;
+                CompanyTypeAndCat.Category_Id = cat.Id;
+                CompanyTypeAndCat.Type_Id = cat.Type_Id;
+                if (CompanyCategories is not null)
+                {
+                    CompanyCategories.Add(CompanyTypeAndCat);
+                }
+            }
+        }
+        if (CompanyCategories is not null && FilteredCheckedCategories.Count() != 0)
+        {
+            using var context = ContextFactory.CreateDbContext();
+
+            context.Company_Types_Categories.AddRange(CompanyCategories);
+            await context.SaveChangesAsync();
+            CompanyCategories.Clear();
+            FilteredCheckedCategories.Clear();
+        }
+
+        await LoadData();
+    }
+
+
+
+    private async Task FilterKeyUp(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await LoadData();
+        }
+    }
+
+    private async Task ButtonFilterClick()
+    {
+        await LoadData();
+    }
+
+    private IQueryable<Business_Types> AddTypeFilter(IQueryable<Business_Types> TypeQuery)
+    {
+        if (!string.IsNullOrWhiteSpace(FilterTypeString))
+        {
+            return TypeQuery.Where(type => type.Type_Name != null && type.Type_Name.Contains(this.FilterTypeString));
+        }
+        return TypeQuery;
+    }
+
+    private IQueryable<Business_Categories> AddCategoryFilter(IQueryable<Business_Categories> CatQuery)
+    {
+        if (!string.IsNullOrWhiteSpace(FilterCategoryString))
+        {
+            return CatQuery.Where(cat => cat.Category_Name != null && cat.Category_Name.Contains(this.FilterCategoryString));
+        }
+        return CatQuery;
+    }
+
+    private async Task HandleCategoryRemove(int CategoryId)
+    {
+
+        using var context = ContextFactory.CreateDbContext();
+        CategoryRemove = await context.Company_Types_Categories.FirstOrDefaultAsync(cat => cat.Category_Id == CategoryId);
+
+
+        if (CurrentCategoryCount > 1)
+        {
+            if (CategoryRemove is not null && Categories is not null)
+            {
+                CategoryError = null;
+                foreach (var cat in Categories.Where(cat => cat.Id == CategoryRemove.Category_Id))
+                {
+                    var isOk = await JS.InvokeAsync<bool>("confirm", $"Are you sure you want to remove the category {cat.Category_Name}?");
+
+                    if (isOk)
+                    {
+                        context.Company_Types_Categories.Remove(CategoryRemove);
+                        await context.SaveChangesAsync();
+                        await LoadData();
+                    }
+                }
+            }
+        }
+        else if(CurrentCategoryCount <= 1) 
+        {
+            CategoryError = "Cannot delete category, there needs to be at least one category selected. Please add a category before deleting.";
+        }
+    }
+
+    private void HandleNavigationCompanyList()
+    {
+        NavigationManager.NavigateTo($"/companies/{StateContainer.CompanyInfoPage}");
+    }
+
+}

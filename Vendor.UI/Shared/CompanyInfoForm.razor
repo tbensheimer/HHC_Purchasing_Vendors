@@ -1,0 +1,103 @@
+﻿
+
+<EditForm Model="@Company" OnValidSubmit="() => HandleCompanyComplete()">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    @if(Company is not null)
+    {
+   
+    @if (IsEdit)
+    {
+        <div class="mb-3"><strong>Sign Up Date:</strong> @Company.Sign_Up</div>
+    }
+
+    <div class="company-name-group input-group mb-3">
+        <span class="company input-group-text"><i alt="building icon" class="fa-solid fa-building"></i></span>
+        <label for="company-name" hidden>Company Name</label>
+        <InputText @bind-Value="@Company.Name" class="required form-control name" id="company-name" name="company-name" type="text" placeholder="Company Name" />
+    </div>
+
+    <div class="company-id-group input-group mb-3">
+        <span class="input-group-text id-logo"><i alt="id card icon" class="fa-solid fa-id-card"></i></span>
+        <label for="id" hidden>Federal I.D. or Social Security Number</label>
+        <InputNumber @bind-Value="@Company.Fed_Id_SSN" id="id" class="required form-control id" type="text" name="federal-id-or-ssn-number" placeholder="Federal ID or Social Security Number" />
+    </div>
+
+    <div class="input-group mb-3">
+        <span class="input-group-text flag"><i alt="flag icon" class="fa-solid fa-flag"></i></span>
+        <label class="input-group-text" for="supp-cat" hidden>Options</label>
+        <InputSelect @bind-Value="@Company.Supplier_Category" name="supplier-category" class="required form-select supp-cat gray" id="supp-cat">
+            <option value="" selected>Choose Supplier Category...</option>
+            <option value="United States Entity">United States Entity</option>
+            <option value="Foreign Entity">Foreign Entity</option>
+        </InputSelect>
+    </div>
+
+    <div class="company-web-group input-group mb-3">
+        <span class="input-group-text globe"><i alt="globe icon" class="fa-solid fa-globe"></i></span>
+        <label for="web" hidden>Website / Internet Address</label>
+        <InputText @bind-Value="@Company.Website" id="web" class="form-control web" name="website" type="text" placeholder="Website / Internet Address" />
+    </div>
+
+    <div class="input-group mb-3">
+        <span class="input-group-text stamp"><i alt="stamp icon" class="fa-solid fa-stamp"></i></span>
+        <label class="input-group-text" for="div-cert" hidden>Diversity Certification</label>
+        <InputSelect @bind-Value="@Company.Diversity_Certification" name="diversity-certification" class="required form-select div-cert gray" id="div-cert">
+            <option value="" selected>Choose Diversity Certification...</option>
+            <option value="Not Certified">Not Certified</option>
+            <option value="City of Indianapolis">City of Indianapolis</option>
+            <option value="State of Indiana">State of Indiana</option>
+            <option value="NMSDC">NMSDC</option>
+            <option value="WBENC">WBENC</option>
+            <option value="Veteran's Administration">Veteran's Administration</option>
+            <option class="other" value="Other">Other</option>
+        </InputSelect>
+    </div>
+
+
+    <div class="other-div-group input-group mb-3 @(Company.Diversity_Certification == "Other" ? "" : "hidden")">
+        <span class="input-group-text stamp"><i alt="stamp icon" class="fa-solid fa-stamp"></i></span>
+        <label for="other-div-cert" hidden>Please describe the other type of diversity certification.</label>
+        <InputText @bind-Value="@Company.Other_Diversity_Certification" id="other-div-cert" class="form-control other-div-cert" type="text" name="other-description-of-diversity-certification" placeholder="If Other, Please describe type of Diversity Certification." />
+    </div>
+
+    <div class="description-group input-group mb-3">
+        <span class="briefcase input-group-text"><i alt="briefcase icon" class="fa-solid fa-briefcase"></i></span>
+        <label for="company-desc" hidden>Description of Goods and Services</label>
+        <InputText @bind-Value="@Company.Description_Goods_Services" class="required form-control name description" name="description-goods-services" id="company-desc" type="text" placeholder="Description of Goods and Services..." />
+    </div>
+
+    @if(IsEdit)
+    {
+        <button type="submit" class="btn btn-success btn-sm mb-3">Save Company Info</button>
+    }
+    else
+    {
+    <button type="submit" class="btn btn-primary mb-3">Next</button>
+    }
+    }
+</EditForm>
+
+
+
+
+@code {
+    [Parameter]
+    public Company? Company { get; set; }
+
+    [Parameter]
+    public bool IsEdit { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> OnSubmit { get; set; }
+
+
+    private async Task HandleCompanyComplete()
+    {
+        if(OnSubmit.HasDelegate)
+        {
+            await OnSubmit.InvokeAsync(true);
+        }
+    }
+
+}

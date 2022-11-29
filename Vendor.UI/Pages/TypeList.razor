@@ -1,0 +1,285 @@
+﻿@page "/types-and-categories-list/{currentPage:int?}"
+@inject IDbContextFactory<VendorDataDbContext> ContextFactory
+@inject IJSRuntime JS
+@inject NavigationManager NavigationManager
+@inject StateContainer StateContainer
+
+<h3>Types and Categories List</h3>
+
+
+@if (Types is not null)
+{
+
+    <ul class="pagination mb-2 mt-4 justify-content-center">
+        <li class="page-item  @(CurrentPage == 1 ? "disabled" : "")">
+            <a class="page-link" href="/types-and-categories-list/@(CurrentPage - 1)">Previous</a>
+        </li>
+        @for (int i = 1; i <= TotalPages; i++)
+        {
+            <li class="page-item @(CurrentPage == i ? "active" : "")">
+                <a class="page-link numbers" href="/types-and-categories-list/@i">@i</a>
+            </li>
+        }
+        <li class="page-item  @(CurrentPage == TotalPages ? "disabled" : "")">
+            <a class="page-link" href="/types-and-categories-list/@(CurrentPage + 1)">Next</a>
+        </li>
+    </ul>
+
+    <div class="mb-2 justify-content-end">
+        <input type="text" @onkeyup="@TextFilterKeyUp" @bind-value="@FilterString" placeholder="Filter Types..." />
+        <button class="btn btn-sm btn-secondary" @onclick="ButtonFilterClick">Filter</button>
+    </div>
+
+
+    <table id="type-table" class="table table-hover">
+        <thead>
+            <tr>
+                <th>Types</th>
+                <th>#</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var type in Types)
+            {
+                <tr>
+                    <td>
+                        <label for="@type.Id" hidden>@type.Type_Name</label>
+                        <input type="text" class="form-control" name="@type.Type_Name" @bind-value="@type.Type_Name" id="@type.Id" />
+                    </td>
+                    <td>
+                        <a @onclick="() => HandleCategoryEdit(type.Id)" href="/category-list/type/@type.Id" class="btn btn-outline-secondary fw-bold btn-sm">Manage Categories</a>
+                    <button style="width: 146px;" @onclick="() => HandleTypeRemove(type.Id)" class="fw-bold btn btn-danger btn-sm">Remove Type</button>
+                </td>
+                </tr>
+            }
+            <tr class="input-row">
+                <td>
+                    <EditForm Model="@BType">
+                        <label for="input-type" hidden>Add Type</label>
+                        <InputText @bind-Value="@InputType" id="input-type" type="text" name="input-type" class="form-control" placeholder=" Add a Type" />
+                    </EditForm>
+
+                </td>
+                <td><button @onclick="() => HandleTypeAdd()" type="button" class="fw-bold btn btn-primary btn-sm">Add Type</button></td>
+            </tr>
+
+        </tbody>
+    </table>
+
+<button @onclick="() => HandleTypeSave()" type="button" class="btn btn-success btn-sm fw-bold">Save Changes</button>
+
+    <ul class="pagination mb-2 mt-2 justify-content-center">
+        <li class="page-item  @(CurrentPage == 1 ? "disabled" : "")">
+            <a class="page-link" href="/types-and-categories-list/@(CurrentPage - 1)">Previous</a>
+        </li>
+        @for (int i = 1; i <= TotalPages; i++)
+        {
+            <li class="page-item @(CurrentPage == i ? "active" : "")">
+                <a class="page-link numbers" href="/types-and-categories-list/@i">@i</a>
+            </li>
+        }
+        <li class="page-item  @(CurrentPage == TotalPages ? "disabled" : "")">
+            <a class="page-link" href="/types-and-categories-list/@(CurrentPage + 1)">Next</a>
+        </li>
+    </ul>
+
+}
+else
+{
+    <div>Loading...</div>
+}
+
+ 
+    <div class="panel home-panel mb-4 mt-4">
+        <div class="layout">
+            <h2 class="home-header fs-4 fw-bold title">Home Page</h2>
+            <p class="home-description desc">Go back to home page to do various tasks</p>
+        </div>
+        <span class="house"><i alt="house icon" class="fa-solid fa-house fa-2x"></i></span>
+        <a href="/" class="stretched-link"></a>
+    </div>
+
+@code {
+
+    public Business_Types[]? Types { get; set; }
+    public Business_Categories[]? Categories { get; set; }
+    public Business_Types? Type { get; set; }
+
+    public Business_Categories? Business_Category { get; set; }
+    public List<Business_Categories>? CategoryList { get; set; }
+    private string? InputType { get; set; }
+    public Business_Types? BType = new Business_Types();
+
+    [Parameter]
+    public int? CurrentPage { get; set; }
+    private const int ItemsPerPage = 5;
+    private double TotalPages { get; set; }
+
+    private string? FilterString { get; set; }
+
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await LoadData();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+
+        //if (firstRender)
+        //{
+        //    await JS.InvokeAsync<IJSObjectReference>("DataTablesAdd", "#type-table");
+        //}
+    }
+
+    public void Dispose()
+    {
+        JS.InvokeAsync<IJSObjectReference>("DataTablesRemove", "#type-table");
+    }
+
+    private async Task LoadData()
+    {
+        if (CurrentPage is null or < 1)
+        {
+            NavigationManager.NavigateTo("/types-and-categories-list/1");
+            return;
+        }
+
+
+        using var context = ContextFactory.CreateDbContext();
+        var ItemsToSkip = (CurrentPage.Value - 1) * ItemsPerPage;
+
+
+
+
+        IQueryable<Business_Types> TypeCountQuery = context.Business_Types;
+        TypeCountQuery = AddFilter(TypeCountQuery);
+        var TypeCount = await TypeCountQuery.CountAsync();
+        TotalPages = TypeCount == 0 ? 1 : Math.Ceiling((double)TypeCount / ItemsPerPage);
+
+
+        if (CurrentPage > TotalPages)
+        {
+            NavigationManager.NavigateTo($"/types-and-categories-list/{TotalPages}");
+            return;
+        }
+
+        StateContainer.TypeListPage = CurrentPage.Value;
+
+
+        IQueryable<Business_Types> TypeQuery = context.Business_Types;
+        TypeQuery = AddFilter(TypeQuery);
+        Types = await TypeQuery
+        .OrderBy(type => type.Type_Name)
+        .Skip(ItemsToSkip)
+        .Take(ItemsPerPage)
+        .ToArrayAsync();
+
+
+    }
+
+    private async Task HandleCategoryEdit(int TypeId)
+    {
+        using var context = ContextFactory.CreateDbContext();
+        if (Types is not null)
+        {
+            foreach (var type in Types)
+            {
+                var dbType = context.Business_Types.FirstOrDefault(t => t.Id == type.Id);
+                if (dbType is not null)
+                {
+                    dbType.Type_Name = type.Type_Name;
+                    context.Update(dbType);
+                    await context.SaveChangesAsync();
+                }
+            }
+        }
+    }
+
+    private async Task HandleTypeSave()
+    {
+        using var context = ContextFactory.CreateDbContext();
+        if (Types is not null)
+        {
+            foreach (var type in Types)
+            {
+                var dbType = context.Business_Types.FirstOrDefault(t => t.Id == type.Id);
+                if (dbType is not null && type.Type_Name != "")
+                {
+                    dbType.Type_Name = type.Type_Name;
+                    context.Update(dbType);
+                    await context.SaveChangesAsync();
+                    await LoadData();
+
+                }
+            }
+        }
+
+    }
+
+    private async Task HandleTypeRemove(int TypeId)
+    {
+        using var context = ContextFactory.CreateDbContext();
+        var dbType = await context.Business_Types.FirstOrDefaultAsync(type => type.Id == TypeId);
+        CategoryList = await context.Business_Categories.Where(cat => cat.Type_Id == TypeId).ToListAsync();
+
+        if (dbType is not null && CategoryList is not null)
+        {
+            var isOk = await JS.InvokeAsync<bool>("confirm", $"Are you sure you want to remove the type {dbType.Type_Name} and all of it's categories?");
+
+            if (isOk)
+            {
+
+
+                context.Business_Types.Remove(dbType);
+
+                foreach (var cat in CategoryList)
+                {
+                    context.Business_Categories.Remove(cat);
+                }
+                await context.SaveChangesAsync();
+                await LoadData();
+            }
+        }
+    }
+
+    private async Task HandleTypeAdd()
+    {
+        using var context = ContextFactory.CreateDbContext();
+
+        if (InputType is not null)
+        {
+            Type = new Business_Types();
+            Type.Type_Name = InputType;
+
+            context.Business_Types.Add(Type);
+            await context.SaveChangesAsync(); 
+            await LoadData();
+            InputType = null;
+        }
+    }
+
+
+    private IQueryable<Business_Types> AddFilter(IQueryable<Business_Types> typeQuery)
+    {
+        if (!string.IsNullOrWhiteSpace(FilterString))
+        {
+            return typeQuery.Where(type => type.Type_Name != null && type.Type_Name.Contains(this.FilterString));
+        }
+        return typeQuery;
+    }
+
+    private async Task TextFilterKeyUp(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await LoadData();
+        }
+    }
+
+    private async Task ButtonFilterClick()
+    {
+        await LoadData();
+    }
+
+}

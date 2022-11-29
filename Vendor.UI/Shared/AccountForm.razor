@@ -1,0 +1,82 @@
+﻿
+<EditForm Model="@Account" class="mb-4" OnValidSubmit="() => HandleAccountComplete()">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <div class="company-signup-group input-group mb-4 shrink mt-4">
+        <span class="envelope input-group-text"><i alt="envelope icon" class="fa-solid fa-envelope"></i></span>
+        <label for="email" hidden>Enter Email</label>
+        <InputText @bind-Value="Account.Email" class="required form-control email" name="email" id="email" type="text" placeholder="Enter Email (Username)" />
+    </div>
+
+    <div class="company-signup-group input-group mb-4 shrink">
+        <span class="lock input-group-text"><i alt="lock icon" class="fa-solid fa-lock"></i></span>
+        <label for="password" hidden>Create Password</label>
+        <InputText @bind-Value="Account.Password" class="required form-control password" name="password" id="password" type="password" placeholder="Create Password" />
+    </div>
+
+    @if (!IsEdit)
+    {
+        <div class="company-signup-group input-group shrink mb-4">
+            <span class="lock input-group-text"><i alt="lock-icon" class="fa-solid fa-lock"></i></span>
+            <label for="password2" hidden>Confirm Password</label>
+            <input @bind="@password2" class="required form-control password2 @(password2 == null ? "" : "modified") @(Account.Password == password2 ? "valid" : "invalid")" id="password2" name="password2" type="password" placeholder="Confirm Password" />
+        </div>
+
+        @if (Account.Password != password2)
+        {
+            PasswordError = "Passwords must be same";
+            PasswordMatch = false;
+        }
+        else
+        {
+            PasswordError = null;
+            PasswordMatch = true;
+        }
+
+        @if (PasswordError is not null)
+        {
+            <div class="alert alert-danger">@PasswordError</div>
+        }
+
+    }
+
+    @if (IsEdit)
+    {
+        <button type="submit" class="btn btn-success btn-sm">Save Account Info</button>
+    }
+    else
+    {
+        <button type="submit" class="btn btn-primary mb-3">Next</button>
+    }
+</EditForm>
+
+@code {
+    [Parameter]
+    public Account? Account { get; set; }
+
+    [Parameter]
+    public bool IsEdit { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> OnSubmit { get; set; }
+
+    [Parameter]
+    public string? password2 { get; set; }
+
+    [Parameter]
+    public bool PasswordMatch { get; set; }
+
+    private string? PasswordError { get; set; }
+
+    public async Task HandleAccountComplete()
+    {
+       // if (PasswordMatch)
+      //  {
+            if (OnSubmit.HasDelegate)
+            {
+                await OnSubmit.InvokeAsync(true);
+            }
+      //  }
+    }
+
+}

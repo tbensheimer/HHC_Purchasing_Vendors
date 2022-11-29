@@ -1,0 +1,632 @@
+﻿@page "/notifications"
+@using System.Net.Mail
+@using System.Net.Mime
+@inject IDbContextFactory<VendorDataDbContext> ContextFactory
+@inject IJSRuntime JS
+
+<main class="main mt-4">
+
+    @if (SendNotifs)
+    {
+        <h2 class="title notif-title mt-4">Notifications</h2>
+        <div class="tabs-content">
+
+            <div class="notifications-group mt-4">
+
+                <form action="#" id="notif-form">
+                    <div class="quill-div mb-4">
+                   @* <div id="notification-input-div">
+                    </div>*@
+                        <BlazoredTextEditor @ref="@Quill">
+                            <ToolbarContent>
+                                 <select class="ql-font">
+                                    <option selected=""></option>
+                                    <option value="serif"></option>
+                                    <option value="monospace"></option>
+                                </select>
+                                <select class="ql-header">
+                                    <option selected=""></option>
+                                    <option value="1"></option>
+                                    <option value="2"></option>
+                                    <option value="3"></option>
+                                    <option value="4"></option>
+                                    <option value="5"></option>
+                                </select>
+                                  <select class="ql-align">
+                                    <option selected=""></option>
+                                    <option value="center"></option>
+                                    <option value="right"></option>
+                                </select>
+                                <span class="ql-formats">
+                                    <button class="ql-bold"></button>
+                                    <button class="ql-italic"></button>
+                                    <button class="ql-underline"></button>
+                                    <button class="ql-strike"></button>
+                                </span>
+                                <span class="ql-formats">
+                                    <select class="ql-color"></select>
+                                    <select class="ql-background"></select>
+                                </span>
+                                <span class="ql-formats">
+                                    <button class="ql-list" value="ordered"></button>
+                                    <button class="ql-list" value="bullet"></button>
+                                    </span>
+                                  
+
+                                <span class="ql-formats">
+                                    <button class="ql-link"></button>
+                                    <button class="ql-image"></button>
+                                </span>
+                            </ToolbarContent>
+                            <EditorContent>
+                                <p>To Company,</p>
+                                <br/>
+                                <br/>
+                                <br/>
+                                <br/>
+                                <br/>
+                                <br/>
+                                <p>Thank you,</p>
+                                <p>Health and Hospital Corporation</p>
+                                <p>Marion County Health Department</p>
+                                
+                            </EditorContent>
+                        </BlazoredTextEditor>
+                        </div>
+
+                    <br />
+
+
+                    <div class="tab mt-4">
+                        <button type="button" @onclick="(e => DisplayTab(1))" class="@((tab1) ? "active" : "")">
+                            <i alt="user icon" class="fa-regular fa-envelope"></i><br />
+                            <span class="d-none d-sm-inline">Send</span>
+                        </button>
+
+                        <button type="button" @onclick="(e => DisplayTab(2))" class="@((tab2) ? "active" : "")">
+                            <i alt="building icon" class="fa-regular fa-list"></i><br />
+                            <span class="d-none d-sm-inline">Types</span>
+                        </button>
+
+                        <button type="button" @onclick="(e => DisplayTab(3))" class="@((tab3) ? "active" : "")">
+                            <i alt="address-book icon" class="fa-regular fa-briefcase"></i><br />
+                            <span class="d-none d-sm-inline">Categories</span>
+                        </button>
+
+                        <button type="button" @onclick="(e => DisplayTab(4))" class="@((tab4) ? "active" : "")">
+                            <i alt="address-book icon" class="fa-regular fa-building"></i><br />
+                            <span class="d-none d-sm-inline">Companies</span>
+                        </button>
+
+                    </div>
+
+                    @if (tab1)
+                    {
+                        <div class="tabcontent mb-4">
+                            
+                            <div class="create-account-container mb-4">
+                                <p class="when fw-bold mb-3">When would you like to send the notification?</p>
+                                <input type="radio" id="immediate" name="send" class="mb-3"/>
+                                <label for="immediate">Immediately</label><br>
+                                <input type="radio" id="repeat7" value="repeat-7-days" name="send" class="mb-3" />
+                                <label for="repeat7">Every 7 days after first notification</label><br>
+
+                                <div>
+                                    <input type="radio" id="other" value="other" name="send" class="mb-4" />
+                                    <label for="other">Every </label>
+                                    <input class="mb-4" id="number-days" type="number" name="number-of-days" />
+                                    <label for="number-days" hidden>Type a Number of Days</label>
+                                    days after first notification
+                                    <div class="number-days-notif-alert alert alert-danger hidden">Please enter a value</div>
+                                </div>
+
+                            </div>
+                            <button type="button" class="btn btn-primary btn-sm" @onclick="() => NextButtonClick(1)">Next</button>
+
+                        </div>
+
+                    }
+                    @if (tab2)
+                    {
+                        <div class="tabcontent mb-4">
+                            <div class="create-account-container mb-4">
+
+                                <h4 class="fw-bold mb-3">Select Types:</h4>
+
+                                <p class="send fw-bold">Which company types should the notification be sent too?</p>
+                                <ul class="company-types mb-4">
+                                    <li>
+                                        <label for="select-all-type">
+                                            <input type="checkbox" class="select-all-type form-check-input" id="select-all-type" />
+                                            Select All
+                                        </label>
+                                    </li>
+                                    @if (Types is not null)
+                                    {
+                                        @foreach (var type in Types)
+                                        {
+                                            @if (type.Is_Checked)
+                                            {
+                                                <li class="typeLi">
+                                                    <label id="key" for="@type.Type_Name">
+                                                        <input @key="type.Id" checked id="@type.Type_Name" value="@type.Is_Checked" @onclick="() => HandleTypeChange(type.Id)" class="form-check-input type-check"
+                                           Name="TypeCheckbox" type="checkbox" /> @type.Type_Name
+                                                    </label>
+                                                    <br />
+                                                </li>
+                                            }
+                                            else
+                                            {
+                                                <li class="typeLi">
+                                                    <label id="key" for="@type.Type_Name">
+                                                        <input @key="type.Id" id="@type.Type_Name" value="@type.Is_Checked" @onclick="() => HandleTypeChange(type.Id)" class="form-check-input type-check"
+                                           Name="TypeCheckbox" type="checkbox" /> @type.Type_Name
+                                                    </label>
+                                                    <br />
+                                                </li>
+                                            }
+                                        }
+                                    }
+                                </ul>
+
+                            </div>
+                            <button type="button" class="btn btn-primary btn-sm" @onclick="() => NextButtonClick(2)">Next</button>
+
+                        </div>
+                    }
+                    @if (tab3)
+                    {
+                        <div class="tabcontent mb-4">
+                            <div class="create-account-container mb-4">
+
+                                <h4 class="fw-bold mb-3">Select Categories:</h4>
+
+                                <p class="send fw-bold">Which company categories should the notification be sent too?</p>
+                                <ul class="company-categories mb-4">
+                                    <li>
+                                        <label for="select-all-category">
+                                            <input type="checkbox" class="form-check-input" id="select-all-category" />
+                                            Select All
+                                        </label>
+                                    </li>
+                                    
+                                    @if (FilteredCategories is not null)
+                                    {
+                                        @foreach (var cat in FilteredCategories)
+                                        {
+                                            @foreach (var type in Types.Where(type => type.Id == cat.Type_Id))
+                                            {
+
+                                                @if (cat.Is_Checked)
+                                                {
+                                                    <li class="catLi">
+                                                        <label id="key" for="@cat.Category_Name">
+                                                            <input @key="cat.Id" checked @onclick="() => HandleCategoryChange(cat.Id)" class="form-check-input cat-check" id="@cat.Category_Name"
+                                           name="@cat.Category_Name" type="checkbox" /><strong>@type.Type_Name:</strong> @cat.Category_Name
+                                                        </label>
+                                                        <br />
+                                                    </li>
+                                                } else {
+                                                    <li class="catLi">
+                                                        <label id="key" for="@cat.Category_Name">
+                                                            <input @key="cat.Id" @onclick="() => HandleCategoryChange(cat.Id)" class="form-check-input cat-check" id="@cat.Category_Name"
+                                           name="@cat.Category_Name" type="checkbox" /><strong>@type.Type_Name:</strong> @cat.Category_Name
+                                                        </label>
+                                                        <br />
+                                                    </li>
+                                                }
+                                            }
+                                        }
+                                    }
+                                </ul>
+
+                            </div>
+                            <button type="button" class="btn btn-primary btn-sm" @onclick="() => NextButtonClick(3)">Next</button>
+
+                        </div>
+                    }
+                    @if (tab4)
+                    {
+
+                        <div class="tabcontent mb-4">
+                            <div class="create-account-container mb-4">
+
+                                <h4 class="fw-bold mb-3">Select Companies:</h4>
+
+                                <p class="send fw-bold">Which companies should the notification be sent too?</p>
+
+                                <ul class="company-send-list mb-4">
+                                    <li>
+                                        <label for="select-all-company">
+                                            <input type="checkbox" class="select-all-company form-check-input" id="select-all-company" />
+                                            Select All
+                                        </label>
+                                    </li>
+                                        @if(RelatedCompanies is not null && Companies is not null)
+                                        {
+                                            @foreach(var rcompany in RelatedCompanies)
+                                            {
+                                                @foreach(var company in Companies.Where(comp => comp.Id == rcompany.CompanyId))
+                                                {
+                                            <li>
+                                                <label for="company-checkbox">
+                                                    <input type="checkbox" class="form-check-input" id="company-checkbox" />
+                                                        @company.Name
+                                                </label>
+                                            </li>
+                                                }
+                                            }
+                                        }
+                                </ul>
+
+                            </div>
+
+                        </div>
+                    }
+
+                    <button type="button" @onclick="@HandleNotifSubmit" class="btn btn-primary submit">Send Notification</button>
+
+                </form>
+            </div>
+        </div>
+    }
+
+    @if (PrevNotifs)
+    {
+        <h2 class="title notif-title mt-4">Previous Notifications</h2>
+
+        <div class="previous-notifs-group pt-2 mt-1">
+            <table class="prev-notif table dt-responsive nowrap w-100 mt-3" id="basic-datatable">
+                <thead>
+                    <tr>
+                        <th>Sent To:</th>
+                        <th>Date Sent:</th>
+                        <th>Content</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                    <td>HP Inc, Lambo</td>
+                    <td>August 21, 2022</td>
+                    <td>"Please send supplies to us asap.</td>
+                    </tr>
+                    <tr>
+                        <td>HP Inc, Lambo</td>
+                        <td>August 21, 2022</td>
+                        <td>"Please send supplies to us asap.</td>
+                    </tr>
+                    <tr>
+                        <td>HP Inc, Lambo</td>
+                        <td>August 21, 2022</td>
+                        <td>"Please send supplies to us asap.</td>
+                    </tr>
+                    <tr>
+                        <td>HP Inc, Lambo</td>
+                        <td>August 21, 2022</td>
+                        <td>"Please send supplies to us asap.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+        </div>
+    }
+    <div class="panel home-panel mb-4 mt-4">
+        <div class="layout">
+            <h2 class="home-header fs-4 fw-bold title">Home Page</h2>
+            <p class="home-description desc">Go back to home page to do various tasks</p>
+        </div>
+        <span class="house"><i alt="house icon" class="fa-solid fa-house fa-2x"></i></span>
+        <a href="/" class="stretched-link"></a>
+    </div>
+
+
+    <div class="tab-div">
+        <button @onclick="@SendNotifsActive" class="tab1-btn send-notifs-content @(SendNotifs == true ? "active-page" : "")" type="button">Send Notifications</button>
+        <button @onclick="@PrevNotifsActive" class="tab2-btn btn prev-notifs-content @(PrevNotifs == true ? "active-page" : "")" type="button">Previous Notifications</button>
+    </div>
+
+
+</main>
+
+@code {
+
+
+    private bool tab1 = true;
+    private bool tab2 = false;
+    private bool tab3 = false;
+    private bool tab4 = false;
+    private bool SendNotifs = true;
+    private bool PrevNotifs = false;
+
+    private Business_Types[]? Types { get; set; }
+    public Business_Types? Type { get; set; }
+    private List<Business_Types> CheckedTypes = new List<Business_Types>();
+
+
+    private Business_Categories[]? Categories { get; set; }
+    private Business_Categories? Category { get; set; }
+    private List<Business_Categories> CheckedCategories = new List<Business_Categories>();
+
+    private List<Business_Categories> FilteredCategories = new List<Business_Categories>();
+    private List<Company_Types_Categories> FilteredCompanies = new List<Company_Types_Categories>();
+    public List<Company_Types_Categories> RelatedCompanies = new List<Company_Types_Categories>();
+
+
+
+    private Company_Types_Categories[]? CompanyTypesCats { get; set; }
+
+
+    private Company[]? Companies { get; set; }
+    // private Notifications? Notification { get; set; }
+
+    public Notifications? Notifs { get; set; }
+
+    public bool IsChecked { get; set; }
+    public bool SendReoccuring { get; set; }
+
+    BlazoredTextEditor? Quill;
+    public string? QuillContent { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = ContextFactory.CreateDbContext();
+        Types = await context.Business_Types.OrderBy(type => type.Type_Name).ToArrayAsync();
+        Categories = await context.Business_Categories.OrderBy(cat => cat.Category_Name).ToArrayAsync();
+        CompanyTypesCats = await context.Company_Types_Categories.ToArrayAsync();
+        Companies = await context.Companies.ToArrayAsync();
+
+        foreach (var type in Types)
+        {
+            type.Is_Checked = false;
+            context.Update(type);
+            await context.SaveChangesAsync();
+        }
+
+        foreach (var cat in Categories)
+        {
+            cat.Is_Checked = false;
+            context.Update(cat);
+            await context.SaveChangesAsync();
+        }
+
+        await LoadData();
+    }
+
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await LoadData();
+    }
+
+    protected async override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if(firstRender)
+        {
+            //  await JS.InvokeVoidAsync("blazorInterop.quillFunction", "notification-input-div");
+
+            //   await JS.InvokeAsync<IJSObjectReference>("blazorInterop.datatableFunction", "#basic-datatable");
+
+        }
+    }
+
+    private async Task LoadData()
+    {
+        using var context = ContextFactory.CreateDbContext();
+
+
+        Companies = await context.Companies
+        .Where(comp => comp.Is_Deleted == false)
+        .Where(comp => comp.Disabled_From_Notifications == false)
+        .OrderBy(comp => comp.Name)
+        .ToArrayAsync();
+
+    }
+
+    public void DisplayTab(int TabNumber)
+    {
+        switch (TabNumber)
+        {
+            case 1:
+                this.tab1 = true;
+                this.tab2 = false;
+                this.tab3 = false;
+                this.tab4 = false;
+
+                break;
+            case 2:
+                this.tab1 = false;
+                this.tab2 = true;
+                this.tab3 = false;
+                this.tab4 = false;
+
+                break;
+            case 3:
+                this.tab1 = false;
+                this.tab2 = false;
+                this.tab3 = true;
+                this.tab4 = false;
+
+                break;
+            case 4:
+                this.tab1 = false;
+                this.tab2 = false;
+                this.tab3 = false;
+                this.tab4 = true;
+
+                break;
+        }
+    }
+
+    private void NextButtonClick(int tab)
+    {
+
+        DisplayTab(tab + 1);
+    }
+
+    private async Task SendNotifsActive()
+    {
+        SendNotifs = true;
+        PrevNotifs = false;
+
+        await LoadData();
+    }
+
+    private void PrevNotifsActive()
+    {
+        SendNotifs = false;
+        PrevNotifs = true;
+    }
+
+    private async Task HandleNotifSubmit()
+    {
+        if (Quill is not null)
+        {
+
+            QuillContent = await this.Quill.GetHTML();
+            StateHasChanged();
+
+
+
+            var sClient = new SmtpClient("SMTP.HHCORP.ORG");
+            var message = new MailMessage();
+
+            sClient.Port = 25;
+            sClient.UseDefaultCredentials = false;
+
+
+            //string filename = "Report1";
+
+            //string fileurl = Server.MapPath("..");
+            //fileurl = fileurl + @"\mailserver\pdf\generated\" + filename + ".pdf";
+
+
+            //if (!string.IsNullOrEmpty(fileurl))
+            //{
+            //    Attachment attachment = new Attachment(fileurl, MediaTypeNames.Application.Pdf);
+            //    ContentDisposition disposition = attachment.ContentDisposition;
+            //    disposition.CreationDate = File.GetCreationTime(fileurl);
+            //    disposition.ModificationDate = File.GetLastWriteTime(fileurl);
+            //    disposition.ReadDate = File.GetLastAccessTime(fileurl);
+            //    disposition.FileName = Path.GetFileName(fileurl);
+            //    disposition.Size = new FileInfo(fileurl).Length;
+            //    disposition.DispositionType = DispositionTypeNames.Attachment;
+            //    message.Attachments.Add(attachment);
+            //}
+
+            message.To.Add(new MailAddress("tbensheimer@gmail.com"));
+            message.From = new MailAddress("test@hhcorp.org");
+            message.Subject = "Test Subject";
+            message.Body = QuillContent;
+            message.IsBodyHtml = true;
+
+
+
+            sClient.Send(message);
+
+        }
+    }
+
+    private async Task HandleTypeChange(int TypeId)
+    {
+        using var context = ContextFactory.CreateDbContext();
+        Type = await context.Business_Types.FirstOrDefaultAsync(type => type.Id == TypeId);
+        Type.Is_Checked = !Type.Is_Checked;
+        context.Update(Type);
+        await context.SaveChangesAsync();
+
+        if (Type.Is_Checked)
+        {
+            if (Type is not null)
+            {
+                CheckedTypes.Add(Type);
+            }
+        }
+
+        if (!Type.Is_Checked)
+        {
+            if (Type is not null)
+            {
+                CheckedTypes.RemoveAll(type => type.Id == TypeId);
+            }
+        }
+
+        await LoadCategories();
+        await LoadData();
+    }
+
+    private async Task LoadCategories()
+    {
+        using var context = ContextFactory.CreateDbContext();
+
+        FilteredCategories.Clear();
+
+        foreach (var type in CheckedTypes)
+        {
+            var CatList = await context.Business_Categories.ToArrayAsync();
+
+            foreach (var cat in CatList)
+            {
+                if (cat.Type_Id == type.Id && type.Is_Checked)
+                {
+                    FilteredCategories.Add(cat);
+                }
+            }
+
+        }
+    }
+
+    private async Task HandleCategoryChange(int CatId)
+    {
+        using var context = ContextFactory.CreateDbContext();
+        Category = await context.Business_Categories.FirstOrDefaultAsync(cat => cat.Id == CatId);
+        Category.Is_Checked = !Category.Is_Checked;
+        context.Update(Category);
+        await context.SaveChangesAsync();
+
+
+        if (Category.Is_Checked)
+        {
+            if (Category is not null)
+            {
+                CheckedCategories.Add(Category);
+
+
+                foreach (var company in CompanyTypesCats.Where(comp => comp.Category_Id == Category.Id))
+                {
+                    if (!RelatedCompanies.Any(comp => comp.CompanyId == company.CompanyId))
+                    {
+                        RelatedCompanies.Add(company);
+                    }
+                }
+
+            }
+        }
+
+        if (!Category.Is_Checked)
+        {
+            if (Category is not null)
+            {
+                CheckedCategories.RemoveAll(cat => cat.Id == CatId);
+
+                foreach (var company in CompanyTypesCats.Where(comp => comp.Category_Id == Category.Id))
+                {
+                    RelatedCompanies.Remove(company);
+
+                    foreach(var cat in CheckedCategories) // doesn't work for multiple companies
+                    {
+                        if (cat.Id == company.Category_Id)
+                        {
+                            RelatedCompanies.Add(company); //This allows to add company back in if they have other categories that were checked
+                        }
+                    }
+                }
+            }
+        }
+
+
+        await LoadCategories();
+        await LoadData();
+    }
+
+
+}

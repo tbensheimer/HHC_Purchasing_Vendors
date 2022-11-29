@@ -1,0 +1,269 @@
+﻿@inject IDbContextFactory<VendorDataDbContext> ContextFactory
+@inject IJSRuntime JS
+
+<EditForm Model="@Authorized_Contact" OnValidSubmit="() => HandleContactsComplete()">
+    <table class="contacts mb-3 table-responsive" id="table">
+        <thead>
+            <tr class="header-rows">
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Email</th>
+                <th>Phone Number</th>
+                <th> </th>
+            </tr>
+        </thead>
+        <tbody>
+           
+            @if(IsEdit)
+            {
+                @if (ContactList is null)
+                {
+                    <div>Loading...</div>
+                }
+                else
+                {
+                    @foreach (var contact in ContactList)
+                    {
+                        <tr class="inputted-contacts">
+                            <td class="expand"><input class="form-control" @bind-value="@contact.FirstName" /></td>
+                            <td class="expand"><input class="form-control" @bind-value="@contact.LastName" /></td>
+                            <td class="expand"><input class="form-control" @bind-value="@contact.Email" /></td>
+                            <td class="expand"><input class="form-control" @bind-value="@contact.Phone_Number" /></td>
+                            <td class="expand">
+                                <button @onclick="() => DeleteContact(contact.Id)" type="button"
+                            style="--bs-btn-padding-y: .5rem; --bs-btn-padding-x: .8rem;"
+                            class="del-cont btn btn-danger btn-sm">
+                                    <span>
+                                        <i alt="trash icon" class="fa-solid fa-trash fa-lg"></i>
+                                    </span>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                }
+            }
+            
+                @if (Contacts is null)
+                {
+                    <div>Loading...</div>
+                }
+                else
+                {
+                @foreach (var contact in Contacts)
+                {
+                    <tr class="inputted-contacts">
+                            <td class="expand"><input class="form-control" value="@contact.FirstName" /></td>
+                            <td class="expand"><input class="form-control" value="@contact.LastName" /></td>
+                            <td class="expand"><input class="form-control" value="@contact.Email" /></td>
+                            <td class="expand"><input class="form-control" value="@contact.Phone_Number" /></td>
+                        <td class="expand">
+                            <button type="button"
+                            style="--bs-btn-padding-y: .5rem; --bs-btn-padding-x: .8rem;"
+                            class="del-cont btn btn-danger btn-sm">
+                                <span>
+                                    <i alt="trash icon" class="fa-solid fa-trash fa-lg"></i>
+                                </span>
+                            </button>
+
+                        </td>
+                    </tr>
+                }
+            
+            }
+            <tr class="input-rows">
+                <td>
+                    <label for="first-name" hidden>First Name</label>
+                    <InputText @bind-Value="@FirstName" id="first-name" type="text" name="contacts-first-name" class="first form-control" placeholder=" First Name" />
+                </td>
+                <td>
+                    <label for="last-name" hidden>Last Name</label>
+                    <InputText @bind-Value="@LastName" id="last-name" type="text" name="contacts-last-name" class="last form-control" placeholder=" Last Name" />
+                </td>
+                <td>
+                    <label for="contact-email" hidden>Contact Email</label>
+                    <InputText @bind-Value="@Email" id="contact-email" type="email" name="contacts-email" class="contact-email form-control" placeholder=" Email" />
+                </td>
+                <td>
+                    <label for="number" hidden>Phone Number</label>
+                    <InputNumber @bind-Value="@Number" id="number" type="number" name="contacts-phone-number" class="number form-control" placeholder=" Phone Number" />
+                </td>
+                <td></td>
+            </tr>
+
+        </tbody>
+    </table>
+    @if (ContactError is not null)
+    {
+        <div class="alert alert-danger">@ContactError</div>
+    }
+
+    <button type="button" @onclick="() => HandleContactAdd()" class="add-contact btn btn-primary btn-sm mb-4"><span><i alt="plus sign icon" class="fa-regular fa-plus"></i></span> Add Contact</button>
+    <br />
+    @if (IsEdit)
+    {
+        <button type="button" @onclick="() => HandleContactsComplete()" class="btn btn-success btn-sm mb-3">Save Contacts Info</button>
+    }
+    else
+    {
+        <button type="submit" class="btn btn-primary">Next</button>
+    }
+
+</EditForm>
+@code {
+    [Parameter]
+    public Company? Company { get; set; }
+    [Parameter]
+    public Authorized_Contacts? Authorized_Contact { get; set; }
+    [Parameter]
+    public string FirstName { get; set; } = default!;
+    [Parameter]
+    public string LastName { get; set; } = default!;
+    [Parameter]
+    public string Email { get; set; } = default!;
+    [Parameter]
+    public int? Number { get; set; }
+    [Parameter]
+    public string? ContactError { get; set; } = default!;
+
+    [Parameter]
+    public bool IsEdit { get; set; }
+
+    [Parameter]
+    public List<Authorized_Contacts>? ContactList { get; set; }
+
+
+
+    public static List<Authorized_Contacts>? Contacts { get; set; }
+
+
+    [Parameter]
+    public EventCallback<bool> OnSubmit { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> OnLoad { get; set; }
+
+    private Authorized_Contacts? SingleContact { get; set; }
+    private List<Authorized_Contacts>? FilteredContacts { get; set; }
+
+
+
+    protected override async Task OnParametersSetAsync()
+    {
+
+        await LoadData();
+
+    }
+
+    protected async Task LoadData()
+    {
+        using var context = ContextFactory.CreateDbContext();
+
+        Contacts = new List<Authorized_Contacts>();
+        //  FilteredContacts = await context.Authorized_Contacts.FirstOrDefaultAsync(contact => contact.CompanyId == Company.Id).Where();
+    }
+
+    private List<Authorized_Contacts> HandleContactAdd()
+    {
+
+        if (FirstName != null && LastName != null && Email != null && Number != null && Company is not null)
+        {
+            Authorized_Contact = new Authorized_Contacts();
+
+            Authorized_Contact.CompanyId = Company.Id;
+            Authorized_Contact.FirstName = FirstName;
+            Authorized_Contact.LastName = LastName;
+            Authorized_Contact.Email = Email;
+            Authorized_Contact.Phone_Number = Number;
+
+
+            Contacts.Add(Authorized_Contact);
+
+
+            //if (IsEdit)
+            // {
+            //      ContactList.Add(Authorized_Contact);
+            //  }
+
+            FirstName = "";
+            LastName = "";
+            Email = "";
+            Number = null;
+            ContactError = null;
+
+        }
+        else
+        {
+            ContactError = "Please fill all fields to add a contact";
+        }
+        return Contacts;
+    }
+
+
+
+    private async Task HandleContactsComplete()
+    {
+        using var context = ContextFactory.CreateDbContext();
+
+
+        // context.Update(Authorized_Contacts.Contact);
+        //  context.Update(ContactList);
+        //if (ContactsForm.Contacts is not null)
+        //{
+            // Authorized_Contact.CompanyId = CompanyId;
+        if (ContactList is not null)
+            {
+            foreach (var contact in ContactList)
+                {
+                    var dbContact = context.Authorized_Contacts.FirstOrDefault(x => x.Id == contact.Id);
+
+                    if (dbContact != null)
+                    {
+                        dbContact.CompanyId = contact.CompanyId;
+                        dbContact.FirstName = contact.FirstName;
+                        dbContact.LastName = contact.LastName;
+                        dbContact.Email = contact.Email;
+                        dbContact.Phone_Number = contact.Phone_Number;
+                        context.Update(dbContact);
+                    }
+                }
+            }
+            //  context.Authorized_Contacts.Update(Authorized_Contact);
+            if(ContactsForm.Contacts is not null)
+            {
+                context.Authorized_Contacts.AddRange(Contacts);
+            }
+            await context.SaveChangesAsync();
+            await LoadData();
+        //}
+        if (OnSubmit.HasDelegate)
+        {
+
+            await OnSubmit.InvokeAsync(true);
+        }
+         
+        
+    }
+
+    private async Task DeleteContact(int ContactId)
+    {
+        using var context = ContextFactory.CreateDbContext();
+        SingleContact = await context.Authorized_Contacts.FirstOrDefaultAsync(contact => contact.Id == ContactId);
+
+        if (SingleContact is not null)
+        {
+            var isOk = await JS.InvokeAsync<bool>("confirm", $"Are you sure you want to delete Contact {SingleContact.FirstName} {SingleContact.LastName}?");
+
+            if (isOk)
+            {
+                SingleContact.Contact_Deleted = true;
+                context.Update(SingleContact);
+                await context.SaveChangesAsync();
+                
+                if (OnSubmit.HasDelegate)
+                {
+                    await OnSubmit.InvokeAsync(false);
+                }
+            }
+        }
+    }
+}

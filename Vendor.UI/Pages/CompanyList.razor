@@ -1,0 +1,249 @@
+﻿@page "/companies/{currentPage:int?}"
+@using Microsoft.EntityFrameworkCore
+@using Vendor.Data.Models
+@inject IDbContextFactory<VendorDataDbContext> ContextFactory
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JS
+@inject StateContainer StateContainer
+
+<h3 class="mb-4">Companies Registered</h3>
+
+<PageTitle>Companies Registered</PageTitle>
+
+@if (Companies is null)
+{
+    <div>Loading...</div>
+}
+else
+{
+    <ul class="pagination mb-2 mt-4 justify-content-center">
+        <li class="page-item  @(CurrentPage == 1 ? "disabled" : "")">
+            <a class="page-link" href="/companies/@(CurrentPage - 1)">Previous</a>
+        </li>
+
+        @for (int i = 1; i <= TotalPages; i++)
+        {
+            <li class="page-item @(CurrentPage == i ? "active" : "")">
+                <a class="page-link numbers" href="/companies/@i">@i</a>
+            </li>
+        }
+
+        <li class="page-item  @(CurrentPage == TotalPages ? "disabled" : "")">
+            <a class="page-link" href="/companies/@(CurrentPage + 1)">Next</a>
+        </li>
+    </ul>
+
+    <div>
+    <a href="/register" class="fw-bold btn btn-sm btn-primary mb-3">Add Company</a>
+
+        <div class="mb-2">
+            <input type="text" @onkeyup="@TextFilterKeyUp" @bind-value="@FilterString" placeholder="Filter Companies..." />
+            <button class="btn btn-sm btn-secondary" @onclick="ButtonFilterClick">Filter</button>
+        </div>
+
+    </div>
+
+    <table class="companies-data table border table table-responsive table-hover" id="table">
+        <thead>
+            <tr>
+                <th>Companies Registered</th>
+                <th>Disable Notifications</th>
+                <th>Edit Company Info</th>
+                <th>Edit Contacts</th>
+                <th>Edit Types and Categories</th>
+                <th>Remove Company</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+
+        @foreach(var company in Companies)
+        {
+            @if (!company.Is_Deleted)
+            {
+                <tr>
+                    <td><button class="btn" style="border:none;  @(company.Disabled_From_Notifications == true ? "color:#9b9999;" : "") background-color:rgb(251, 244, 238);" id="company">@company.Name</button></td>
+
+                    @if (company.Disabled_From_Notifications)
+                    {
+                <td>
+                    <div class="form-check form-switch justify-content-center">
+                        <input checked @onchange="() => HandleCompanyDisabled(company.Id, company.Disabled_From_Notifications)" class="form-check-input" type="checkbox" id="notifications-switch">
+                        <label style="margin: 0 auto;" class="form-check-label" for="notifications-switch" hidden>Disable Company Notifications</label>
+                    </div>
+                </td>
+                    }
+                    else
+                    {
+                        <td>
+                            <div class="form-check form-switch justify-content-center">
+                                <input @onchange="() => HandleCompanyDisabled(company.Id, company.Disabled_From_Notifications)" class="form-check-input" type="checkbox" id="notifications-switch">
+                                <label style="margin: 0 auto;" class="form-check-label" for="notifications-switch" hidden>Disable Company Notifications</label>
+                            </div>
+                        </td>
+                    }
+                <td><a class="edit-link" href="/edit/companyinfo/@company.Id"><i alt="building icon" class="link-icon-building fa-solid fa-building"></i></a></td>
+                    <td><a class="edit-link" href="/edit/company-contacts/@company.Id"><i alt="address book icon" class="link-icon-book fa-solid fa-address-book"></i></a></td>
+                <td><a class="edit-link" href="/edit/company-types-and-categories/@company.Id"><i alt="briefcase icon" class="link-icon-case fa-solid fa-briefcase"></i></a></td>
+                    <td><button @onclick="() => HandleCompanyDelete(company.Id)" id="trash" style="height: 30px !important; margin: 5px 0;" class="remove btn btn-danger"><span><i alt="trash icon" id="trash-icon" class="fa-solid fa-trash white"></i></span></button></td>
+                </tr>
+            }
+        }
+
+    </table>
+
+    <ul class="pagination mb-4 mt-4 justify-content-center">
+        <li class="page-item  @(CurrentPage == 1 ? "disabled" : "")">
+            <a class="page-link" href="/companies/@(CurrentPage - 1)">Previous</a>
+        </li>
+
+        @for (int i = 1; i <= TotalPages; i++)
+        {
+            <li class="page-item @(CurrentPage == i ? "active" : "")">
+                <a class="page-link numbers" href="/companies/@i">@i</a>
+            </li>
+        }
+
+        <li class="page-item  @(CurrentPage == TotalPages ? "disabled" : "")">
+            <a class="page-link" href="/companies/@(CurrentPage + 1)">Next</a>
+        </li>
+    </ul>
+}
+
+    <div class="panel home-panel mb-4 mt-4">
+        <div class="layout">
+            <h2 class="home-header fs-4 fw-bold title">Home Page</h2>
+            <p class="home-description desc">Go back to home page to do various tasks</p>
+        </div>
+        <span class="house"><i alt="house icon" class="fa-solid fa-house fa-2x"></i></span>
+        <a href="/" class="stretched-link"></a>
+    </div>
+
+@code {
+
+    // public class CompanyInfo
+    //  {
+    //   private VendorDataDbContext _db;
+    //  public CompanyInfo(VendorDataDbContext db)
+    //    {
+    //        _db = db;
+    //       }
+    //
+
+    private Company[]? Companies { get; set; }
+    private List<Company> List { get; set; } = new List <Company>();
+    public Company? Company { get; set; }
+    [Parameter]
+    public int? CurrentPage { get; set; }
+    private const int ItemsPerPage = 10;
+    private double TotalPages {get; set;}
+    private string? FilterString {get;set;}
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        if (CurrentPage is null or < 1)
+        {
+            NavigationManager.NavigateTo("/companies/1");
+            return;
+        }
+
+        using var context = ContextFactory.CreateDbContext();
+        var ItemsToSkip = (CurrentPage.Value - 1) * ItemsPerPage;
+
+        IQueryable<Company> CompanyCountQuery = context.Companies;
+        CompanyCountQuery = AddFilter(CompanyCountQuery);
+        var CompanyCount = await CompanyCountQuery.Where(comp => comp.Is_Deleted != true).CountAsync();
+        TotalPages = CompanyCount == 0 ? 1 : Math.Ceiling((double)CompanyCount / ItemsPerPage);
+
+        if (CurrentPage > TotalPages)
+        {
+            NavigationManager.NavigateTo($"companies/{TotalPages}");
+            return;
+        }
+
+        StateContainer.CompanyInfoPage = CurrentPage.Value;
+
+        IQueryable<Company> CompanyQuery = context.Companies;
+        CompanyQuery = AddFilter(CompanyQuery);
+        Companies = await CompanyQuery
+        .Where(comp => comp.Is_Deleted != true)
+        .OrderBy(comp => comp.Name)
+        .Skip(ItemsToSkip)
+        .Take(ItemsPerPage)
+        .ToArrayAsync();
+    }
+
+    private async Task TextFilterKeyUp(KeyboardEventArgs e)
+    {
+        if(e.Key == "Enter")
+        {
+            await LoadData();
+        }
+    }
+
+    private async Task ButtonFilterClick()
+    {
+        await LoadData();
+    }
+
+    private IQueryable<Company> AddFilter(IQueryable<Company> companyQuery)
+    {
+        if(!string.IsNullOrWhiteSpace(FilterString))
+        {
+            return companyQuery.Where(comp => comp.Name != null && comp.Name.Contains(this.FilterString));
+        }
+        return companyQuery;
+    }
+
+
+    private async Task HandleCompanyDelete(int Id)
+    {
+
+        using var context = ContextFactory.CreateDbContext();
+        Company = await context.Companies.FirstOrDefaultAsync(comp => comp.Id == Id);
+
+        if(Company is not null)
+        {
+            var isOk = await JS.InvokeAsync<bool>("confirm", $"Are you sure you want to delete Company {Company.Name}?");
+
+            if (isOk)
+            {
+                Company.Is_Deleted = true;
+                //context.Remove(Company);
+                context.Update(Company);
+                await context.SaveChangesAsync();
+                await LoadData();
+            }
+        }
+    }
+
+
+    private async Task HandleCompanyDisabled(int Id, bool Disabled)
+    {
+        using var context = ContextFactory.CreateDbContext();
+        Company = await context.Companies.FirstOrDefaultAsync(comp => comp.Id == Id);
+
+        if(Disabled && Company is not null)
+        {
+            Company.Disabled_From_Notifications = false;
+            context.Update(Company);
+            await context.SaveChangesAsync();
+            await LoadData();
+        } else if (!Disabled && Company is not null)
+        {
+            Company.Disabled_From_Notifications = true;
+            context.Update(Company);
+            await context.SaveChangesAsync();
+            await LoadData();
+        }
+
+    }
+}
+
+    
+

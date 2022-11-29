@@ -16,6 +16,9 @@
 }
 else
 {
+
+
+    //
     <ul class="pagination mb-2 mt-4 justify-content-center">
         <li class="page-item  @(CurrentPage == 1 ? "disabled" : "")">
             <a class="page-link" href="/companies/@(CurrentPage - 1)">Previous</a>
@@ -32,6 +35,29 @@ else
             <a class="page-link" href="/companies/@(CurrentPage + 1)">Next</a>
         </li>
     </ul>
+@*
+    <ul class="pagination mb-2 mt-4 justify-content-center">
+        <li class="page-item  @(CurrentPage == 1 ? "disabled" : "")">
+            <a class="page-link" href="/companies/1"><span class="oi oi-chevron-left"></span><span class="oi oi-chevron-left"></span> </a>
+        </li>
+        <li class="page-item  @(CurrentPage == 1 ? "disabled" : "")">
+            <a class="page-link" href="/companies/@(CurrentPage - 1)"><span class="oi oi-chevron-left"></span></a>
+        </li>
+
+        <li class="page-item">
+            <input min="1" max="@TotalPages" class="page-link page-number" type="number" @bind-value="@CurrentPage" />
+        </li>
+
+
+        <li class="page-item  @(CurrentPage == TotalPages ? "disabled" : "")">
+            <a class="page-link" href="/companies/@(CurrentPage + 1)"><span class="oi oi-chevron-right"></span></a>
+        </li>
+        <li class="page-item  @(CurrentPage == TotalPages ? "disabled" : "")">
+            <a class="page-link" href="/companies/@TotalPages"><span class="oi oi-chevron-right"></span><span class="oi oi-chevron-right"></span> </a>
+        </li>
+    </ul>
+*@
+    //
 
     <div>
     <a href="/register" class="fw-bold btn btn-sm btn-primary mb-3">Add Company</a>
@@ -144,6 +170,19 @@ else
         await LoadData();
     }
 
+    //protected override async void OnAfterRender(bool firstRender)
+    //{
+    //    if (firstRender)
+    //    {
+    //        await JS.InvokeAsync<IJSObjectReference>("DataTablesAdd", "#table_id");
+    //    }
+    //}
+
+    //public void Dispose()
+    //{
+    //    JS.InvokeAsync<IJSObjectReference>("DataTablesRemove", "#table_id");
+    //}
+
     private async Task LoadData()
     {
         if (CurrentPage is null or < 1)
@@ -243,6 +282,8 @@ else
         }
 
     }
+
+   
 }
 
     

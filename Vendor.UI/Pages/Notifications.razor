@@ -413,6 +413,7 @@
     {
         using var context = ContextFactory.CreateDbContext();
 
+        Types = await context.Business_Types.OrderBy(type => type.Type_Name).ToArrayAsync();
 
         Companies = await context.Companies
         .Where(comp => comp.Is_Deleted == false)
@@ -608,16 +609,16 @@
             {
                 CheckedCategories.RemoveAll(cat => cat.Id == CatId);
 
-                foreach (var company in CompanyTypesCats.Where(comp => comp.Category_Id == Category.Id))
-                {
-                    RelatedCompanies.Remove(company);
+                RelatedCompanies.Clear();
 
-                    foreach(var cat in CheckedCategories) // doesn't work for multiple companies
+                foreach (var company in CompanyTypesCats)
+                {
+                    foreach(var cat in CheckedCategories.Where(cat => cat.Id == company.Category_Id)) 
                     {
-                        if (cat.Id == company.Category_Id)
-                        {
+                       if(!RelatedCompanies.Any(comp => comp.CompanyId == company.CompanyId))
+                       {
                             RelatedCompanies.Add(company); //This allows to add company back in if they have other categories that were checked
-                        }
+                       }
                     }
                 }
             }

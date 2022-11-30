@@ -79,6 +79,15 @@
 
     @if (IsEdit)
     {
+        @if (SaveAddressSuccess is not null)
+        { 
+        <div class="alert alert-success">@SaveAddressSuccess</div>
+        }
+        @if (SaveAddressError is not null)
+        {
+            <div class="alert alert-danger">@SaveAddressError</div>
+        }
+
         <button type="submit" class="btn btn-success btn-sm">Save Address Info</button>
     }
     else
@@ -96,6 +105,12 @@
 
     [Parameter]
     public EventCallback<bool> OnSubmit { get; set; }
+
+    [Parameter]
+    public string? SaveAddressSuccess { get; set; }
+
+    [Parameter]
+    public string? SaveAddressError { get; set; }
 
     private async Task HandleAddressComplete()
     {

@@ -42,6 +42,15 @@
 
     @if (IsEdit)
     {
+        @if (SaveAccountSuccess is not null)
+        {
+            <div class="alert alert-success">@SaveAccountSuccess</div>
+        }
+
+        @if (SaveAccountEror is not null)
+        {
+            <div class="alert alert-danger">@SaveAccountEror</div>
+        }
         <button type="submit" class="btn btn-success btn-sm">Save Account Info</button>
     }
     else
@@ -66,17 +75,22 @@
     [Parameter]
     public bool PasswordMatch { get; set; }
 
+    [Parameter]
+    public string? SaveAccountSuccess { get; set; }
+
+    [Parameter]
+    public string? SaveAccountEror { get; set; }
+
     private string? PasswordError { get; set; }
 
     public async Task HandleAccountComplete()
     {
-       // if (PasswordMatch)
-      //  {
+     
             if (OnSubmit.HasDelegate)
             {
                 await OnSubmit.InvokeAsync(true);
             }
-      //  }
+     
     }
 
 }

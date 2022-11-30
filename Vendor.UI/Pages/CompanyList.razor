@@ -69,6 +69,12 @@ else
 
     </div>
 
+    @if(SuccessRemoveMessage is not null)
+    {
+        <div class="alert alert-success text-al">@SuccessRemoveMessage</div>
+    }
+
+
     <table class="companies-data table border table table-responsive table-hover" id="table">
         <thead>
             <tr>
@@ -165,6 +171,8 @@ else
     private double TotalPages {get; set;}
     private string? FilterString {get;set;}
 
+    private string? SuccessRemoveMessage { get; set; }
+
     protected override async Task OnParametersSetAsync()
     {
         await LoadData();
@@ -215,6 +223,8 @@ else
         .Skip(ItemsToSkip)
         .Take(ItemsPerPage)
         .ToArrayAsync();
+
+        SuccessRemoveMessage = null;
     }
 
     private async Task TextFilterKeyUp(KeyboardEventArgs e)
@@ -257,6 +267,8 @@ else
                 context.Update(Company);
                 await context.SaveChangesAsync();
                 await LoadData();
+                SuccessRemoveMessage = "Company successfully removed!";
+                
             }
         }
     }

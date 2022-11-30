@@ -23,13 +23,13 @@
         {
             <div class="create-account-container mb-4">
                 <h3>Account:</h3>
-                <AccountForm OnSubmit="@HandleAccountSubmit" IsEdit="true" Account="@Account" />
+                <AccountForm OnSubmit="@HandleAccountSubmit" SaveAccountEror="@SaveAccountError" SaveAccountSuccess="@SaveAccountSuccess" IsEdit="true" Account="@Account" />
             </div>
         }
 
         <div class="create-account-container mb-4">
             <h3 class="mb-3">Company Info</h3>
-            <CompanyInfoForm OnSubmit="@HandleCompanySubmit" IsEdit="true" Company="@Company" />
+            <CompanyInfoForm SaveCompanyInfoSuccess="@SaveCompanyInfoSuccess" SaveCompanyInfoError="@SaveCompanyInfoError" OnSubmit="@HandleCompanySubmit" IsEdit="true" Company="@Company" />
         </div>
 
 
@@ -41,7 +41,7 @@
         {
             <div class="create-account-container mb-4">
                 <h3 class="mb-3">Address</h3>
-                <AddressForm OnSubmit="@HandleAddressSubmit" IsEdit="true" Address="@Address" />
+                <AddressForm SaveAddressSuccess="@SaveAddressSuccess" SaveAddressError="@SaveAddressError" OnSubmit="@HandleAddressSubmit" IsEdit="true" Address="@Address" />
             </div>
         }
     }
@@ -72,50 +72,106 @@
     private Company? Company { get; set; }
     private Account? Account { get; set; }
     private Address? Address { get; set; }
-   
+
+    private string? SaveAccountSuccess { get; set; }
+    private string? SaveAccountError { get; set; }
+
+    private string? SaveCompanyInfoSuccess { get; set; }
+    private string? SaveCompanyInfoError { get; set; }
+
+    private string? SaveAddressSuccess { get; set; }
+    private string? SaveAddressError { get; set; }
+
 
 
     protected override async Task OnParametersSetAsync()
+    {
+        await LoadData();
+
+    }
+
+    private async Task LoadData()
     {
         using var context = ContextFactory.CreateDbContext();
         Company = await context.Companies.FirstOrDefaultAsync(comp => comp.Id == CompanyId);
 
         Account = await context.Accounts.FirstOrDefaultAsync(acc => acc.CompanyId == CompanyId);
         Address = await context.Addresses.FirstOrDefaultAsync(add => add.CompanyId == CompanyId);
-
+        SaveAccountSuccess = null;
+        SaveAccountError = null;
+        SaveCompanyInfoSuccess = null;
+        SaveCompanyInfoError = null;
+        SaveAddressSuccess = null;
+        SaveAddressError = null;
     }
 
     private async Task HandleCompanySubmit(bool isValid)
     {
-        if (Company is null || !isValid)
+        if (isValid)
         {
-            return;
+            if (Company is not null)
+            {
+                try
+                {
+                    using var context = ContextFactory.CreateDbContext();
+                    context.Update(Company);
+                    await context.SaveChangesAsync();
+                    await LoadData();
+                    SaveCompanyInfoSuccess = "Saved Company Info changes successfully!";
+                }
+                catch{
+                    await LoadData();
+                    SaveCompanyInfoError = "There was an error while saving Company Info changes. Please try again.";
+                }
+            }
         }
-        using var context = ContextFactory.CreateDbContext();
-        context.Update(Company);
-        await context.SaveChangesAsync();
     }
 
     private async Task HandleAccountSubmit(bool isValid)
     {
-        if (Account is null || !isValid)
+        if (isValid)
         {
-            return;
+            if (Account is not null)
+            {
+                try
+                {
+                    using var context = ContextFactory.CreateDbContext();
+                    context.Update(Account);
+                    await context.SaveChangesAsync();
+                    await LoadData();
+                    SaveAccountSuccess = "Saved Account changes successfully!";
+                }
+                catch
+                {
+                    await LoadData();
+                    SaveAccountError = "There was an error while saving Account changes. Please try again.";
+                }
+            }
         }
-        using var context = ContextFactory.CreateDbContext();
-        context.Update(Account);
-        await context.SaveChangesAsync();
+
     }
 
     private async Task HandleAddressSubmit(bool isValid)
     {
-        if (Address is null || !isValid)
+        if (isValid)
         {
-            return;
+            if (Address is not null)
+            {
+                try
+                {
+                    using var context = ContextFactory.CreateDbContext();
+                    context.Update(Address);
+                    await context.SaveChangesAsync();
+                    await LoadData();
+                    SaveAddressSuccess = "Saved Address changes successfully!";
+                }
+                catch 
+                {
+                    await LoadData();
+                    SaveAddressError = "There was an error while saving Address changes. Please try again.";
+                }
         }
-        using var context = ContextFactory.CreateDbContext();
-        context.Update(Address);
-        await context.SaveChangesAsync();
+        }
     }
 
     private void HandleNavigationCompanyList()

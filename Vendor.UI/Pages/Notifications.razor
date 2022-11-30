@@ -304,10 +304,10 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var notifs in NotifsHistory)
+                    @*@foreach (var notifs in NotifsHistory)
                     {
 
-                    }
+                    }*@
                 </tbody>
             </table>
 
@@ -419,6 +419,9 @@
 
             await JS.InvokeAsync<IJSObjectReference>("DataTablesAdd", "#basic-datatable");
 
+            await JS.InvokeAsync<IJSObjectReference>("DataTablesRemove", "#basic-datatable");
+
+
         }
     }
 
@@ -488,10 +491,11 @@
         await LoadData();
     }
 
-    private void PrevNotifsActive()
+    private async void PrevNotifsActive()
     {
         SendNotifs = false;
         PrevNotifs = true;
+        await JS.InvokeAsync<IJSObjectReference>("DataTablesRemove", "#basic-datatable");
     }
 
     private async Task HandleNotifSubmit()

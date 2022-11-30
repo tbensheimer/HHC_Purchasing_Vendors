@@ -71,7 +71,7 @@
                                 <p>Thank you,</p>
                                 <p>Health and Hospital Corporation - Purchasing Department</p>
                                 <p>Marion County Health Department</p>
-                                <img width="150" src="/logo.PNG" cid="imageIdentifier" >
+                                <img width="150" src="/logo.PNG" cid="imageIdentifier">
                             </EditorContent>
                         </BlazoredTextEditor>
                     </div>
@@ -95,39 +95,39 @@
                             <span class="d-none d-sm-inline">Categories</span>
                         </button>
 
-                      @*  <button type="button" @onclick="(e => DisplayTab(4))" class="@((tab4) ? "active" : "")">
-                            <i alt="address-book icon" class="fa-regular fa-building"></i><br />
-                            <span class="d-none d-sm-inline">Companies</span>
-                        </button>*@
+                        @*  <button type="button" @onclick="(e => DisplayTab(4))" class="@((tab4) ? "active" : "")">
+                    <i alt="address-book icon" class="fa-regular fa-building"></i><br />
+                    <span class="d-none d-sm-inline">Companies</span>
+                    </button>*@
 
                     </div>
 
                     @*@if (tab1)
-                    {
-                        <div class="tabcontent mb-4">
+                {
+                <div class="tabcontent mb-4">
 
-                            <div class="create-account-container mb-4">
-                                <p class="when fw-bold mb-3">When would you like to send the notification?</p>
-                                <input type="radio" id="immediate" name="send" class="mb-3" />
-                                <label for="immediate">Immediately</label><br>
-                                <input type="radio" id="repeat7" value="repeat-7-days" name="send" class="mb-3" />
-                                <label for="repeat7">Every 7 days after first notification</label><br>
+                <div class="create-account-container mb-4">
+                <p class="when fw-bold mb-3">When would you like to send the notification?</p>
+                <input type="radio" id="immediate" name="send" class="mb-3" />
+                <label for="immediate">Immediately</label><br>
+                <input type="radio" id="repeat7" value="repeat-7-days" name="send" class="mb-3" />
+                <label for="repeat7">Every 7 days after first notification</label><br>
 
-                                <div>
-                                    <input type="radio" id="other" value="other" name="send" class="mb-4" />
-                                    <label for="other">Every </label>
-                                    <input class="mb-4" id="number-days" type="number" name="number-of-days" />
-                                    <label for="number-days" hidden>Type a Number of Days</label>
-                                    days after first notification
-                                    <div class="number-days-notif-alert alert alert-danger hidden">Please enter a value</div>
-                                </div>
+                <div>
+                <input type="radio" id="other" value="other" name="send" class="mb-4" />
+                <label for="other">Every </label>
+                <input class="mb-4" id="number-days" type="number" name="number-of-days" />
+                <label for="number-days" hidden>Type a Number of Days</label>
+                days after first notification
+                <div class="number-days-notif-alert alert alert-danger hidden">Please enter a value</div>
+                </div>
 
-                            </div>
-                            <button type="button" class="btn btn-primary btn-sm" @onclick="() => NextButtonClick(1)">Next</button>
+                </div>
+                <button type="button" class="btn btn-primary btn-sm" @onclick="() => NextButtonClick(1)">Next</button>
 
-                        </div>
+                </div>
 
-                    }*@
+                }*@
                     @if (tab1)
                     {
                         <div class="tabcontent mb-4">
@@ -138,10 +138,20 @@
                                 <p class="send fw-bold">Which company types should the notification be sent too?</p>
                                 <ul class="company-types mb-4">
                                     <li>
-                                        <label for="select-all-type">
-                                            <input type="checkbox" class="select-all-type form-check-input" id="select-all-type" />
-                                            Select All
-                                        </label>
+                                        @if (TypeAll)
+                                        {
+                                            <label for="select-all-type">
+                                                <input checked @onclick="() => HandleTypeAll()" type="checkbox" class="select-all-type form-check-input" id="select-all-type" />
+                                                Select All
+                                            </label>
+                                        }
+                                        else
+                                        {
+                                            <label for="select-all-type">
+                                                <input @onclick="() => HandleTypeAll()" type="checkbox" class="select-all-type form-check-input" id="select-all-type" />
+                                                Select All
+                                            </label>
+                                        }
                                     </li>
                                     @if (Types is not null)
                                     {
@@ -169,6 +179,10 @@
                                             }
                                         }
                                     }
+                                    else
+                                    {
+                                        <div>Loading...</div>
+                                    }
                                 </ul>
 
                             </div>
@@ -186,10 +200,20 @@
                                 <p class="send fw-bold">Which company categories should the notification be sent too?</p>
                                 <ul class="company-categories mb-4">
                                     <li>
-                                        <label for="select-all-category">
-                                            <input type="checkbox" class="form-check-input" id="select-all-category" />
-                                            Select All
-                                        </label>
+                                        @if (CategoryAll)
+                                        {
+                                            <label for="select-all-category">
+                                                <input @onclick="() => HandleCategoryAll()" checked type="checkbox" class="form-check-input" id="select-all-category" />
+                                                Select All
+                                            </label>
+                                        }
+                                        else
+                                        {
+                                            <label for="select-all-category">
+                                                <input @onclick="() => HandleCategoryAll()" type="checkbox" class="form-check-input" id="select-all-category" />
+                                                Select All
+                                            </label>
+                                        }
                                     </li>
 
                                     @if (FilteredCategories is not null)
@@ -222,10 +246,14 @@
                                             }
                                         }
                                     }
+                                    else
+                                    {
+                                        <div>Loading...</div>
+                                    }
                                 </ul>
 
                             </div>
-                            <button type="button" class="btn btn-primary btn-sm" @onclick="() => PreviousButtonClick(2)">Previous</button> 
+                            <button type="button" class="btn btn-primary btn-sm" @onclick="() => PreviousButtonClick(2)">Previous</button>
                             <button type="button" class="btn btn-primary btn-sm" @onclick="() => NextButtonClick(2)">Next</button>
 
                         </div>
@@ -242,10 +270,20 @@
 
                                 <ul class="company-send-list mb-4">
                                     <li>
-                                        <label for="select-all-company">
-                                            <input type="checkbox" class="select-all-company form-check-input" id="select-all-company" />
-                                            Select All
-                                        </label>
+                                        @if (CompanyAll)
+                                        {
+                                            <label for="select-all-company">
+                                                <input @onclick="() => HandleCompanyAll()" checked type="checkbox" class="select-all-company form-check-input" id="select-all-company" />
+                                                Select All
+                                            </label>
+                                        }
+                                        else
+                                        {
+                                            <label for="select-all-company">
+                                                <input @onclick="() => HandleCompanyAll()" type="checkbox" class="select-all-company form-check-input" id="select-all-company" />
+                                                Select All
+                                            </label>
+                                        }
                                     </li>
                                     @if (RelatedCompanies is not null && Companies is not null)
                                     {
@@ -276,6 +314,10 @@
                                             }
                                         }
                                     }
+                                    else if (RelatedCompanies is not null && Companies is not null)
+                                    {
+                                        <div>Loading...</div>
+                                    }
                                 </ul>
 
                             </div>
@@ -285,12 +327,15 @@
                         </div>
                     }
                     <button type="button" @onclick="@HandleNotifSubmit" class="btn btn-primary submit">Send Notification</button>
-
-                    @if(SendNotifSuccess is not null)
+                    @if (IsBusy)
+                    {
+                        <div class="alert alert-secondary">Sending...</div>
+                    }
+                    @if (SendNotifSuccess is not null && !IsBusy)
                     {
                         <div class="alert alert-success mt-4">@SendNotifSuccess</div>
                     }
-                    @if(SendNotifError is not null)
+                    @if (SendNotifError is not null)
                     {
                         <div class="alert alert-danger mt-4">@SendNotifError</div>
 
@@ -303,7 +348,7 @@
 
     @if (PrevNotifs)
     {
-       
+
         <h2 class="title notif-title mt-4">Previous Notifications</h2>
 
         <div class="previous-notifs-group pt-2 mt-1">
@@ -318,9 +363,9 @@
                 </thead>
                 <tbody>
                     @*@foreach (var notifs in NotifsHistory)
-                    {
+                {
 
-                    }*@
+                }*@
                 </tbody>
             </table>
 
@@ -375,7 +420,7 @@
     private Company[]? Companies { get; set; }
     private Company? Company { get; set; }
     private List<Company> SelectedCompanies = new List<Company>();
-    private Notifications[]? NotifsHistory {get; set;}
+    private Notifications[]? NotifsHistory { get; set; }
     private Notification_Recipient[]? NotifsRec { get; set; }
 
 
@@ -385,8 +430,13 @@
     BlazoredTextEditor? Quill;
     public string? QuillContent { get; set; }
 
-    private string? SendNotifSuccess {get; set;}
+    private string? SendNotifSuccess { get; set; }
     private string? SendNotifError { get; set; }
+
+    private bool IsBusy = false;
+    private bool TypeAll = false;
+    private bool CategoryAll = false;
+    private bool CompanyAll = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -532,32 +582,48 @@
 
             try
             {
+                IsBusy = true;
                 var sClient = new SmtpClient("SMTP.HHCORP.ORG");
                 var message = new MailMessage();
 
                 sClient.Port = 25;
                 sClient.UseDefaultCredentials = false;
 
-                AlternateView altView = AlternateView.CreateAlternateViewFromString(QuillContent, null, MediaTypeNames.Text.Html);
-                LinkedResource linkresource = new LinkedResource("C:\\Users\\tbensheimer\\Desktop\\HHC logo.PNG");
-                linkresource.ContentId = "imageIdentifier";
-                altView.LinkedResources.Add(linkresource);
+                //AlternateView altView = AlternateView.CreateAlternateViewFromString(QuillContent, null, MediaTypeNames.Text.Html);
+                //LinkedResource linkresource = new LinkedResource("logo.PNG");
+                //linkresource.ContentId = "imageIdentifier";
+                //altView.LinkedResources.Add(linkresource);
 
-                message.To.Add(new MailAddress("tbensheimer@gmail.com"));
+
+                foreach (var company in SelectedCompanies)
+                {
+                    using var context = ContextFactory.CreateDbContext();
+                    var CompanyContacts = await context.Authorized_Contacts.Where(contact => contact.CompanyId == company.Id && !contact.Contact_Deleted).ToArrayAsync();
+
+                    foreach (var person in CompanyContacts)
+                    {
+                        if (person is not null)
+                        {
+                            message.To.Add(new MailAddress($"{person.Email}"));
+                        }
+                    }
+                }
+
                 message.From = new MailAddress("test@hhcorp.org");
                 message.Subject = "Test Subject";
-                message.AlternateViews.Add(altView);
-                // message.Body = QuillContent;
+                //message.AlternateViews.Add(altView);
+                message.Body = QuillContent;
                 message.IsBodyHtml = true;
 
                 sClient.Send(message);
                 await LoadData();
+                IsBusy = false;
                 SendNotifSuccess = "Sent Successfully!";
-                
+
 
 
             }
-            catch 
+            catch
             {
                 await LoadData();
                 SendNotifError = "There was an error while sending the notification. Please try again.";
@@ -567,7 +633,7 @@
         }
     }
 
-   
+
 
     private async Task HandleTypeChange(int TypeId)
     {
@@ -679,7 +745,7 @@
         context.Update(Company);
         await context.SaveChangesAsync();
 
-        if (Company.Is_Checked )
+        if (Company.Is_Checked)
         {
             SelectedCompanies.Add(Company);
         }
@@ -692,5 +758,128 @@
         await LoadData();
     }
 
+    private async Task HandleTypeAll()
+    {
+        using var context = ContextFactory.CreateDbContext();
+        TypeAll = !TypeAll;
+
+        if (TypeAll)
+        {
+            CheckedTypes.Clear();
+            foreach (var type in Types)
+            {
+                type.Is_Checked = true;
+                context.Update(type);
+                await context.SaveChangesAsync();
+
+                CheckedTypes.Add(type);
+            }
+            await LoadCategories();
+            await LoadData();
+
+        }
+        else if (!TypeAll)
+        {
+            foreach (var type in Types)
+            {
+                type.Is_Checked = false;
+                context.Update(type);
+                await context.SaveChangesAsync();
+
+                CheckedTypes.RemoveAll(Type => Type.Id == type.Id);
+            }
+            await LoadCategories();
+            await LoadData();
+        }
+    }
+
+    private async Task HandleCategoryAll()
+    {
+
+        using var context = ContextFactory.CreateDbContext();
+        CategoryAll = !CategoryAll;
+
+        if (CategoryAll)
+        {
+            CheckedCategories.Clear();
+            RelatedCompanies.Clear();
+
+            foreach (var cat in FilteredCategories)
+            {
+                cat.Is_Checked = true;
+                context.Update(cat);
+                await context.SaveChangesAsync();
+
+                CheckedCategories.Add(cat);
+
+                foreach (var ctc in CompanyTypesCats)
+                {
+                    if (!RelatedCompanies.Any(comp => comp.CompanyId == ctc.CompanyId))
+                    {
+                        RelatedCompanies.Add(ctc);
+                    }
+                }
+
+            }
+            await LoadCategories();
+            await LoadData();
+        }
+        else if (!CategoryAll)
+        {
+            CheckedCategories.Clear();
+            RelatedCompanies.Clear();
+
+            foreach (var cat in FilteredCategories)
+            {
+                cat.Is_Checked = false;
+                context.Update(cat);
+                await context.SaveChangesAsync();
+            }
+
+        }
+    }
+
+    private async Task HandleCompanyAll()
+    {
+        using var context = ContextFactory.CreateDbContext();
+        CompanyAll = !CompanyAll;
+
+        if (CompanyAll)
+        {
+            SelectedCompanies.Clear();
+            foreach (var company in RelatedCompanies)
+            {
+                var Company = await context.Companies.Where(comp => comp.Id == company.CompanyId).ToArrayAsync();
+
+                foreach(var comp in Company)
+                {
+                    comp.Is_Checked = true;
+                    context.Update(comp);
+                    await context.SaveChangesAsync();
+
+                    if(!SelectedCompanies.Any(company => company.Id == comp.Id))
+                    {
+                        SelectedCompanies.Add(comp);
+                    }
+                }
+
+            }
+            await LoadData();
+        } else if (!CompanyAll)
+        {
+            SelectedCompanies.Clear();
+            foreach (var company in RelatedCompanies)
+            {
+                var Company = await context.Companies.Where(comp => comp.Id == company.CompanyId).ToArrayAsync();
+
+                foreach(var comp in Company)
+                {
+                    comp.Is_Checked = false;
+                    context.Update(comp);
+                    await context.SaveChangesAsync();  // TEST and REFACTOR CODE === Remove company notg working
+                }
+            }
+        }
+    }
 
 }

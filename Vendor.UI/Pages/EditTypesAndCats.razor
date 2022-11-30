@@ -20,10 +20,9 @@
                             <p><strong>@type.Type_Name:</strong> @category.Category_Name</p>
                             <button @onclick="() => HandleCategoryRemove(category.Id)" class="btn btn-outline-danger btn-sm" type="button">Remove</button>
                         </div>
-                        if(CategoryError is not null)
-                        {
-                            <div class="alert alert-danger">@CategoryError</div>
-                        }
+                        <br />
+                      
+                        
                     }
 
                 }
@@ -34,6 +33,21 @@
             <div>Loading...</div>
         }
     </div>
+
+      @if(CategoryError is not null)
+        {
+        <div class="alert alert-danger">@CategoryError</div>
+        }
+
+        @if(SuccessMessage is not null)
+        {
+        <div class="alert alert-success">@SuccessMessage</div>
+        }
+
+        @if (ErrorMessage is not null)
+        {
+        ErrorMessage = "There was an error while saving changes. Please try again.";
+        }
 
 
     <div class="types-categories-group mb-4">
@@ -201,7 +215,8 @@
     private string? CategoryError { get; set; }
     private int? CurrentCategoryCount { get; set; }
 
-
+    private string? SuccessMessage { get; set; }
+    private string? ErrorMessage { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -260,6 +275,9 @@
                 QueryableCategories.Add(cat);
             }
         }
+
+        SuccessMessage = null;
+        ErrorMessage = null;
 
     }
 
@@ -346,7 +364,7 @@
 
     private async Task HandleTypesCatsSubmit()
     {
-       
+
         foreach (var cat in CheckedCategories)
         {
 
@@ -378,15 +396,23 @@
         }
         if (CompanyCategories is not null && FilteredCheckedCategories.Count() != 0)
         {
-            using var context = ContextFactory.CreateDbContext();
+            try
+            {
+                using var context = ContextFactory.CreateDbContext();
 
-            context.Company_Types_Categories.AddRange(CompanyCategories);
-            await context.SaveChangesAsync();
-            CompanyCategories.Clear();
-            FilteredCheckedCategories.Clear();
+                context.Company_Types_Categories.AddRange(CompanyCategories);
+                await context.SaveChangesAsync();
+                CompanyCategories.Clear();
+                FilteredCheckedCategories.Clear();
+                await LoadData();
+                SuccessMessage = "Saved Type and category changes successfully!";
+            }
+            catch 
+            {
+                await LoadData();
+                ErrorMessage = "There was an error while saving changes. Please try again.";
+            }
         }
-
-        await LoadData();
     }
 
 
@@ -440,15 +466,25 @@
 
                     if (isOk)
                     {
-                        context.Company_Types_Categories.Remove(CategoryRemove);
-                        await context.SaveChangesAsync();
-                        await LoadData();
-                    }
+                        try
+                        {
+                            context.Company_Types_Categories.Remove(CategoryRemove);
+                            await context.SaveChangesAsync();
+                            await LoadData();
+                            SuccessMessage = "Removed successfully!";
+                        }
+                        catch
+                        {
+                            await LoadData();
+                            ErrorMessage = "There was an error while removing the Type and Category. Please try again.";
+                        }
+                }
                 }
             }
         }
         else if(CurrentCategoryCount <= 1) 
         {
+            await LoadData();
             CategoryError = "Cannot delete category, there needs to be at least one category selected. Please add a category before deleting.";
         }
     }

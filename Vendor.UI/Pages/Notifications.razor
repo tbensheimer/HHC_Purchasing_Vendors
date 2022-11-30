@@ -522,7 +522,7 @@
         await JS.InvokeAsync<IJSObjectReference>("DataTablesRemove", "#basic-datatable");
     }
 
-    private async Task HandleNotifSubmit()
+    private async void HandleNotifSubmit()
     {
         if (Quill is not null)
         {

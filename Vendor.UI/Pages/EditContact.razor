@@ -70,7 +70,8 @@ else
         Authorized_Contact = await context.Authorized_Contacts.FirstOrDefaultAsync(cont => cont.CompanyId == CompanyId);
         Company = await context.Companies.FirstOrDefaultAsync(comp => comp.Id == CompanyId);
         ContactList = await context.Authorized_Contacts.Where(cont => cont.CompanyId == CompanyId && cont.Contact_Deleted == false).ToListAsync();
-        ContactsForm.Contacts = new();
+        ContactError = null;
+        //   ContactsForm.Contacts = new();
     }
 
     private async Task HandleContactSubmit(bool isValid)

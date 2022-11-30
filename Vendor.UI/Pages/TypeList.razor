@@ -66,6 +66,16 @@
         </tbody>
     </table>
 
+    @if (SuccessMessage is not null)
+    {
+        <div class="alert alert-success">@SuccessMessage</div>
+    }
+
+    @if (ErrorMessage is not null)
+    {
+        <div class="alert alert-danger">@ErrorMessage</div>
+    }
+
 <button @onclick="() => HandleTypeSave()" type="button" class="btn btn-success btn-sm fw-bold">Save Changes</button>
 
     <ul class="pagination mb-2 mt-2 justify-content-center">
@@ -117,25 +127,29 @@ else
 
     private string? FilterString { get; set; }
 
+    private string? SuccessMessage { get; set; }
+
+    private string? ErrorMessage { get; set; }
+
 
     protected override async Task OnParametersSetAsync()
     {
         await LoadData();
     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
+    //protected override async Task OnAfterRenderAsync(bool firstRender)
+    //{
 
-        //if (firstRender)
-        //{
-        //    await JS.InvokeAsync<IJSObjectReference>("DataTablesAdd", "#type-table");
-        //}
-    }
+    //    //if (firstRender)
+    //    //{
+    //    //    await JS.InvokeAsync<IJSObjectReference>("DataTablesAdd", "#type-table");
+    //    //}
+    //}
 
-    public void Dispose()
-    {
-        JS.InvokeAsync<IJSObjectReference>("DataTablesRemove", "#type-table");
-    }
+    //public void Dispose()
+    //{
+    //    JS.InvokeAsync<IJSObjectReference>("DataTablesRemove", "#type-table");
+    //}
 
     private async Task LoadData()
     {
@@ -176,6 +190,9 @@ else
         .ToArrayAsync();
 
 
+        SuccessMessage = null;
+        ErrorMessage = null;
+
     }
 
     private async Task HandleCategoryEdit(int TypeId)
@@ -188,9 +205,17 @@ else
                 var dbType = context.Business_Types.FirstOrDefault(t => t.Id == type.Id);
                 if (dbType is not null)
                 {
-                    dbType.Type_Name = type.Type_Name;
-                    context.Update(dbType);
-                    await context.SaveChangesAsync();
+                    try
+                    {
+                        dbType.Type_Name = type.Type_Name;
+                        context.Update(dbType);
+                        await context.SaveChangesAsync();
+                        SuccessMessage = "Type changes saved successfully!";
+                    }
+                    catch 
+                    {
+                        ErrorMessage = "There was an error while saving Type changes. Please try again.";
+                    }
                 }
             }
         }
@@ -206,11 +231,19 @@ else
                 var dbType = context.Business_Types.FirstOrDefault(t => t.Id == type.Id);
                 if (dbType is not null && type.Type_Name != "")
                 {
-                    dbType.Type_Name = type.Type_Name;
-                    context.Update(dbType);
-                    await context.SaveChangesAsync();
-                    await LoadData();
-
+                    try
+                    {
+                        dbType.Type_Name = type.Type_Name;
+                        context.Update(dbType);
+                        await context.SaveChangesAsync();
+                        await LoadData();
+                        SuccessMessage = "Type changes saved successfully!";
+                    }
+                    catch 
+                    {
+                        await LoadData();
+                        ErrorMessage = "There was an error while saving Type changes. Please try again.";
+                    }
                 }
             }
         }
@@ -230,15 +263,22 @@ else
             if (isOk)
             {
 
-
-                context.Business_Types.Remove(dbType);
-
-                foreach (var cat in CategoryList)
+                try
                 {
-                    context.Business_Categories.Remove(cat);
+                    context.Business_Types.Remove(dbType);
+                    foreach (var cat in CategoryList)
+                    {
+                        context.Business_Categories.Remove(cat);
+                    }
+                    await context.SaveChangesAsync();
+                    await LoadData();
+                    SuccessMessage = "Successfully removed Type and all of it's categories!";
                 }
-                await context.SaveChangesAsync();
-                await LoadData();
+                catch
+                {
+                    await LoadData();
+                    ErrorMessage = "There was an error while removing the Type and it's categories. Please try again.";
+                }
             }
         }
     }
@@ -249,14 +289,23 @@ else
 
         if (InputType is not null)
         {
-            Type = new Business_Types();
-            Type.Type_Name = InputType;
+            try
+            {
+                Type = new Business_Types();
+                Type.Type_Name = InputType;
 
-            context.Business_Types.Add(Type);
-            await context.SaveChangesAsync(); 
-            await LoadData();
-            InputType = null;
-        }
+                context.Business_Types.Add(Type);
+                await context.SaveChangesAsync();
+                await LoadData();
+                InputType = null;
+                SuccessMessage = "Added Type successfully!";
+            }
+            catch 
+            {
+                await LoadData();
+                ErrorMessage = "There was an error while adding the Type. Please try again.";
+            }
+    }
     }
 
 

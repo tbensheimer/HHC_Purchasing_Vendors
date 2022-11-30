@@ -49,6 +49,15 @@
         </tbody>
     </table>
 
+    @if(SuccessMessage is not null)
+    {
+        <div class="alert alert-success">@SuccessMessage</div>
+    }
+
+    @if(ErrorMessage is not null)
+    {
+        <div class="alert alert-danger">@ErrorMessage</div>
+    }
     <button @onclick="() => HandleCategorySave()" type="button" class="btn btn-success btn-sm fw-bold mb-4">Save Changes</button>
 }
 
@@ -87,6 +96,10 @@
 
     private string? InputCat { get; set; }
 
+    private string? SuccessMessage { get; set; }
+
+    private string? ErrorMessage { get; set; }
+
     protected override async Task OnParametersSetAsync()
     {
         await LoadData();   
@@ -98,6 +111,9 @@
 
         CatList = await context.Business_Categories.Where(cat => cat.Type_Id == TypeId).ToArrayAsync();
         Type = await context.Business_Types.FirstOrDefaultAsync(type => type.Id == TypeId);
+
+        SuccessMessage = null;
+        ErrorMessage = null;
 
     }
 
@@ -113,9 +129,17 @@
 
             if (isOk)
             {
-                context.Business_Categories.Remove(dbCat);
-                await context.SaveChangesAsync();
-                await LoadData();
+                try
+                {
+                    context.Business_Categories.Remove(dbCat);
+                    await context.SaveChangesAsync();
+                    await LoadData();
+                    SuccessMessage = "Category successfully removed!";
+                }
+                catch {
+                    await LoadData();
+                    ErrorMessage = "There was an error while deleting category. Please try again.";
+                }
             }
         }
     }
@@ -126,13 +150,21 @@
 
         if (InputCat is not null)
         {
-            Category = new Business_Categories();
-            Category.Type_Id = TypeId;
-            Category.Category_Name = InputCat;
-            context.Business_Categories.Add(Category);
-            await context.SaveChangesAsync();
-            await LoadData();
-            InputCat = null;
+            try
+            {
+                Category = new Business_Categories();
+                Category.Type_Id = TypeId;
+                Category.Category_Name = InputCat;
+                context.Business_Categories.Add(Category);
+                await context.SaveChangesAsync();
+                await LoadData();
+                InputCat = null;
+                SuccessMessage = "Category successfully added!";
+            }
+            catch{
+                await LoadData();
+                ErrorMessage = "There was an error in adding a Category. Please try again.";
+            }
         }
     }
 
@@ -146,12 +178,19 @@
                 var dbCat = context.Business_Categories.FirstOrDefault(c => c.Id == cat.Id);
                 if (dbCat is not null && cat.Category_Name != "")
                 {
-                    dbCat.Category_Name = cat.Category_Name;
-                    context.Update(dbCat);
-                    await context.SaveChangesAsync();
-                    await LoadData();
-
-                }
+                    try
+                    {
+                        dbCat.Category_Name = cat.Category_Name;
+                        context.Update(dbCat);
+                        await context.SaveChangesAsync();
+                        await LoadData();
+                        SuccessMessage = "Category changes saved successfully!";
+                    }
+                    catch{
+                        await LoadData();
+                        ErrorMessage = "There was an error while saving category changes. Please try again.";
+                    }
+            }
             }
         }
 

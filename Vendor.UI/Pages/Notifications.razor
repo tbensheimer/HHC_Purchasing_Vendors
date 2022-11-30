@@ -4,6 +4,7 @@
 @using System.Net.Mime
 @inject IDbContextFactory<VendorDataDbContext> ContextFactory
 @inject IJSRuntime JS
+@inject NavigationManager NavigationManager
 
 <main class="main mt-4">
 
@@ -70,7 +71,7 @@
                                 <p>Thank you,</p>
                                 <p>Health and Hospital Corporation - Purchasing Department</p>
                                 <p>Marion County Health Department</p>
-                                <img src="/indianapolis.jpg" cid="imageIdentifier" >
+                                <img width="150" src="/logo.PNG" cid="imageIdentifier" >
                             </EditorContent>
                         </BlazoredTextEditor>
                     </div>
@@ -224,6 +225,7 @@
                                 </ul>
 
                             </div>
+                            <button type="button" class="btn btn-primary btn-sm" @onclick="() => PreviousButtonClick(2)">Previous</button> 
                             <button type="button" class="btn btn-primary btn-sm" @onclick="() => NextButtonClick(2)">Next</button>
 
                         </div>
@@ -277,11 +279,22 @@
                                 </ul>
 
                             </div>
+                            <button type="button" class="btn btn-primary btn-sm" @onclick="() => PreviousButtonClick(3)">Previous</button>
+
 
                         </div>
                     }
-
                     <button type="button" @onclick="@HandleNotifSubmit" class="btn btn-primary submit">Send Notification</button>
+
+                    @if(SendNotifSuccess is not null)
+                    {
+                        <div class="alert alert-success mt-4">@SendNotifSuccess</div>
+                    }
+                    @if(SendNotifError is not null)
+                    {
+                        <div class="alert alert-danger mt-4">@SendNotifError</div>
+
+                    }
 
                 </form>
             </div>
@@ -372,6 +385,9 @@
     BlazoredTextEditor? Quill;
     public string? QuillContent { get; set; }
 
+    private string? SendNotifSuccess {get; set;}
+    private string? SendNotifError { get; set; }
+
     protected override async Task OnInitializedAsync()
     {
         using var context = ContextFactory.CreateDbContext();
@@ -379,7 +395,7 @@
         Categories = await context.Business_Categories.OrderBy(cat => cat.Category_Name).ToArrayAsync();
         CompanyTypesCats = await context.Company_Types_Categories.ToArrayAsync();
         Companies = await context.Companies.ToArrayAsync();
-     //   NotifsHistory = await context.NotificationsList.ToArrayAsync();
+        //   NotifsHistory = await context.NotificationsList.ToArrayAsync();
         NotifsRec = await context.Notification_Recipients.ToArrayAsync();
 
         foreach (var type in Types)
@@ -440,6 +456,9 @@
         .OrderBy(comp => comp.Name)
         .ToArrayAsync();
 
+        SendNotifSuccess = null;
+        SendNotifError = null;
+
     }
 
     public void DisplayTab(int TabNumber)
@@ -483,6 +502,11 @@
         DisplayTab(tab + 1);
     }
 
+    private void PreviousButtonClick(int tab)
+    {
+        DisplayTab(tab - 1);
+    }
+
     private async Task SendNotifsActive()
     {
         SendNotifs = true;
@@ -491,7 +515,7 @@
         await LoadData();
     }
 
-    private async void PrevNotifsActive()
+    private async Task PrevNotifsActive()
     {
         SendNotifs = false;
         PrevNotifs = true;
@@ -506,30 +530,39 @@
             QuillContent = await this.Quill.GetHTML();
             StateHasChanged();
 
-    
+            try
+            {
+                var sClient = new SmtpClient("SMTP.HHCORP.ORG");
+                var message = new MailMessage();
 
-            var sClient = new SmtpClient("SMTP.HHCORP.ORG");
-            var message = new MailMessage();
+                sClient.Port = 25;
+                sClient.UseDefaultCredentials = false;
 
-            sClient.Port = 25;
-            sClient.UseDefaultCredentials = false;
+                AlternateView altView = AlternateView.CreateAlternateViewFromString(QuillContent, null, MediaTypeNames.Text.Html);
+                LinkedResource linkresource = new LinkedResource("C:\\Users\\tbensheimer\\Desktop\\HHC logo.PNG");
+                linkresource.ContentId = "imageIdentifier";
+                altView.LinkedResources.Add(linkresource);
 
-            AlternateView altView = AlternateView.CreateAlternateViewFromString(QuillContent, null, MediaTypeNames.Text.Html);
-            LinkedResource linkresource = new LinkedResource("C:\\Users\tbensheimer\\Desktop\\indianapolis.jpg");
-            linkresource.ContentId = "imageIdentifier";
-            altView.LinkedResources.Add(linkresource);
+                message.To.Add(new MailAddress("tbensheimer@gmail.com"));
+                message.From = new MailAddress("test@hhcorp.org");
+                message.Subject = "Test Subject";
+                message.AlternateViews.Add(altView);
+                // message.Body = QuillContent;
+                message.IsBodyHtml = true;
+
+                sClient.Send(message);
+                await LoadData();
+                SendNotifSuccess = "Sent Successfully!";
+                
 
 
-            message.To.Add(new MailAddress("tbensheimer@gmail.com"));
-            message.From = new MailAddress("test@hhcorp.org");
-            message.Subject = "Test Subject";
-            message.AlternateViews.Add(altView);
-            message.IsBodyHtml = true;
+            }
+            catch 
+            {
+                await LoadData();
+                SendNotifError = "There was an error while sending the notification. Please try again.";
+            }
 
-
-
-            sClient.Send(message);
-            
 
         }
     }

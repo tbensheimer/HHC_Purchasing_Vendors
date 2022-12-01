@@ -73,10 +73,11 @@ table th {
     background-color: rgb(250, 226, 206) !important;
     border: 1px solid white !important;
     border-bottom: 1px solid black !important;
+    padding: 4px !important;
 }
 
-table td{
-    background-color: rgb(251, 244, 238) !important;
+table td {
+    background-color: rgb(248, 248, 248) !important;
     padding: 10px !important;
 }
 

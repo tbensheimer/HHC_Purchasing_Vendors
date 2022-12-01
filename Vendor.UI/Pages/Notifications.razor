@@ -326,6 +326,11 @@
 
                         </div>
                     }
+                    @if(SelectedCompanies is not null)
+                    {
+                        <p style="font-size: 20" class="fw-bold">Selected Companies: @SelectedCompaniesCount</p>
+                    }
+
                     <button type="button" @onclick="@HandleNotifSubmit" class="btn btn-primary submit">Send Notification</button>
                     @if (IsBusy)
                     {
@@ -354,7 +359,7 @@
         <div class="previous-notifs-group pt-2 mt-1">
             <table class="prev-notif table dt-responsive nowrap w-100 mt-3" id="basic-datatable">
                 <thead>
-                    <tr>
+                    <tr class="header-row">
                         <th>Subject</th>
                         <th>Contents</th>
                         <th>Sent To:</th>
@@ -362,10 +367,25 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @*@foreach (var notifs in NotifsHistory)
+                    @if(NotifsHistory is not null)
+                    {
+                    @foreach (var notifs in NotifsHistory)
                 {
+                    <tr>
+                        <td>@notifs.Title</td>
+                        <td>@notifs.Body</td>
+                        <td>Some Company</td>
+                        <td>@notifs.Date_Sent</td>
+                    </tr>
+                }
+                        <tr>
+                            <td>adsdddddddddddddddddddd</td>
+                            <td><div style="word-wrap: break-word !important; overflow-wrap: break-word !important; width: 100px !important;">dddddddddddddddddddddddddddddddddddddddddddddddsssssssssssssssssssssssaaaaaa aaaaaaaaaaaaaaaafffffffffffffffffffffffffffffffffffffff</div></td>
+                            <td>Some Company</td>
+                            <td>ffffffffffffff</td>
+                        </tr>
 
-                }*@
+                    }
                 </tbody>
             </table>
 
@@ -420,7 +440,7 @@
     private Company[]? Companies { get; set; }
     private Company? Company { get; set; }
     private List<Company> SelectedCompanies = new List<Company>();
-    private Notifications[]? NotifsHistory { get; set; }
+    private Vendor.Data.Models.Notifications[]? NotifsHistory { get; set; }
     private Notification_Recipient[]? NotifsRec { get; set; }
 
 
@@ -438,6 +458,8 @@
     private bool CategoryAll = false;
     private bool CompanyAll = false;
 
+    private int? SelectedCompaniesCount {get; set;}
+
     protected override async Task OnInitializedAsync()
     {
         using var context = ContextFactory.CreateDbContext();
@@ -445,7 +467,7 @@
         Categories = await context.Business_Categories.OrderBy(cat => cat.Category_Name).ToArrayAsync();
         CompanyTypesCats = await context.Company_Types_Categories.ToArrayAsync();
         Companies = await context.Companies.ToArrayAsync();
-        //   NotifsHistory = await context.NotificationsList.ToArrayAsync();
+        NotifsHistory = await context.NotificationsList.ToArrayAsync();
         NotifsRec = await context.Notification_Recipients.ToArrayAsync();
 
         foreach (var type in Types)
@@ -485,8 +507,6 @@
 
             await JS.InvokeAsync<IJSObjectReference>("DataTablesAdd", "#basic-datatable");
 
-            await JS.InvokeAsync<IJSObjectReference>("DataTablesRemove", "#basic-datatable");
-
 
         }
     }
@@ -508,6 +528,8 @@
 
         SendNotifSuccess = null;
         SendNotifError = null;
+
+        SelectedCompaniesCount = SelectedCompanies.Where(comp => !comp.Is_Deleted).Count();
 
     }
 
@@ -561,6 +583,8 @@
     {
         SendNotifs = true;
         PrevNotifs = false;
+        await JS.InvokeAsync<IJSObjectReference>("DataTablesRemove", "#basic-datatable");
+
 
         await LoadData();
     }
@@ -569,7 +593,7 @@
     {
         SendNotifs = false;
         PrevNotifs = true;
-        await JS.InvokeAsync<IJSObjectReference>("DataTablesRemove", "#basic-datatable");
+        await JS.InvokeAsync<IJSObjectReference>("DataTablesAdd", "#basic-datatable");
     }
 
     private async void HandleNotifSubmit()
@@ -778,7 +802,8 @@
             await LoadData();
 
         }
-        else if (!TypeAll)
+
+        if (!TypeAll)
         {
             foreach (var type in Types)
             {
@@ -814,9 +839,13 @@
 
                 foreach (var ctc in CompanyTypesCats)
                 {
-                    if (!RelatedCompanies.Any(comp => comp.CompanyId == ctc.CompanyId))
+                    var Company = await context.Companies.FirstOrDefaultAsync(comp => comp.Id == ctc.CompanyId);
+                    if (!RelatedCompanies.Any(comp => comp.CompanyId == ctc.CompanyId ))
                     {
-                        RelatedCompanies.Add(ctc);
+                        if (Company is not null && !Company.Disabled_From_Notifications)
+                        {
+                            RelatedCompanies.Add(ctc);
+                        }
                     }
                 }
 
@@ -824,7 +853,8 @@
             await LoadCategories();
             await LoadData();
         }
-        else if (!CategoryAll)
+
+        if (!CategoryAll)
         {
             CheckedCategories.Clear();
             RelatedCompanies.Clear();
@@ -851,13 +881,13 @@
             {
                 var Company = await context.Companies.Where(comp => comp.Id == company.CompanyId).ToArrayAsync();
 
-                foreach(var comp in Company)
+                foreach (var comp in Company)
                 {
                     comp.Is_Checked = true;
                     context.Update(comp);
                     await context.SaveChangesAsync();
 
-                    if(!SelectedCompanies.Any(company => company.Id == comp.Id))
+                    if (!SelectedCompanies.Any(company => company.Id == comp.Id))
                     {
                         SelectedCompanies.Add(comp);
                     }
@@ -865,20 +895,23 @@
 
             }
             await LoadData();
-        } else if (!CompanyAll)
+        }
+
+        if (!CompanyAll)
         {
             SelectedCompanies.Clear();
             foreach (var company in RelatedCompanies)
             {
                 var Company = await context.Companies.Where(comp => comp.Id == company.CompanyId).ToArrayAsync();
 
-                foreach(var comp in Company)
+                foreach (var comp in Company)
                 {
                     comp.Is_Checked = false;
                     context.Update(comp);
                     await context.SaveChangesAsync();  // TEST and REFACTOR CODE === Remove company notg working
                 }
             }
+            await LoadData();
         }
     }
 

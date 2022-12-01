@@ -44,11 +44,11 @@
                 <tr>
                     <td>
                         <label for="@type.Id" hidden>@type.Type_Name</label>
-                        <input type="text" class="form-control" name="@type.Type_Name" @bind-value="@type.Type_Name" id="@type.Id" />
+                        <input style="box-shadow: 0px 0px 2px 2px rgb(230, 228, 228)" type="text" class="form-control" name="@type.Type_Name" @bind-value="@type.Type_Name" id="@type.Id" />
                     </td>
                     <td>
-                        <a @onclick="() => HandleCategoryEdit(type.Id)" href="/category-list/type/@type.Id" class="btn btn-outline-secondary fw-bold btn-sm">Manage Categories</a>
-                    <button style="width: 146px;" @onclick="() => HandleTypeRemove(type.Id)" class="fw-bold btn btn-danger btn-sm">Remove Type</button>
+                        <a @onclick="() => HandleCategoryEdit(type.Id)" href="/category-list/type/@type.Id" style="background-color: rgb(150, 149, 149) !important" class="btn btn-secondary fw-bold btn-sm">Manage Categories</a>
+                        <button style="width: 146px; border: none !imporant; background-color: rgb(172, 84, 84) !important" @onclick="() => HandleTypeRemove(type.Id)" class="fw-bold btn btn-danger btn-sm">Remove Type</button>
                 </td>
                 </tr>
             }
@@ -56,7 +56,7 @@
                 <td>
                     <EditForm Model="@BType">
                         <label for="input-type" hidden>Add Type</label>
-                        <InputText @bind-Value="@InputType" id="input-type" type="text" name="input-type" class="form-control" placeholder=" Add a Type" />
+                        <InputText style="box-shadow: 0px 0px 2px 2px rgb(230, 228, 228);" @bind-Value="@InputType" id="input-type" type="text" name="input-type" class="form-control" placeholder=" Add a Type" />
                     </EditForm>
 
                 </td>
@@ -137,13 +137,13 @@ else
         await LoadData();
     }
 
-    //protected override async Task OnAfterRenderAsync(bool firstRender)
-    //{
+   //protected override async Task OnAfterRenderAsync(bool firstRender)
+   // {
 
-    //    //if (firstRender)
-    //    //{
-    //    //    await JS.InvokeAsync<IJSObjectReference>("DataTablesAdd", "#type-table");
-    //    //}
+   //     if (firstRender)
+   //     {
+   //         await JS.InvokeAsync<IJSObjectReference>("DataTablesAdd", "#type-table");
+   //     }
     //}
 
     //public void Dispose()

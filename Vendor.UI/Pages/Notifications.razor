@@ -5,6 +5,7 @@
 @inject IDbContextFactory<VendorDataDbContext> ContextFactory
 @inject IJSRuntime JS
 @inject NavigationManager NavigationManager
+@using System.IO;
 
 <main class="main mt-4">
 
@@ -57,7 +58,7 @@
 
                                 <span class="ql-formats">
                                     <button class="ql-link"></button>
-                                    <button class="ql-image"></button>
+                                    <button class="ql-image" data-toggle="tooltip" data-placement="bottom" title="Insert Image"></button>
                                 </span>
                             </ToolbarContent>
                             <EditorContent>
@@ -72,27 +73,31 @@
                                 <p>Health and Hospital Corporation - Purchasing Department</p>
                                 <p>Marion County Health Department</p>
                                 <img width="150" src="/logo.PNG" cid="imageIdentifier">
-                            </EditorContent>
+
+
+@*                                <img src="@imageDataUri"/>
+*@                            </EditorContent>
                         </BlazoredTextEditor>
                     </div>
+
 
                     <br />
 
 
                     <div class="tab mt-4">
                         <button type="button" @onclick="(e => DisplayTab(1))" class="@((tab1) ? "active" : "")">
-                            <span alt="user icon" class="oi oi-envelope-closed"></span><br />
-                            <span class="d-none d-sm-inline">Send</span>
+                            <span alt="user icon" class="oi oi-briefcase"></span><br />
+                            <span class="d-none d-sm-inline">Types</span>
                         </button>
 
                         <button type="button" @onclick="(e => DisplayTab(2))" class="@((tab2) ? "active" : "")">
                             <span alt="building icon" class="oi oi-paperclip"></span><br />
-                            <span class="d-none d-sm-inline">Types</span>
+                            <span class="d-none d-sm-inline">Categories</span>
                         </button>
 
                         <button type="button" @onclick="(e => DisplayTab(3))" class="@((tab3) ? "active" : "")">
-                            <span alt="address-book icon" class="oi oi-briefcase"></span><br />
-                            <span class="d-none d-sm-inline">Categories</span>
+                            <span alt="address-book icon" class="oi oi-envelope-closed"></span><br />
+                            <span class="d-none d-sm-inline">Companies</span>
                         </button>
 
                         @*  <button type="button" @onclick="(e => DisplayTab(4))" class="@((tab4) ? "active" : "")">
@@ -357,7 +362,7 @@
         <h2 class="title notif-title mt-4">Previous Notifications</h2>
 
         <div class="previous-notifs-group pt-2 mt-1">
-            <table class="prev-notif table dt-responsive nowrap w-100 mt-3" id="basic-datatable">
+            <table class=" table dt-responsive nowrap w-100 mt-3" id="basic-datatable">
                 <thead>
                     <tr class="header-row">
                         <th>Subject</th>
@@ -371,19 +376,15 @@
                     {
                     @foreach (var notifs in NotifsHistory)
                 {
-                    <tr>
-                        <td>@notifs.Title</td>
+                     
+                                <tr>
+                                    <td>@notifs.Title</td>
                         <td>@notifs.Body</td>
-                        <td>Some Company</td>
+                        <td> Some Company</td>
                         <td>@notifs.Date_Sent</td>
                     </tr>
+                               
                 }
-                        <tr>
-                            <td>adsdddddddddddddddddddd</td>
-                            <td><div style="word-wrap: break-word !important; overflow-wrap: break-word !important; width: 100px !important;">dddddddddddddddddddddddddddddddddddddddddddddddsssssssssssssssssssssssaaaaaa aaaaaaaaaaaaaaaafffffffffffffffffffffffffffffffffffffff</div></td>
-                            <td>Some Company</td>
-                            <td>ffffffffffffff</td>
-                        </tr>
 
                     }
                 </tbody>
@@ -415,7 +416,7 @@
     private bool tab1 = true;
     private bool tab2 = false;
     private bool tab3 = false;
-    private bool tab4 = false;
+  //  private bool tab4 = false;
     private bool SendNotifs = true;
     private bool PrevNotifs = false;
 
@@ -460,6 +461,9 @@
 
     private int? SelectedCompaniesCount {get; set;}
 
+    //string imageDataUri;
+
+
     protected override async Task OnInitializedAsync()
     {
         using var context = ContextFactory.CreateDbContext();
@@ -493,6 +497,21 @@
 
         await LoadData();
     }
+
+    //long maxFileSize = 1024 * 1024 * 15;
+
+    //async Task LoadImage(InputFileChangeEventArgs e)
+    //{
+    //    var imageFile = await e.File.RequestImageFileAsync("image/jpeg", maxWidth: 640, maxHeight: 480);
+    //    using Stream fileStream = imageFile.OpenReadStream(maxFileSize);
+    //    using MemoryStream ms = new();
+
+
+    //    await fileStream.CopyToAsync(ms);
+
+    //    imageDataUri = $"data:image/jpeg;base64,{Convert.ToBase64String(ms.ToArray())}";
+
+    //}
 
 
     protected override async Task OnParametersSetAsync()
@@ -529,6 +548,7 @@
         SendNotifSuccess = null;
         SendNotifError = null;
 
+
         SelectedCompaniesCount = SelectedCompanies.Where(comp => !comp.Is_Deleted).Count();
 
     }
@@ -541,28 +561,28 @@
                 this.tab1 = true;
                 this.tab2 = false;
                 this.tab3 = false;
-                this.tab4 = false;
+          //      this.tab4 = false;
 
                 break;
             case 2:
                 this.tab1 = false;
                 this.tab2 = true;
                 this.tab3 = false;
-                this.tab4 = false;
+          //      this.tab4 = false;
 
                 break;
             case 3:
                 this.tab1 = false;
                 this.tab2 = false;
                 this.tab3 = true;
-                this.tab4 = false;
+           //     this.tab4 = false;
 
                 break;
             case 4:
                 this.tab1 = false;
                 this.tab2 = false;
                 this.tab3 = false;
-                this.tab4 = true;
+            //    this.tab4 = true;
 
                 break;
         }
@@ -596,6 +616,16 @@
         await JS.InvokeAsync<IJSObjectReference>("DataTablesAdd", "#basic-datatable");
     }
 
+    //private AlternateView GetEmbeddedImage(String filePath)
+    //{
+    //    LinkedResource res = new LinkedResource(filePath, MediaTypeNames.Image.Jpeg);
+    //    res.ContentId = Guid.NewGuid().ToString();
+    //    string htmlBody = @"<img src='cid:" + res.ContentId + @"'/>";
+    //    AlternateView alternateView = AlternateView.CreateAlternateViewFromString(htmlBody, null, MediaTypeNames.Text.Html);
+    //    alternateView.LinkedResources.Add(res);
+    //    return alternateView;
+    //}
+
     private async void HandleNotifSubmit()
     {
         if (Quill is not null)
@@ -604,19 +634,21 @@
             QuillContent = await this.Quill.GetHTML();
             StateHasChanged();
 
+            if (SelectedCompaniesCount == 0)
+            {
+                await LoadData();
+                SendNotifError = "Please select at least one company to send the notification to.";
+                return;
+            }
             try
             {
                 IsBusy = true;
+
                 var sClient = new SmtpClient("SMTP.HHCORP.ORG");
                 var message = new MailMessage();
 
                 sClient.Port = 25;
                 sClient.UseDefaultCredentials = false;
-
-                //AlternateView altView = AlternateView.CreateAlternateViewFromString(QuillContent, null, MediaTypeNames.Text.Html);
-                //LinkedResource linkresource = new LinkedResource("logo.PNG");
-                //linkresource.ContentId = "imageIdentifier";
-                //altView.LinkedResources.Add(linkresource);
 
 
                 foreach (var company in SelectedCompanies)
@@ -635,7 +667,7 @@
 
                 message.From = new MailAddress("test@hhcorp.org");
                 message.Subject = "Test Subject";
-                //message.AlternateViews.Add(altView);
+                //message.AlternateViews.Add(GetEmbeddedImage("c:/image.png"));
                 message.Body = QuillContent;
                 message.IsBodyHtml = true;
 
@@ -643,8 +675,6 @@
                 await LoadData();
                 IsBusy = false;
                 SendNotifSuccess = "Sent Successfully!";
-
-
 
             }
             catch
@@ -796,6 +826,7 @@
                 context.Update(type);
                 await context.SaveChangesAsync();
 
+
                 CheckedTypes.Add(type);
             }
             await LoadCategories();
@@ -834,6 +865,7 @@
                 cat.Is_Checked = true;
                 context.Update(cat);
                 await context.SaveChangesAsync();
+
 
                 CheckedCategories.Add(cat);
 

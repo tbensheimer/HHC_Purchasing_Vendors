@@ -19,8 +19,8 @@ namespace Vendor.Data.Models
         [RegularExpression(@"^((?!\.)[\w-_.]*[^.])(@\w+)(\.\w+(\.\w+)?[^.\W])$", ErrorMessage = "Invalid email address. Format: XXXX@example.com")]
         public string? Email { get; set; } = default!;
         [Required]
-        [RegularExpression(@"^([+]?\d{1,2}[-\s]?|)\d{3}[-\s]?\d{3}[-\s]?\d{4}$", ErrorMessage = "Invalid phone number. Format: XXXXXXXXXX or XXXXXXXXXXX or XXX XXX XXXX or X XXX XXX XXXX")]
-        public int? Phone_Number { get; set; }
+        [RegularExpression(@"^(\d{3}-\d{3}-\d{4}|\d{10}|(\d{3})\s?\d{3}-\d{4})$", ErrorMessage = "Invalid phone number. Format: XXXXXXXXXX or XXXXXXXXXXX or XXX XXX XXXX or X XXX XXX XXXX")]
+        public double? Phone_Number { get; set; }
 
         public bool Contact_Deleted { get; set; }
 

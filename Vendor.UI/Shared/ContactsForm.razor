@@ -1,4 +1,5 @@
-﻿@inject IDbContextFactory<VendorDataDbContext> ContextFactory
+﻿@using System.Text.RegularExpressions
+@inject IDbContextFactory<VendorDataDbContext> ContextFactory
 @inject IJSRuntime JS
 
 <EditForm Model="@Authorized_Contact" OnValidSubmit="() => HandleContactsComplete()">
@@ -80,12 +81,11 @@
                 </td>
                 <td>
                     <label for="contact-email" hidden>Contact Email</label>
-                    <InputText @bind-Value="@Email" id="contact-email" type="email" name="contacts-email" class="contact-email form-control" placeholder=" Email" />
+                    <input @bind-value="@Email" id="contact-email" type="email" name="contacts-email" class="contact-email form-control" placeholder=" Email" />
                 </td>
                 <td>
                     <label for="number" hidden>Phone Number</label>
-                    <InputNumber @bind-Value="@Number" id="number" type="number" name="contacts-phone-number" class="number form-control" placeholder=" Phone Number" />
-                </td>
+                    <input @bind-value="@Number" id="number" pattern="[0-9]{10}" max="10" type="text" name="contacts-phone-number" class="form-control" placeholder=" Phone Number" />                </td>
                 <td></td>
             </tr>
 
@@ -126,7 +126,7 @@
     [Parameter]
     public string Email { get; set; } = default!;
     [Parameter]
-    public int? Number { get; set; }
+    public double? Number { get; set; }
     [Parameter]
     public string? ContactError { get; set; } = default!;
 
@@ -187,33 +187,49 @@
 
         if (FirstName != null && LastName != null && Email != null && Number != null && Company is not null)
         {
-            try
+
+            bool EmailValid = Regex.IsMatch(Email, @"^((?!\.)[\w-_.]*[^.])(@\w+)(\.\w+(\.\w+)?[^.\W])$");
+            bool PhoneValid = Regex.IsMatch(Number.ToString(), @"^(\d{3}-\d{3}-\d{4}|\d{10}|(\d{3})\s?\d{3}-\d{4})$");
+
+            if (EmailValid == true && PhoneValid == true)
             {
-                Authorized_Contact = new Authorized_Contacts();
+                try
+                {
+                    Authorized_Contact = new Authorized_Contacts();
 
-                Authorized_Contact.CompanyId = Company.Id;
-                Authorized_Contact.FirstName = FirstName;
-                Authorized_Contact.LastName = LastName;
-                Authorized_Contact.Email = Email;
-                Authorized_Contact.Phone_Number = Number;
+                    Authorized_Contact.CompanyId = Company.Id;
+                    Authorized_Contact.FirstName = FirstName;
+                    Authorized_Contact.LastName = LastName;
+                    Authorized_Contact.Email = Email;
+                    Authorized_Contact.Phone_Number = Number;
 
-                context.Authorized_Contacts.Add(Authorized_Contact);
-                await context.SaveChangesAsync();
-                await OnSubmit.InvokeAsync(false);
-                await LoadData();
-                SuccessMessage = "Contact successfully added!";
-                FirstName = "";
-                LastName = "";
-                Email = "";
-                Number = null;
-                ContactError = null;
+                    context.Authorized_Contacts.Add(Authorized_Contact);
+                    await context.SaveChangesAsync();
+                    await OnSubmit.InvokeAsync(false);
+                    await LoadData();
+                    SuccessMessage = "Contact successfully added!";
+                    FirstName = "";
+                    LastName = "";
+                    Email = "";
+                    Number = null;
+                    ContactError = null;
+                }
+                catch
+                {
+                    SuccessMessage = null;
+                    ContactError = "There was an error adding a contact. Please try again.";
+                }
             }
-            catch
+            else if (!EmailValid)
             {
-                await LoadData();
-                ContactError = "There was an error adding a contact. Please try again.";
+                SuccessMessage = null;
+                ContactError = "Invalid Email. Please use the following format: XXX@example.com";
             }
-
+            else if (!PhoneValid)
+            {
+                SuccessMessage = null;
+                ContactError = "Invalid PhoneNumber. Please use the following format: XXXXXXXXXXX (no dashes or spaces)";
+            }
 
 
             //Contacts.Add(Authorized_Contact);
@@ -229,6 +245,7 @@
         }
         else
         {
+            SuccessMessage = null;
             ContactError = "Please fill all fields to add a contact";
         }
     }
@@ -254,15 +271,33 @@
                 {
                     var dbContact = context.Authorized_Contacts.FirstOrDefault(x => x.Id == contact.Id);
 
-                    if (dbContact != null)
+                    if (dbContact != null && contact.Email != null && contact.Phone_Number != null)
                     {
-                        dbContact.CompanyId = contact.CompanyId;
-                        dbContact.FirstName = contact.FirstName;
-                        dbContact.LastName = contact.LastName;
-                        dbContact.Email = contact.Email;
-                        dbContact.Phone_Number = contact.Phone_Number;
-                        context.Update(dbContact);
 
+                        bool EmailValid = Regex.IsMatch(contact.Email, @"^((?!\.)[\w-_.]*[^.])(@\w+)(\.\w+(\.\w+)?[^.\W])$");
+                        bool PhoneValid = Regex.IsMatch(contact.Phone_Number.ToString(), @"^(\d{3}-\d{3}-\d{4}|\d{10}|(\d{3})\s?\d{3}-\d{4})$");
+
+                        if (EmailValid && PhoneValid)
+                        {
+                            dbContact.CompanyId = contact.CompanyId;
+                            dbContact.FirstName = contact.FirstName;
+                            dbContact.LastName = contact.LastName;
+                            dbContact.Email = contact.Email;
+                            dbContact.Phone_Number = contact.Phone_Number;
+                            context.Update(dbContact);
+                        }
+                        else if (!EmailValid)
+                        {
+                            SuccessMessage = null;
+                            ContactError = "Invalid Email. Please use the following format: XXX@example.com";
+                            return;
+                        }
+                        else if (!PhoneValid)
+                        {
+                            SuccessMessage = null;
+                            ContactError = "Invalid PhoneNumber. Please use the following format: XXXXXXXXXXX (no dashes or spaces)";
+                            return;
+                        }
                     }
                 }
             }

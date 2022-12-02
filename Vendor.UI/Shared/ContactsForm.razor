@@ -154,6 +154,7 @@
 
 
 
+
     protected override async Task OnParametersSetAsync()
     {
 
@@ -167,6 +168,7 @@
 
         Contacts = new List<Authorized_Contacts>();
         //  FilteredContacts = await context.Authorized_Contacts.FirstOrDefaultAsync(contact => contact.CompanyId == Company.Id).Where();
+
 
 
         if (!IsEdit)
@@ -256,6 +258,14 @@
     {
         using var context = ContextFactory.CreateDbContext();
 
+        var ContactsCount = ContactList.Count();
+
+        if(ContactsCount == 0)
+        {
+            SuccessMessage = null;
+            ContactError = "There is no contact information present. Please add a contact";
+            return;
+        }
 
         // context.Update(Authorized_Contacts.Contact);
         //  context.Update(ContactList);
@@ -333,6 +343,15 @@
     {
         using var context = ContextFactory.CreateDbContext();
         SingleContact = await context.Authorized_Contacts.FirstOrDefaultAsync(contact => contact.Id == ContactId);
+
+        var ContactsCount = ContactList.Count();
+
+        if (ContactsCount == 1 && IsEdit)
+        {
+            SuccessMessage = null;
+            ContactError = "Must have at least one contact. Please add a contact before deleting one.";
+            return;
+        }
 
         if (SingleContact is not null)
         {

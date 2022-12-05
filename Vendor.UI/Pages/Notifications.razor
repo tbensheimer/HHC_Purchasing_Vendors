@@ -21,7 +21,7 @@
                     <label for="subject-line" hidden>Subject Line</label>
                     <input @bind-value="SubjectLine" class="required form-control mb-2" id="subject-line" name="subject-line" type="text" placeholder="Subject Line" />
 
-                    <div class="quill-div mb-4">
+                    <div class="quill-div mb-2">
                         <BlazoredTextEditor @ref="@Quill">
                             <ToolbarContent>
                                 <select class="ql-font">
@@ -369,7 +369,7 @@
                 <thead>
                     <tr class="header-row">
                         <th>Subject</th>
-                        <th>Contents</th>
+                        <th>Content</th>
                         <th>Sent To:</th>
                         <th>Date Sent:</th>
                     </tr>
@@ -382,8 +382,17 @@
 
                             <tr>
                                 <td>@notifs.Title</td>
-                                <td>@notifs.Body</td>
-                                <td> Some Company</td>
+                                <td>
+                                    <button style="color: rgb(80, 80, 250); text-decoration: underline" type="button" class="btn" @onclick="() => ModalShow(notifs.Id)">
+                                        @notifs.Body.Substring(0, 15)....
+                                    </button>
+                                </td>
+                                <td>
+                                @foreach(var rec in NotifsRec.Where(rec => rec.NotificationsId == notifs.Id).Take(3))
+                                {
+                                    <button class="btn" @onclick="() => ModalShow(notifs.Id)">@rec.CompanyName</button>
+                                }
+                                </td>
                                 <td>@notifs.Date_Sent</td>
                             </tr>
 
@@ -394,6 +403,80 @@
             </table>
 
         </div>
+
+     
+                    //Modal Start
+            @if (ShowModal)
+            {
+                <div class="modal fade show" id="myModal" style="display:block" aria-modal="true" role="dialog">
+                <div class="modal-dialog modal-dialog-scrollable">
+                        <div class="modal-content">
+
+                            <!-- Modal Header -->
+                            <div style="flex-direction: column;" class="modal-header">
+
+                                    <h4 class="modal-title mb-3">Notification Id: <strong>@NotificationId</strong></h4>
+                                <h5>Subject: <strong>@NotificationSubjectLine</strong></h5>
+                                    
+                            </div>
+
+                            <!-- Modal body -->
+                            <div class="modal-body">
+                                @if(NotificationBody is not null)
+                                {
+                                <p>@NotificationBody</p>
+                                }
+                            </div>
+
+                            <!-- Modal footer -->
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" @onclick="@ModalCancel">Close</button>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            }
+            //Modal End
+
+        //Modal Start
+        @if (ShowListModal)
+        {
+            <div class="modal fade show" id="myModal" style="display:block" aria-modal="true" role="dialog">
+                <div class="modal-dialog modal-dialog-scrollable">
+                    <div class="modal-content">
+
+                        <!-- Modal Header -->
+                        <div style="flex-direction: column;" class="modal-header">
+
+                            <h4 class="modal-title mb-3">Notification Id: <strong>@NotificationId</strong></h4>
+                        </div>
+
+                        <!-- Modal body -->
+                        <div class="modal-body">
+                            <ul>
+                            @if (ListOfCompanies is not null)
+                            {
+                                @foreach (var comp in ListOfCompanies)
+                                {
+                                    <li>@comp</li>
+                                }
+                            }
+                            </ul>
+                        </div>
+
+                        <!-- Modal footer -->
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" @onclick="@ModalCancel">Close</button>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        }
+        //Modal End
+
+
     }
     <div class="panel home-panel mb-4 mt-4">
         <div class="layout">
@@ -446,6 +529,7 @@
     private List<Company> SelectedCompanies = new List<Company>();
     private Vendor.Data.Models.Notifications[]? NotifsHistory { get; set; }
     private Notification_Recipient[]? NotifsRec { get; set; }
+    private Notification_Recipient? RecipientObject { get; set; }
 
 
     public bool IsChecked { get; set; }
@@ -467,8 +551,53 @@
 
     private string? SubjectLine = null;
 
+    private Vendor.Data.Models.Notifications? Notif { get; set; }
+    private int? NotificationId { get; set; }
+    private string? NotificationSubjectLine { get; set; }
+    private string? NotificationBody { get; set; }
+    private int NotificationsCount { get; set; }
+
+    private List<string> ListOfCompanies = new List<string>();
+    bool ShowListModal = false;
+
     //string imageDataUri;
 
+    bool ShowModal = false;
+
+    private async Task ModalShow(int NotifId)
+    {
+        using var context = ContextFactory.CreateDbContext();
+        Notif = await context.NotificationsList.FirstOrDefaultAsync(notif => notif.Id == NotifId);
+
+        ShowModal = true;
+        NotificationId = Notif.Id;
+        NotificationSubjectLine = Notif.Title;
+        NotificationBody = Notif.Body;
+    }
+    private async Task ModalShowCompanyList(int NotifId)
+    {
+        ListOfCompanies.Clear();
+
+        using var context = ContextFactory.CreateDbContext();
+
+        var CompaniesSent = await context.Notification_Recipients.Where(rec => rec.NotificationsId == NotifId).ToListAsync();
+
+        if(CompaniesSent is not null)
+        {
+            foreach(var comp in CompaniesSent)
+            {
+                ListOfCompanies.Add(comp.CompanyName);
+            }
+        }
+        ShowListModal = true;
+
+    }
+
+    void ModalCancel()
+    {
+        ShowModal = false;
+        ShowListModal = false;
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -477,8 +606,7 @@
         Categories = await context.Business_Categories.OrderBy(cat => cat.Category_Name).ToArrayAsync();
         CompanyTypesCats = await context.Company_Types_Categories.ToArrayAsync();
         Companies = await context.Companies.ToArrayAsync();
-        NotifsHistory = await context.NotificationsList.ToArrayAsync();
-        NotifsRec = await context.Notification_Recipients.ToArrayAsync();
+
 
         foreach (var type in Types)
         {
@@ -554,8 +682,11 @@
         SendNotifSuccess = null;
         SendNotifError = null;
 
+        NotifsHistory = await context.NotificationsList.ToArrayAsync();
+        NotifsRec = await context.Notification_Recipients.ToArrayAsync();
 
         SelectedCompaniesCount = SelectedCompanies.Where(comp => !comp.Is_Deleted).Count();
+        NotificationsCount = await context.NotificationsList.CountAsync();
 
     }
 
@@ -619,6 +750,7 @@
     {
         SendNotifs = false;
         PrevNotifs = true;
+        await LoadData();
         await JS.InvokeAsync<IJSObjectReference>("DataTablesAdd", "#basic-datatable");
     }
 
@@ -634,12 +766,16 @@
 
     private async void HandleNotifSubmit()
     {
+        using var context = ContextFactory.CreateDbContext();
+
         if (IsBusy)
         {
             return;
         }
         IsBusy = true;
         IsBusyMessage = "Sending...";
+        SendNotifError = null;
+        SendNotifSuccess = null;
 
         if (SelectedCompaniesCount == 0 || SelectedCompaniesCount is null)
         {
@@ -664,7 +800,7 @@
 
                 foreach (var company in SelectedCompanies)
                 {
-                    using var context = ContextFactory.CreateDbContext();
+
                     var CompanyContacts = await context.Authorized_Contacts.Where(contact => contact.CompanyId == company.Id && !contact.Contact_Deleted).ToArrayAsync();
 
                     foreach (var person in CompanyContacts)
@@ -678,7 +814,6 @@
 
                 if (SubjectLine is null)
                 {
-                    IsBusyMessage = null;
                     SendNotifSuccess = null;
                     SendNotifError = "Please provide a subject line.";
                     return;
@@ -686,7 +821,7 @@
                 else
                 {
                     SendNotifError = null;
-                   message.Subject = SubjectLine;
+                    message.Subject = SubjectLine;
                 }
 
                 message.From = new MailAddress("test@hhcorp.org");
@@ -695,6 +830,30 @@
                 message.IsBodyHtml = true;
 
                 sClient.Send(message);
+
+
+                Notif = new Data.Models.Notifications();
+                Notif.Title = SubjectLine;
+                Notif.Body = QuillContent;
+                Notif.Date_Sent = DateTime.Now;
+                Notif.Created_By = "test@hhcorp.org";
+
+                context.NotificationsList.Add(Notif);
+                await context.SaveChangesAsync();
+
+
+        
+
+                foreach (var company in SelectedCompanies)
+                {
+                    RecipientObject = new Notification_Recipient();
+                    RecipientObject.NotificationsId = Notif.Id;
+                    RecipientObject.CompanyId = company.Id;
+                    RecipientObject.CompanyName = company.Name;
+                    context.Notification_Recipients.Add(RecipientObject);
+                    await context.SaveChangesAsync();
+                }
+                await LoadData();
                 SendNotifSuccess = "Sent Successfully!";
 
             }
@@ -702,14 +861,15 @@
             {
                 SendNotifError = "There was an error while sending the notification. Please try again.";
             }
-            finally{
+            finally
+            {
                 IsBusy = false;
                 IsBusyMessage = null;
                 StateHasChanged();
             }
-            ;
+
         }
-        
+
     }
 
 
@@ -872,6 +1032,8 @@
             await LoadCategories();
             await LoadData();
         }
+        StateHasChanged();
+
     }
 
     private async Task HandleCategoryAll()
@@ -909,6 +1071,7 @@
             }
             await LoadCategories();
             await LoadData();
+            StateHasChanged();
         }
 
         if (!CategoryAll)
@@ -952,6 +1115,7 @@
 
             }
             await LoadData();
+            StateHasChanged();
         }
 
         if (!CompanyAll)

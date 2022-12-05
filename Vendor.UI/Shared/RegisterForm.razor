@@ -1,6 +1,7 @@
 ﻿@page "/register"
 @using Microsoft.EntityFrameworkCore
 @inject IDbContextFactory<VendorDataDbContext> ContextFactory
+@inject NavigationManager NavigationManager
 
 <h3>Registration Form</h3>
 
@@ -178,7 +179,9 @@
                                                         </label>
                                                         <br />
                                                     </li>
-                                                } else {
+                                                }
+                                                else
+                                                {
                                                     <li class="catLi">
                                                         <label id="key" for="@cat.Category_Name">
                                                             <input @key="cat.Id" @onclick="() => HandleCategoryChange(cat.Id)" class="form-check-input cat-check" id="@cat.Category_Name"
@@ -198,7 +201,7 @@
 
                     </div>
                     <p class="fw-bold mt-3">Contacts Selected: @CategoryCount</p>
-                    @if(ErrorMessage is not null)
+                    @if (ErrorMessage is not null)
                     {
                         <div class="alert alert-danger">@ErrorMessage</div>
                     }
@@ -213,20 +216,30 @@
     @if (tab6)
     {
         <div class="tab-content">
-            <div class="reg-complete-group mt-3">
+            <div class="reg-complete-group mt-3 mb-4">
                 <div class="text-center">
-                    <h2 class="mt-0"><i alt="check mark icon" class="fa-solid fa-check"></i></h2>
+                    <h2 class="mt-0"><i alt="check mark icon" class="oi oi-check"></i></h2>
+
                     <h3 class="mt-0">Registration Complete!</h3>
 
-                    <p class="w-75 mb-2 mx-auto">
-                        Thank you for registering your company.
+                    <p class="w-75 mb-2 mx-auto">Thank you for registering your company.</p>
+                    <p class="w-75 mb-4 mx-auto">An account was successfully created. You may log into your account whenever to update and make changes.</p>
+                    <p>
                         Your company will receive notifications from us if we require your services and for updates.
+                        Please note that completing this form does not gurantee that we will do business with your company.
                     </p>
 
-                    <p class="w-75 mb-4 mx-auto">You may log into your account whenever to update and make changes.</p>
-
-                        <a href="/login" class="fw-bold btn btn-success">Go to Log In Page</a>
+                    <label classclass="mb-4" for="legal">
+                    <input @onclick="() => HandleComplianceAgreement()" type="checkbox" class="form-check-input" id="legal" />
+                        Please check (Compliance statement will be provided)
+                    </label>
+                    <br />
+                    <a @onclick="() => HandleLoginClick()" class="fw-bold btn btn-success mt-3">Go to Log In Page</a>
                 </div>
+                @if(ErrorMessage is not null)
+                {
+                    <div class="alert alert-danger mt-3">@ErrorMessage</div>
+                }
             </div>
         </div>
     }
@@ -275,6 +288,8 @@
     private int? CategoryCount { get; set; }
     private string? ErrorMessage { get; set; }
 
+    private bool ComplianceAgreement = false;
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -317,7 +332,7 @@
         SignUpDate = DateTime.Now;
         ContactsForm.Contacts = new();
         //CompanyTypeAndCat = new Company_Types_Categories();
-        ErrorMessage = null;        
+        ErrorMessage = null;
 
         using var context = ContextFactory.CreateDbContext();
         IQueryable<Business_Types> TypeQuery = context.Business_Types;
@@ -355,6 +370,8 @@
 
     public void DisplayTab(int TabNumber)
     {
+        ErrorMessage = null;
+
         switch (TabNumber)
         {
             case 1:
@@ -603,7 +620,7 @@
             ErrorMessage = "No Contacts selected. Please select a contact.";
             return;
         }
-        
+
 
         foreach (var cat in CheckedCategories)
         {
@@ -667,6 +684,26 @@
             return CatQuery.Where(cat => cat.Category_Name != null && cat.Category_Name.Contains(this.FilterCategoryString));
         }
         return CatQuery;
+    }
+
+    private void HandleComplianceAgreement()
+    {
+        ComplianceAgreement = !ComplianceAgreement;
+    }
+
+    private void HandleLoginClick()
+    {
+        if(!ComplianceAgreement)
+        {
+            ErrorMessage = "Please read the compliance statement and check if you understand and agree to the statement.";
+            return;
+        }
+
+        if(ComplianceAgreement)
+        {
+            ErrorMessage = null;
+            NavigationManager.NavigateTo("/login");
+        }
     }
 
 }

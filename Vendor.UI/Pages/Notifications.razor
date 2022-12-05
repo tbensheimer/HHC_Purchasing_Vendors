@@ -17,9 +17,11 @@
             <div class="notifications-group mt-4">
 
                 <form action="#" id="notif-form">
+
+                    <label for="subject-line" hidden>Subject Line</label>
+                    <input @bind-value="SubjectLine" class="required form-control mb-2" id="subject-line" name="subject-line" type="text" placeholder="Subject Line" />
+
                     <div class="quill-div mb-4">
-                        @* <div id="notification-input-div">
-                    </div>*@
                         <BlazoredTextEditor @ref="@Quill">
                             <ToolbarContent>
                                 <select class="ql-font">
@@ -75,8 +77,9 @@
                                 <img width="150" src="/logo.PNG" cid="imageIdentifier">
 
 
-@*                                <img src="@imageDataUri"/>
-*@                            </EditorContent>
+                                @*                                <img src="@imageDataUri"/>
+                            *@
+                            </EditorContent>
                         </BlazoredTextEditor>
                     </div>
 
@@ -331,17 +334,17 @@
 
                         </div>
                     }
-                    @if(SelectedCompanies is not null)
+                    @if (SelectedCompanies is not null)
                     {
                         <p style="font-size: 20" class="fw-bold">Selected Companies: @SelectedCompaniesCount</p>
                     }
 
-                    <button type="button" @onclick="@HandleNotifSubmit" class="btn btn-primary submit">Send Notification</button>
-                    @if (IsBusy)
+                    <button type="button" disabled="@IsBusy" @onclick="@HandleNotifSubmit" class="btn btn-primary submit">Send Notification</button>
+                    @if (IsBusyMessage is not null)
                     {
-                        <div class="alert alert-secondary">Sending...</div>
+                        <div class="alert alert-secondary mt-2">@IsBusyMessage</div>
                     }
-                    @if (SendNotifSuccess is not null && !IsBusy)
+                    @if (SendNotifSuccess is not null)
                     {
                         <div class="alert alert-success mt-4">@SendNotifSuccess</div>
                     }
@@ -372,19 +375,19 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @if(NotifsHistory is not null)
+                    @if (NotifsHistory is not null)
                     {
-                    @foreach (var notifs in NotifsHistory)
-                {
-                     
-                                <tr>
-                                    <td>@notifs.Title</td>
-                        <td>@notifs.Body</td>
-                        <td> Some Company</td>
-                        <td>@notifs.Date_Sent</td>
-                    </tr>
-                               
-                }
+                        @foreach (var notifs in NotifsHistory)
+                        {
+
+                            <tr>
+                                <td>@notifs.Title</td>
+                                <td>@notifs.Body</td>
+                                <td> Some Company</td>
+                                <td>@notifs.Date_Sent</td>
+                            </tr>
+
+                        }
 
                     }
                 </tbody>
@@ -416,7 +419,7 @@
     private bool tab1 = true;
     private bool tab2 = false;
     private bool tab3 = false;
-  //  private bool tab4 = false;
+    //  private bool tab4 = false;
     private bool SendNotifs = true;
     private bool PrevNotifs = false;
 
@@ -453,13 +456,16 @@
 
     private string? SendNotifSuccess { get; set; }
     private string? SendNotifError { get; set; }
+    private string? IsBusyMessage { get; set; }
 
     private bool IsBusy = false;
     private bool TypeAll = false;
     private bool CategoryAll = false;
     private bool CompanyAll = false;
 
-    private int? SelectedCompaniesCount {get; set;}
+    private int? SelectedCompaniesCount { get; set; }
+
+    private string? SubjectLine = null;
 
     //string imageDataUri;
 
@@ -561,28 +567,28 @@
                 this.tab1 = true;
                 this.tab2 = false;
                 this.tab3 = false;
-          //      this.tab4 = false;
+                //      this.tab4 = false;
 
                 break;
             case 2:
                 this.tab1 = false;
                 this.tab2 = true;
                 this.tab3 = false;
-          //      this.tab4 = false;
+                //      this.tab4 = false;
 
                 break;
             case 3:
                 this.tab1 = false;
                 this.tab2 = false;
                 this.tab3 = true;
-           //     this.tab4 = false;
+                //     this.tab4 = false;
 
                 break;
             case 4:
                 this.tab1 = false;
                 this.tab2 = false;
                 this.tab3 = false;
-            //    this.tab4 = true;
+                //    this.tab4 = true;
 
                 break;
         }
@@ -628,22 +634,27 @@
 
     private async void HandleNotifSubmit()
     {
+        if (IsBusy)
+        {
+            return;
+        }
+        IsBusy = true;
+        IsBusyMessage = "Sending...";
+
+        if (SelectedCompaniesCount == 0 || SelectedCompaniesCount is null)
+        {
+            IsBusy = false;
+            IsBusyMessage = null;
+            SendNotifError = "Please select at least one company to send the notification to.";
+            return;
+        }
         if (Quill is not null)
         {
-
             QuillContent = await this.Quill.GetHTML();
             StateHasChanged();
 
-            if (SelectedCompaniesCount == 0)
-            {
-                await LoadData();
-                SendNotifError = "Please select at least one company to send the notification to.";
-                return;
-            }
             try
             {
-                IsBusy = true;
-
                 var sClient = new SmtpClient("SMTP.HHCORP.ORG");
                 var message = new MailMessage();
 
@@ -665,26 +676,40 @@
                     }
                 }
 
+                if (SubjectLine is null)
+                {
+                    IsBusyMessage = null;
+                    SendNotifSuccess = null;
+                    SendNotifError = "Please provide a subject line.";
+                    return;
+                }
+                else
+                {
+                    SendNotifError = null;
+                   message.Subject = SubjectLine;
+                }
+
                 message.From = new MailAddress("test@hhcorp.org");
-                message.Subject = "Test Subject";
                 //message.AlternateViews.Add(GetEmbeddedImage("c:/image.png"));
                 message.Body = QuillContent;
                 message.IsBodyHtml = true;
 
                 sClient.Send(message);
-                await LoadData();
-                IsBusy = false;
                 SendNotifSuccess = "Sent Successfully!";
 
             }
             catch
             {
-                await LoadData();
                 SendNotifError = "There was an error while sending the notification. Please try again.";
             }
-
-
+            finally{
+                IsBusy = false;
+                IsBusyMessage = null;
+                StateHasChanged();
+            }
+            ;
         }
+        
     }
 
 
@@ -872,7 +897,7 @@
                 foreach (var ctc in CompanyTypesCats)
                 {
                     var Company = await context.Companies.FirstOrDefaultAsync(comp => comp.Id == ctc.CompanyId);
-                    if (!RelatedCompanies.Any(comp => comp.CompanyId == ctc.CompanyId ))
+                    if (!RelatedCompanies.Any(comp => comp.CompanyId == ctc.CompanyId))
                     {
                         if (Company is not null && !Company.Disabled_From_Notifications)
                         {
@@ -940,7 +965,7 @@
                 {
                     comp.Is_Checked = false;
                     context.Update(comp);
-                    await context.SaveChangesAsync();  // TEST and REFACTOR CODE === Remove company notg working
+                    await context.SaveChangesAsync();
                 }
             }
             await LoadData();

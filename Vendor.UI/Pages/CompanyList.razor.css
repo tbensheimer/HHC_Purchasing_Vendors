@@ -2,10 +2,8 @@
 }
 
 .main {
-    width: 100vw;
     display: flex;
     flex-direction: column;
-    align-items: center;
     font-family: Arial, Helvetica, sans-serif;
 }
 
@@ -39,6 +37,7 @@
     display: flex;
     width: 25rem;
     align-items: center;
+    align-self: center !important;
     justify-content: space-around;
     background-color: white;
 }
@@ -111,6 +110,10 @@ i {
     margin-left: 60% !important;
 }
 
+.form-check-input:hover {
+    cursor: pointer;
+}
+
 .border th {
     border: 1px solid white;
 }
@@ -146,13 +149,6 @@ i {
         width: 70% !important;
     }
 
-.content {
-    display: none;
-    overflow: hidden;
-    background-color: azure;
-    max-height: 0;
-    transform: translateY(-710px);
-}
 
 #notif-form {
     background-color: rgb(230, 240, 251);

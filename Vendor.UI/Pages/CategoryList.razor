@@ -14,6 +14,11 @@
 
 @if(CatList is not null)
 {
+        <div class="mb-2 justify-content-end">
+            <input type="text" @onkeyup="@TextFilterKeyUp" @bind-value="@FilterString" placeholder="Filter Categories..." />
+            <button class="btn btn-sm btn-secondary" @onclick="ButtonFilterClick">Filter</button>
+        </div>
+
     <table class="table table-hover">
         <thead>
             <tr>
@@ -100,6 +105,9 @@
 
     private string? ErrorMessage { get; set; }
 
+    private string? FilterString { get; set; }
+
+
     protected override async Task OnParametersSetAsync()
     {
         await LoadData();   
@@ -109,7 +117,13 @@
     {
         using var context = ContextFactory.CreateDbContext();
 
-        CatList = await context.Business_Categories.Where(cat => cat.Type_Id == TypeId).ToArrayAsync();
+
+        IQueryable<Business_Categories> CatQuery = context.Business_Categories;
+        CatQuery = AddFilter(CatQuery);
+        CatList = await CatQuery
+        .Where(cat => cat.Type_Id == TypeId)
+        .ToArrayAsync();
+
         Type = await context.Business_Types.FirstOrDefaultAsync(type => type.Id == TypeId);
 
         SuccessMessage = null;
@@ -195,6 +209,29 @@
         }
 
     }
+
+     private IQueryable<Business_Categories> AddFilter(IQueryable<Business_Categories> catQuery)
+    {
+        if (!string.IsNullOrWhiteSpace(FilterString))
+        {
+            return catQuery.Where(cat => cat.Category_Name != null && cat.Category_Name.Contains(this.FilterString));
+        }
+        return catQuery;
+    }
+
+    private async Task TextFilterKeyUp(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await LoadData();
+        }
+    }
+
+    private async Task ButtonFilterClick()
+    {
+        await LoadData();
+    }
+
 
     private void HandleNavigationTypeList()
     {

@@ -384,14 +384,11 @@
                                 <td>@notifs.Title</td>
                                 <td>
                                     <button style="color: rgb(80, 80, 250); text-decoration: underline" type="button" class="btn" @onclick="() => ModalShow(notifs.Id)">
-                                        @notifs.Body.Substring(0, 15)....
+                                        @((MarkupString)notifs.Body.Substring(0, 15))
                                     </button>
                                 </td>
                                 <td>
-                                @foreach(var rec in NotifsRec.Where(rec => rec.NotificationsId == notifs.Id).Take(3))
-                                {
-                                    <button class="btn" @onclick="() => ModalShow(notifs.Id)">@rec.CompanyName</button>
-                                }
+                                    <button class="btn btn-secondary btn-sm" @onclick="() => ModalShowCompanyList(notifs.Id)">Click to see Recipients</button>
                                 </td>
                                 <td>@notifs.Date_Sent</td>
                             </tr>
@@ -424,7 +421,7 @@
                             <div class="modal-body">
                                 @if(NotificationBody is not null)
                                 {
-                                <p>@NotificationBody</p>
+                                <p>@((MarkupString)NotificationBody)</p>
                                 }
                             </div>
 
@@ -449,11 +446,13 @@
                         <!-- Modal Header -->
                         <div style="flex-direction: column;" class="modal-header">
 
-                            <h4 class="modal-title mb-3">Notification Id: <strong>@NotificationId</strong></h4>
+                            <h4 class="modal-title">Notification Id: <strong>@NotificationId</strong></h4>
                         </div>
 
                         <!-- Modal body -->
                         <div class="modal-body">
+                            <h5 style="text-decoration: underline">Recipients:</h5>
+
                             <ul>
                             @if (ListOfCompanies is not null)
                             {
@@ -554,12 +553,12 @@
     private Vendor.Data.Models.Notifications? Notif { get; set; }
     private int? NotificationId { get; set; }
     private string? NotificationSubjectLine { get; set; }
-    private string? NotificationBody { get; set; }
+    private MarkupString? NotificationBody { get; set; }
     private int NotificationsCount { get; set; }
 
     private List<string> ListOfCompanies = new List<string>();
     bool ShowListModal = false;
-
+    private MarkupString myMarkup { get; set; }
     //string imageDataUri;
 
     bool ShowModal = false;
@@ -568,11 +567,13 @@
     {
         using var context = ContextFactory.CreateDbContext();
         Notif = await context.NotificationsList.FirstOrDefaultAsync(notif => notif.Id == NotifId);
+        myMarkup = new MarkupString($"{Notif.Body}");
 
         ShowModal = true;
         NotificationId = Notif.Id;
         NotificationSubjectLine = Notif.Title;
-        NotificationBody = Notif.Body;
+        NotificationBody = myMarkup;
+
     }
     private async Task ModalShowCompanyList(int NotifId)
     {
@@ -581,6 +582,7 @@
         using var context = ContextFactory.CreateDbContext();
 
         var CompaniesSent = await context.Notification_Recipients.Where(rec => rec.NotificationsId == NotifId).ToListAsync();
+        NotificationId = NotifId;
 
         if(CompaniesSent is not null)
         {

@@ -55,26 +55,41 @@
 
         function DataTablesAdd(table) {
             
-            setTimeout(() => {
+         //   setTimeout(() => {
             $(function() {
                 $(table).DataTable();
             });
-            },200);
+        //    },200);
+
+        }
+
+        function DataTablesAddOrderbyDate(table) {
+
+            setTimeout(() => {
+                $(function () {
+                    $(table).DataTable({
+                        "order": [[3, 'desc']]
+                    });
+                });
+            }, 200);
 
         }
 
         function DataTablesRemove(table) {
      
-            setTimeout(() => {
+         //   setTimeout(() => {
             $(function() {
                 $(table).DataTable().destroy();
             })
-            }, 200);
+          //  }, 200);
            
         }
 
-    </script>
+        function ToggleDropdown(dropdown) {
+            document.getElementById(dropdown).classList.toggle("hidden");
+        }
 
+    </script>
 
 
 </body>

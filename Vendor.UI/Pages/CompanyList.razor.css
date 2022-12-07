@@ -103,16 +103,19 @@ i {
 .table td, .table th {
     text-align: center;
     vertical-align: middle;
+    padding-left: 0;
 }
 
 .form-switch {
-    width: 1rem;
-    margin-left: 60% !important;
+    width: auto;
+    margin-left: 0;
+    display: flex;
 }
 
 .form-check-input:hover {
     cursor: pointer;
 }
+
 
 .border th {
     border: 1px solid white;
@@ -286,6 +289,14 @@ td {
 .hidden {
     display: none !important;
 }
+
+/*.dropdown .dropdown-list {
+    display: none !important;
+}
+
+.dropdown:hover .dropdown-list {
+    display: block !important;
+}*/
 
 .input-category-div {
     display: flex;

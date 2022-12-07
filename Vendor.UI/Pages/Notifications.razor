@@ -6,6 +6,8 @@
 @inject IJSRuntime JS
 @inject NavigationManager NavigationManager
 @using System.IO;
+@using System.Reflection
+@using System.Text.RegularExpressions
 
 <main class="main mt-4">
 
@@ -17,75 +19,6 @@
             <div class="notifications-group mt-4">
 
                 <form action="#" id="notif-form">
-
-                    <label for="subject-line" hidden>Subject Line</label>
-                    <input @bind-value="SubjectLine" class="required form-control mb-2" id="subject-line" name="subject-line" type="text" placeholder="Subject Line" />
-
-                    <div class="quill-div mb-2">
-                        <BlazoredTextEditor @ref="@Quill">
-                            <ToolbarContent>
-                                <select class="ql-font">
-                                    <option selected=""></option>
-                                    <option value="serif"></option>
-                                    <option value="monospace"></option>
-                                </select>
-                                <select class="ql-header">
-                                    <option selected=""></option>
-                                    <option value="1"></option>
-                                    <option value="2"></option>
-                                    <option value="3"></option>
-                                    <option value="4"></option>
-                                    <option value="5"></option>
-                                </select>
-                                <select class="ql-align">
-                                    <option selected=""></option>
-                                    <option value="center"></option>
-                                    <option value="right"></option>
-                                </select>
-                                <span class="ql-formats">
-                                    <button class="ql-bold"></button>
-                                    <button class="ql-italic"></button>
-                                    <button class="ql-underline"></button>
-                                    <button class="ql-strike"></button>
-                                </span>
-                                <span class="ql-formats">
-                                    <select class="ql-color"></select>
-                                    <select class="ql-background"></select>
-                                </span>
-                                <span class="ql-formats">
-                                    <button class="ql-list" value="ordered"></button>
-                                    <button class="ql-list" value="bullet"></button>
-                                </span>
-
-
-                                <span class="ql-formats">
-                                    <button class="ql-link"></button>
-                                    <button class="ql-image" data-toggle="tooltip" data-placement="bottom" title="Insert Image"></button>
-                                </span>
-                            </ToolbarContent>
-                            <EditorContent>
-                                <p>To Company,</p>
-                                <br />
-                                <br />
-                                <br />
-                                <br />
-                                <br />
-                                <br />
-                                <p>Thank you,</p>
-                                <p>Health and Hospital Corporation - Purchasing Department</p>
-                                <p>Marion County Health Department</p>
-                                <img width="150" src="/logo.PNG" cid="imageIdentifier">
-
-
-                                @*                                <img src="@imageDataUri"/>
-                            *@
-                            </EditorContent>
-                        </BlazoredTextEditor>
-                    </div>
-
-
-                    <br />
-
 
                     <div class="tab mt-4">
                         <button type="button" @onclick="(e => DisplayTab(1))" class="@((tab1) ? "active" : "")">
@@ -103,39 +36,9 @@
                             <span class="d-none d-sm-inline">Companies</span>
                         </button>
 
-                        @*  <button type="button" @onclick="(e => DisplayTab(4))" class="@((tab4) ? "active" : "")">
-                    <i alt="address-book icon" class="fa-regular fa-building"></i><br />
-                    <span class="d-none d-sm-inline">Companies</span>
-                    </button>*@
-
                     </div>
 
-                    @*@if (tab1)
-                {
-                <div class="tabcontent mb-4">
 
-                <div class="create-account-container mb-4">
-                <p class="when fw-bold mb-3">When would you like to send the notification?</p>
-                <input type="radio" id="immediate" name="send" class="mb-3" />
-                <label for="immediate">Immediately</label><br>
-                <input type="radio" id="repeat7" value="repeat-7-days" name="send" class="mb-3" />
-                <label for="repeat7">Every 7 days after first notification</label><br>
-
-                <div>
-                <input type="radio" id="other" value="other" name="send" class="mb-4" />
-                <label for="other">Every </label>
-                <input class="mb-4" id="number-days" type="number" name="number-of-days" />
-                <label for="number-days" hidden>Type a Number of Days</label>
-                days after first notification
-                <div class="number-days-notif-alert alert alert-danger hidden">Please enter a value</div>
-                </div>
-
-                </div>
-                <button type="button" class="btn btn-primary btn-sm" @onclick="() => NextButtonClick(1)">Next</button>
-
-                </div>
-
-                }*@
                     @if (tab1)
                     {
                         <div class="tabcontent mb-4">
@@ -334,6 +237,70 @@
 
                         </div>
                     }
+
+                    <label for="subject-line" hidden>Subject Line</label>
+                    <input @bind-value="SubjectLine" class="required form-control mb-2" id="subject-line" name="subject-line" type="text" placeholder="Subject Line" />
+
+                    <div class="quill-div mb-2">
+                        <BlazoredTextEditor @ref="@Quill">
+                            <ToolbarContent>
+                                <select class="ql-font">
+                                    <option selected=""></option>
+                                    <option value="serif"></option>
+                                    <option value="monospace"></option>
+                                </select>
+                                <select class="ql-header">
+                                    <option selected=""></option>
+                                    <option value="1"></option>
+                                    <option value="2"></option>
+                                    <option value="3"></option>
+                                    <option value="4"></option>
+                                    <option value="5"></option>
+                                </select>
+                                <select class="ql-align">
+                                    <option selected=""></option>
+                                    <option value="center"></option>
+                                    <option value="right"></option>
+                                </select>
+                                <span class="ql-formats">
+                                    <button class="ql-bold"></button>
+                                    <button class="ql-italic"></button>
+                                    <button class="ql-underline"></button>
+                                    <button class="ql-strike"></button>
+                                </span>
+                                <span class="ql-formats">
+                                    <select class="ql-color"></select>
+                                    <select class="ql-background"></select>
+                                </span>
+                                <span class="ql-formats">
+                                    <button class="ql-list" value="ordered"></button>
+                                    <button class="ql-list" value="bullet"></button>
+                                </span>
+
+
+                                <span class="ql-formats">
+                                    <button class="ql-link"></button>
+                                    <button class="ql-image" data-toggle="tooltip" data-placement="bottom" title="Insert Image"></button>
+                                </span>
+                            </ToolbarContent>
+                            <EditorContent>
+                                <p>@EmailToPerson</p>
+                                <br />
+                                <br />
+                                <br />
+                                <br />
+                                <br />
+                                <br />
+                                <p>Thank you,</p>
+                                <p>Health and Hospital Corporation - Purchasing Department</p>
+                                <p>Marion County Health Department</p>
+                                <img width="150" src="logo.PNG">
+                                @*                              <img width="150" src="cid:imageId">
+                            *@
+                            </EditorContent>
+                        </BlazoredTextEditor>
+                    </div>
+
                     @if (SelectedCompanies is not null)
                     {
                         <p style="font-size: 20" class="fw-bold">Selected Companies: @SelectedCompaniesCount</p>
@@ -353,6 +320,7 @@
                         <div class="alert alert-danger mt-4">@SendNotifError</div>
 
                     }
+
 
                 </form>
             </div>
@@ -401,40 +369,40 @@
 
         </div>
 
-     
-                    //Modal Start
-            @if (ShowModal)
-            {
-                <div class="modal fade show" id="myModal" style="display:block" aria-modal="true" role="dialog">
+
+        //Modal Start
+        @if (ShowModal)
+        {
+            <div class="modal fade show" id="myModal" style="display:block" aria-modal="true" role="dialog">
                 <div class="modal-dialog modal-dialog-scrollable">
-                        <div class="modal-content">
+                    <div class="modal-content">
 
-                            <!-- Modal Header -->
-                            <div style="flex-direction: column;" class="modal-header">
+                        <!-- Modal Header -->
+                        <div style="flex-direction: column;" class="modal-header">
 
-                                    <h4 class="modal-title mb-3">Notification Id: <strong>@NotificationId</strong></h4>
-                                <h5>Subject: <strong>@NotificationSubjectLine</strong></h5>
-                                    
-                            </div>
-
-                            <!-- Modal body -->
-                            <div class="modal-body">
-                                @if(NotificationBody is not null)
-                                {
-                                <p>@((MarkupString)NotificationBody)</p>
-                                }
-                            </div>
-
-                            <!-- Modal footer -->
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" @onclick="@ModalCancel">Close</button>
-                            </div>
+                            <h4 class="modal-title mb-3">Notification Id: <strong>@NotificationId</strong></h4>
+                            <h5>Subject: <strong>@NotificationSubjectLine</strong></h5>
 
                         </div>
+
+                        <!-- Modal body -->
+                        <div class="modal-body">
+                            @if (NotificationBody is not null)
+                            {
+                                <p>@((MarkupString)NotificationBody)</p>
+                            }
+                        </div>
+
+                        <!-- Modal footer -->
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" @onclick="@ModalCancel">Close</button>
+                        </div>
+
                     </div>
                 </div>
-            }
-            //Modal End
+            </div>
+        }
+        //Modal End
 
         //Modal Start
         @if (ShowListModal)
@@ -454,13 +422,13 @@
                             <h5 style="text-decoration: underline">Recipients:</h5>
 
                             <ul>
-                            @if (ListOfCompanies is not null)
-                            {
-                                @foreach (var comp in ListOfCompanies)
+                                @if (ListOfCompanies is not null)
                                 {
-                                    <li>@comp</li>
+                                    @foreach (var comp in ListOfCompanies)
+                                    {
+                                        <li>@comp</li>
+                                    }
                                 }
-                            }
                             </ul>
                         </div>
 
@@ -562,6 +530,7 @@
     //string imageDataUri;
 
     bool ShowModal = false;
+    private string? EmailToPerson { get; set; }
 
     private async Task ModalShow(int NotifId)
     {
@@ -584,9 +553,9 @@
         var CompaniesSent = await context.Notification_Recipients.Where(rec => rec.NotificationsId == NotifId).ToListAsync();
         NotificationId = NotifId;
 
-        if(CompaniesSent is not null)
+        if (CompaniesSent is not null)
         {
-            foreach(var comp in CompaniesSent)
+            foreach (var comp in CompaniesSent)
             {
                 ListOfCompanies.Add(comp.CompanyName);
             }
@@ -687,7 +656,7 @@
         NotifsHistory = await context.NotificationsList.ToArrayAsync();
         NotifsRec = await context.Notification_Recipients.ToArrayAsync();
 
-        SelectedCompaniesCount = SelectedCompanies.Where(comp => !comp.Is_Deleted).Count();
+        SelectedCompaniesCount = SelectedCompanies.Where(comp => !comp.Is_Deleted && !comp.Disabled_From_Notifications).Count();
         NotificationsCount = await context.NotificationsList.CountAsync();
 
     }
@@ -753,7 +722,7 @@
         SendNotifs = false;
         PrevNotifs = true;
         await LoadData();
-        await JS.InvokeAsync<IJSObjectReference>("DataTablesAdd", "#basic-datatable");
+        await JS.InvokeAsync<IJSObjectReference>("DataTablesAddOrderbyDate", "#basic-datatable");
     }
 
     //private AlternateView GetEmbeddedImage(String filePath)
@@ -788,8 +757,6 @@
         }
         if (Quill is not null)
         {
-            QuillContent = await this.Quill.GetHTML();
-            StateHasChanged();
 
             try
             {
@@ -798,21 +765,6 @@
 
                 sClient.Port = 25;
                 sClient.UseDefaultCredentials = false;
-
-
-                foreach (var company in SelectedCompanies)
-                {
-
-                    var CompanyContacts = await context.Authorized_Contacts.Where(contact => contact.CompanyId == company.Id && !contact.Contact_Deleted).ToArrayAsync();
-
-                    foreach (var person in CompanyContacts)
-                    {
-                        if (person is not null)
-                        {
-                            message.To.Add(new MailAddress($"{person.Email}"));
-                        }
-                    }
-                }
 
                 if (SubjectLine is null)
                 {
@@ -826,12 +778,51 @@
                     message.Subject = SubjectLine;
                 }
 
+
+
+                // ATTEMPT TO GET IMAGE (dont forget to put cid in image in text editor)
+
+                // AlternateView htmlView = AlternateView.CreateAlternateViewFromString(QuillContent, null, "text/html");
+
+                // LinkedResource theEmailImage = new LinkedResource("M:\\Projects\\HHC_Purchasing_Vendors\\Vendor.UI\\wwwroot\\logo.PNG");
+                // theEmailImage.ContentId = "imageId";
+                // htmlView.LinkedResources.Add(theEmailImage);
+
+                //message.AlternateViews.Add(htmlView);
+
+
+
+                //
+
                 message.From = new MailAddress("test@hhcorp.org");
-                //message.AlternateViews.Add(GetEmbeddedImage("c:/image.png"));
-                message.Body = QuillContent;
                 message.IsBodyHtml = true;
 
-                sClient.Send(message);
+                foreach (var company in SelectedCompanies)
+                {
+
+                    var CompanyContacts = await context.Authorized_Contacts.Where(contact => contact.CompanyId == company.Id && !contact.Contact_Deleted).ToArrayAsync();
+
+                    foreach (var person in CompanyContacts)
+                    {
+                        if (person is not null)
+                        {
+                            EmailToPerson = $"{person.FirstName} {person.LastName},";           //This Not WORKING
+                            StateHasChanged();
+
+
+                            message.To.Clear();            //So each email is sent to person one at a time: prevents other companies seeing their competitors
+                            message.To.Add(new MailAddress($"{person.Email}"));
+
+                        }
+
+                        QuillContent = await this.Quill.GetHTML();
+                        StateHasChanged();
+                        message.Body = QuillContent;
+
+                        sClient.Send(message);
+                    }
+                }
+
 
 
                 Notif = new Data.Models.Notifications();
@@ -844,7 +835,7 @@
                 await context.SaveChangesAsync();
 
 
-        
+
 
                 foreach (var company in SelectedCompanies)
                 {
@@ -986,7 +977,7 @@
         context.Update(Company);
         await context.SaveChangesAsync();
 
-        if (Company.Is_Checked)
+        if (Company.Is_Checked && !Company.Disabled_From_Notifications)
         {
             SelectedCompanies.Add(Company);
         }
@@ -1101,7 +1092,7 @@
             SelectedCompanies.Clear();
             foreach (var company in RelatedCompanies)
             {
-                var Company = await context.Companies.Where(comp => comp.Id == company.CompanyId).ToArrayAsync();
+                var Company = await context.Companies.Where(comp => comp.Id == company.CompanyId && !comp.Disabled_From_Notifications).ToArrayAsync();
 
                 foreach (var comp in Company)
                 {
@@ -1137,5 +1128,6 @@
             await LoadData();
         }
     }
+
 
 }

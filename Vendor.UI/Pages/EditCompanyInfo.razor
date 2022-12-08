@@ -6,43 +6,58 @@
 
 <div class="main">
 
+
     @if (Company == null)
     {
         <div class="mb-3">Loading...</div>
     }
     else
     {
-        <h3>Edit/View Company @Company.Name</h3>
+        <h3 class="mt-4 mb-4">Edit/View Company: <strong>@Company.Name</strong></h3>
 
-
-        @if (Account == null)
-        {
-            <div>Loading...</div>
-        }
-        else
-        {
-            <div class="create-account-container mb-4">
-                <h3>Account:</h3>
-                <AccountForm OnSubmit="@HandleAccountSubmit" SaveAccountEror="@SaveAccountError" SaveAccountSuccess="@SaveAccountSuccess" IsEdit="true" Account="@Account" />
-            </div>
-        }
-
-        <div class="create-account-container mb-4">
-            <h3 class="mb-3">Company Info</h3>
-            <CompanyInfoForm SaveCompanyInfoSuccess="@SaveCompanyInfoSuccess" SaveCompanyInfoError="@SaveCompanyInfoError" OnSubmit="@HandleCompanySubmit" IsEdit="true" Company="@Company" />
+        <div class="tab-div mb-2">
+            <button @onclick="@HandleAccountActive" class="tab1-btn @(AccountActive == true ? "active-page" : "")" type="button">Account</button>
+            <button @onclick="@HandleInfoActive" class="tab2-btn btn @(InfoActive == true ? "active-page" : "")" type="button">Company Info</button>
+            <button @onclick="@HandleAddressActive" class="tab3-btn btn @(AddressActive == true ? "active-page" : "")" type="button">Address</button>
         </div>
 
 
-        @if (Address == null)
+        @if (AccountActive)
         {
-            <div>Loading...</div>
+            @if (Account == null)
+            {
+                <div>Loading...</div>
+            }
+            else
+            {
+                <div class="create-account-container mb-4">
+                    <h3>Account:</h3>
+                    <AccountForm OnSubmit="@HandleAccountSubmit" SaveAccountEror="@SaveAccountError" SaveAccountSuccess="@SaveAccountSuccess" IsEdit="true" Account="@Account" />
+                </div>
+            }
         }
-        else
+        @if (InfoActive)
         {
             <div class="create-account-container mb-4">
-                <h3 class="mb-3">Address</h3>
-                <AddressForm SaveAddressSuccess="@SaveAddressSuccess" SaveAddressError="@SaveAddressError" OnSubmit="@HandleAddressSubmit" IsEdit="true" Address="@Address" />
-            </div>
+                <h3 class="mb-3">Company Information</h3>
+            <CompanyInfoForm SaveCompanyInfoSuccess="@SaveCompanyInfoSuccess" SaveCompanyInfoError="@SaveCompanyInfoError" OnSubmit="@HandleCompanySubmit" IsEdit="true" Company="@Company" />
+        </div>
+        }
+
+        @if (AddressActive)
+        {
+            @if (Address == null)
+            {
+                <div>Loading...</div>
+            }
+            else
+            {
+                <div class="create-account-container mb-4">
+                    <h3 class="mb-3">Address</h3>
+                    <AddressForm SaveAddressSuccess="@SaveAddressSuccess" SaveAddressError="@SaveAddressError" OnSubmit="@HandleAddressSubmit" IsEdit="true" Address="@Address" />
+                </div>
+            }
+
         }
     }
 
@@ -82,6 +97,10 @@
     private string? SaveAddressSuccess { get; set; }
     private string? SaveAddressError { get; set; }
 
+    private bool AccountActive = true;
+    private bool InfoActive = false;
+    private bool AddressActive = false;
+
 
 
     protected override async Task OnParametersSetAsync()
@@ -114,6 +133,11 @@
                 try
                 {
                     using var context = ContextFactory.CreateDbContext();
+
+                    if(Company.Diversity_Certification != "Other")
+                    {
+                        Company.Other_Diversity_Certification = "";
+                    }
                     context.Update(Company);
                     await context.SaveChangesAsync();
                     await LoadData();
@@ -125,6 +149,10 @@
                 }
             }
         }
+        else
+        {
+            await LoadData();
+        }
     }
 
     private async Task HandleAccountSubmit(bool isValid)
@@ -135,7 +163,7 @@
             {
                 try
                 {
-                    using var context = ContextFactory.CreateDbContext();
+                    using var context = ContextFactory.CreateDbContext();             
                     context.Update(Account);
                     await context.SaveChangesAsync();
                     await LoadData();
@@ -170,8 +198,29 @@
                     await LoadData();
                     SaveAddressError = "There was an error while saving Address changes. Please try again.";
                 }
+            }
         }
-        }
+    }
+
+    private void HandleAccountActive()
+    {
+        AccountActive = true;
+        InfoActive = false;
+        AddressActive = false;
+    }
+
+    private void HandleInfoActive()
+    {
+        AccountActive = false;
+        InfoActive = true;
+        AddressActive = false;
+    }
+
+    private void HandleAddressActive()
+    {
+        AccountActive = false;
+        InfoActive = false;
+        AddressActive = true;
     }
 
     //private void HandleNavigationCompanyList()

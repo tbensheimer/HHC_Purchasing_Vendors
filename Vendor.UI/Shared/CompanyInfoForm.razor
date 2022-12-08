@@ -8,24 +8,26 @@
 
         @if (IsEdit)
         {
-            <div class="mb-3"><strong>Sign Up Date:</strong> @Company.Sign_Up</div>
+
+            <div class="mb-3 form-control"><strong>Sign Up Date:</strong> @Company.Sign_Up</div>
+
         }
 
         <div class="company-name-group input-group mb-3">
-            <span class="company input-group-text"><i alt="building icon" class="fa-solid fa-building"></i></span>
-            <label for="company-name" hidden>Company Name</label>
+            @*            <span class="company input-group-text"><i alt="building icon" class="fa-solid fa-building"></i></span>
+        *@            <label for="company-name" class="input-group-text col-sm-1 justify-content-center fw-bold">Name</label>
             <InputText @bind-Value="@Company.Name" class="required form-control name" id="company-name" name="company-name" type="text" placeholder="Company Name" />
         </div>
 
         <div class="company-id-group input-group mb-3">
-            <span class="input-group-text id-logo"><i alt="id card icon" class="fa-solid fa-id-card"></i></span>
-            <label for="id" hidden>Federal I.D. or Social Security Number</label>
-            <InputNumber @bind-Value="@Company.Fed_Id_SSN" id="id" class="required form-control id" type="text" name="federal-id-or-ssn-number" placeholder="Federal ID or Social Security Number" />
+            @*            <span class="input-group-text id-logo"><i alt="id card icon" class="fa-solid fa-id-card"></i></span>
+        *@            <label for="id" class="input-group-text col-sm-1 justify-content-center fw-bold">SSN / EIN</label>
+            <InputNumber @bind-Value="@Company.Fed_Id_SSN" id="id" class="required form-control id" type="text" name="federal-id-or-ssn-number" placeholder="Social Security Number or Employee Identification Number" />
         </div>
 
         <div class="input-group mb-3">
-            <span class="input-group-text flag"><i alt="flag icon" class="fa-solid fa-flag"></i></span>
-            <label class="input-group-text" for="supp-cat" hidden>Options</label>
+            @*            <span class="input-group-text flag"><i alt="flag icon" class="fa-solid fa-flag"></i></span>
+        *@       <label class="input-group-text justify-content-center fw-bold" for="supp-cat">Supplier Cat.</label>
             <InputSelect @bind-Value="@Company.Supplier_Category" name="supplier-category" class="required form-select supp-cat gray" id="supp-cat">
                 <option value="" selected>Choose Supplier Category...</option>
                 <option value="United States Entity">United States Entity</option>
@@ -34,14 +36,14 @@
         </div>
 
         <div class="company-web-group input-group mb-3">
-            <span class="input-group-text globe"><i alt="globe icon" class="fa-solid fa-globe"></i></span>
-            <label for="web" hidden>Website / Internet Address</label>
+@*            <span class="input-group-text globe"><i alt="globe icon" class="fa-solid fa-globe"></i></span>
+        *@            <label for="web" class="input-group-text justify-content-center fw-bold col-sm-1">Website</label>
             <InputText @bind-Value="@Company.Website" id="web" class="form-control web" name="website" type="text" placeholder="Website / Internet Address" />
         </div>
 
         <div class="input-group mb-3">
-            <span class="input-group-text stamp"><i alt="stamp icon" class="fa-solid fa-stamp"></i></span>
-            <label class="input-group-text" for="div-cert" hidden>Diversity Certification</label>
+@*            <span class="input-group-text stamp"><i alt="stamp icon" class="fa-solid fa-stamp"></i></span>
+        *@            <label class="input-group-text justify-content-center fw-bold" for="div-cert">Diversity Cert.</label>
             <InputSelect @bind-Value="@Company.Diversity_Certification" name="diversity-certification" class="required form-select div-cert gray" id="div-cert">
                 <option value="" selected>Choose Diversity Certification...</option>
                 <option value="Not Certified">Not Certified</option>
@@ -54,16 +56,19 @@
             </InputSelect>
         </div>
 
-
-        <div class="other-div-group input-group mb-3 @(Company.Diversity_Certification == "Other" ? "" : "hidden")">
-            <span class="input-group-text stamp"><i alt="stamp icon" class="fa-solid fa-stamp"></i></span>
-            <label for="other-div-cert" hidden>Please describe the other type of diversity certification.</label>
-            <InputText @bind-Value="@Company.Other_Diversity_Certification" id="other-div-cert" class="form-control other-div-cert" type="text" name="other-description-of-diversity-certification" placeholder="If Other, Please describe type of Diversity Certification." />
+        @if (Company.Diversity_Certification == "Other")
+        {
+            <div class="other-div-group input-group mb-3 @(Company.Diversity_Certification == "Other" ? "" : "hidden")">
+@*                <span class="input-group-text stamp"><i alt="stamp icon" class="fa-solid fa-stamp"></i></span>
+*@            <label for="other-div-cert" hidden>Please describe the other type of diversity certification.</label>
+            <InputText required @bind-Value="@Company.Other_Diversity_Certification" id="other-div-cert" class="form-control other-div-cert" type="text" name="other-description-of-diversity-certification" placeholder="Please describe type of Diversity Certification." />
         </div>
+        }
+
 
         <div class="description-group input-group mb-3">
-            <span class="briefcase input-group-text"><i alt="briefcase icon" class="fa-solid fa-briefcase"></i></span>
-            <label for="company-desc" hidden>Description of Goods and Services</label>
+@*            <span class="briefcase input-group-text"><i alt="briefcase icon" class="fa-solid fa-briefcase"></i></span>
+        *@            <label for="company-desc" class="input-group-text justify-content-center fw-bold">Goods / Services Desc.</label>
             <InputText @bind-Value="@Company.Description_Goods_Services" class="required form-control name description" name="description-goods-services" id="company-desc" type="text" placeholder="Description of Goods and Services..." />
         </div>
 
@@ -107,6 +112,7 @@
 
     [Parameter]
     public string? SaveCompanyInfoError { get; set; }
+
 
 
 

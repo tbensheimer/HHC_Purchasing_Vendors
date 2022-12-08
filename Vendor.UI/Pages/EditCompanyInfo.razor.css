@@ -18,6 +18,27 @@
     cursor: pointer;
 }
 
+.tab1-btn, .tab2-btn, .tab3-btn {
+    background-color: aliceblue;
+    color: black;
+    border: none;
+    border-radius: 10px 10px 0 0;
+    padding: 9px;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+
+
+.active-tab, .active-page {
+    background-color: rgb(70, 112, 252) !important;
+    color: white;
+    display: default;
+}
+
+.active-tab {
+    height: 5rem;
+}
+
     .panel:hover {
         transform: scale(1.05);
     }

@@ -5,6 +5,7 @@
 @inject IDbContextFactory<VendorDataDbContext> ContextFactory
 @inject IJSRuntime JS
 @inject NavigationManager NavigationManager
+@inject StateContainer StateContainer
 @using System.IO;
 @using System.Reflection
 @using System.Text.RegularExpressions
@@ -238,6 +239,10 @@
                         </div>
                     }
 
+                   
+                        <p style="font-size: 20" class="fw-bold">Selected Companies: @SelectedCompaniesCount</p>
+                    
+
                     <label for="subject-line" hidden>Subject Line</label>
                     <input @bind-value="SubjectLine" class="required form-control mb-2" id="subject-line" name="subject-line" type="text" placeholder="Subject Line" />
 
@@ -294,17 +299,11 @@
                                 <p>Thank you,</p>
                                 <p>Health and Hospital Corporation - Purchasing Department</p>
                                 <p>Marion County Health Department</p>
-                                <img width="150" src="logo.PNG">
                                 @*                              <img width="150" src="cid:imageId">
                             *@
                             </EditorContent>
                         </BlazoredTextEditor>
                     </div>
-
-                    @if (SelectedCompanies is not null)
-                    {
-                        <p style="font-size: 20" class="fw-bold">Selected Companies: @SelectedCompaniesCount</p>
-                    }
 
                     <button type="button" disabled="@IsBusy" @onclick="@HandleNotifSubmit" class="btn btn-primary submit">Send Notification</button>
                     @if (IsBusyMessage is not null)
@@ -531,6 +530,7 @@
 
     bool ShowModal = false;
     private string? EmailToPerson { get; set; }
+    private string? TemplateEmail { get; set; }
 
     private async Task ModalShow(int NotifId)
     {
@@ -603,36 +603,10 @@
         await LoadData();
     }
 
-    //long maxFileSize = 1024 * 1024 * 15;
-
-    //async Task LoadImage(InputFileChangeEventArgs e)
-    //{
-    //    var imageFile = await e.File.RequestImageFileAsync("image/jpeg", maxWidth: 640, maxHeight: 480);
-    //    using Stream fileStream = imageFile.OpenReadStream(maxFileSize);
-    //    using MemoryStream ms = new();
-
-
-    //    await fileStream.CopyToAsync(ms);
-
-    //    imageDataUri = $"data:image/jpeg;base64,{Convert.ToBase64String(ms.ToArray())}";
-
-    //}
-
 
     protected override async Task OnParametersSetAsync()
     {
         await LoadData();
-    }
-
-    protected async override Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-
-            await JS.InvokeAsync<IJSObjectReference>("DataTablesAdd", "#basic-datatable");
-
-
-        }
     }
 
     private async Task LoadData()
@@ -779,23 +753,20 @@
                 }
 
 
-
-                // ATTEMPT TO GET IMAGE (dont forget to put cid in image in text editor)
-
-                // AlternateView htmlView = AlternateView.CreateAlternateViewFromString(QuillContent, null, "text/html");
-
-                // LinkedResource theEmailImage = new LinkedResource("M:\\Projects\\HHC_Purchasing_Vendors\\Vendor.UI\\wwwroot\\logo.PNG");
-                // theEmailImage.ContentId = "imageId";
-                // htmlView.LinkedResources.Add(theEmailImage);
-
-                //message.AlternateViews.Add(htmlView);
-
-
-
-                //
-
                 message.From = new MailAddress("test@hhcorp.org");
                 message.IsBodyHtml = true;
+
+                QuillContent = await this.Quill.GetHTML();
+
+                var bytes = Convert.FromBase64String($"{StateContainer.LogoImage}");
+                var contents = new MemoryStream(bytes);
+                Attachment companyLogo = new Attachment(contents, "Logo.png", "image/png");
+                companyLogo.ContentId = "logo";
+                message.Attachments.Add(companyLogo);
+
+                var Template = QuillContent + "<img width='150' src='cid:logo'>";
+
+                StateHasChanged();
 
                 foreach (var company in SelectedCompanies)
                 {
@@ -806,7 +777,7 @@
                     {
                         if (person is not null)
                         {
-                            EmailToPerson = $"{person.FirstName} {person.LastName},";           //This Not WORKING
+                            EmailToPerson = $"{person.FirstName} {person.LastName},";           
                             StateHasChanged();
 
 
@@ -815,21 +786,23 @@
 
                         }
 
-                        QuillContent = await this.Quill.GetHTML();
-                        StateHasChanged();
-                        message.Body = QuillContent;
+                        TemplateEmail = EmailToPerson + Template;
+                        message.Body = TemplateEmail;
+                        TemplateEmail = "";
 
                         sClient.Send(message);
                     }
+                    EmailToPerson = "";
                 }
 
 
 
                 Notif = new Data.Models.Notifications();
                 Notif.Title = SubjectLine;
-                Notif.Body = QuillContent;
+                Notif.Body = "To Recipients," + QuillContent + "<img width='150' src='logo.PNG' />";
                 Notif.Date_Sent = DateTime.Now;
                 Notif.Created_By = "test@hhcorp.org";
+                
 
                 context.NotificationsList.Add(Notif);
                 await context.SaveChangesAsync();

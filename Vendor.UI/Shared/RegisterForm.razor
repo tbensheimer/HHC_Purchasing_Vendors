@@ -463,6 +463,10 @@
         if (Company is not null)
         {
             using var context = ContextFactory.CreateDbContext();
+            if (Company.Diversity_Certification != "Other")
+            {
+                Company.Other_Diversity_Certification = "";
+            }
             Company.Sign_Up = SignUpDate;
             context.Companies.Add(Company);
             await context.SaveChangesAsync();

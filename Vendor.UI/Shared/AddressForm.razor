@@ -2,6 +2,7 @@
 <EditForm Model="@Address" class="mb-4" OnValidSubmit="() => HandleAddressComplete()">
     <DataAnnotationsValidator />
     <ValidationSummary />
+
     <div class="company-address-group input-group mb-1">
         <label for="company-address" hidden>Street Address</label>
         <InputText @bind-Value="@Address.Address_1" class="required form-control address" id="company-address" name="address" type="text" placeholder="Street Address" />

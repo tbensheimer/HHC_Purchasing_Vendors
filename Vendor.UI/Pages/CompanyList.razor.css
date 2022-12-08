@@ -29,6 +29,10 @@
     width: 3rem;
 }
 
+#table th {
+    padding: 10px !important;
+}
+
 .panel {
     padding: 20px;
     border: solid rgb(192, 191, 191) 1px;

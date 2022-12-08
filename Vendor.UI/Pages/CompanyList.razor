@@ -127,6 +127,38 @@
                                     </ul>
 
                                 </div>
+
+
+                                <div class="dropdown">
+                                    <button class="btn btn-primary btn-sm dropdown-toggle text-left" id="actionDropdownButton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        Actions
+                                    </button>
+                                    <div class="dropdown-menu" aria-labelledby="actionDropdownButton">
+
+                                        <ul id="@company.Id" style="list-style: none; display: flex; flex-direction:column; padding-left: 0; height: auto;" class="dropdown-list hidden">
+                                            <li class="mt-1 mb-1">
+                                                <a class="btn btn-sm btn-outline-secondary fw-bold" href="/edit/companyinfo/@company.Id">
+                                                    Information
+                                                </a>
+                                            </li>
+                                            <li class="mt-1 mb-1">
+                                                <a class="btn btn-sm btn-outline-primary fw-bold" href="/edit/company-contacts/@company.Id">
+                                                    Contacts
+                                                </a>
+                                            </li>
+                                            <li class="mt-1 mb-1">
+                                                <a class="btn btn-sm btn-outline-success fw-bold" href="/edit/company-types-and-categories/@company.Id">
+                                                    Types/Categories
+                                                </a>
+                                            </li>
+                                            <li class="mt-1 mb-1">
+                                                <button @onclick="() => HandleCompanyDelete(company.Id)" id="trash" style="height: auto; margin: 5px 0;" class="remove btn btn-sm btn-outline-danger">Remove</button>
+                                            </li>
+                                        </ul>
+
+                                    </div>
+                                </div>
+
                             </td>
 @*                            <td><button @onclick="() => HandleCompanyDelete(company.Id)" id="trash" style="height: auto; margin: 5px 0;" class="remove btn btn-sm btn-danger"><span><i alt="trash icon" id="trash-icon" class="fa-solid fa-trash white"></i></span></button></td>
 *@                        </tr>
@@ -214,14 +246,14 @@
     //        DataTablePresent = true;
     //        await JS.InvokeAsync<IJSObjectReference>("DataTablesAdd", "#table");
     //    }
-    //    //else if (DataTablePresent && Companies is not null)
-    //    //{
-    //    //    DataTablePresent = false;
-    //    //    await JS.InvokeAsync<IJSObjectReference>("DataTablesRemove", "#table");
-    //    }
+    ////    //else if (DataTablePresent && Companies is not null)
+    ////    //{
+    ////    //    DataTablePresent = false;
+    ////    //    await JS.InvokeAsync<IJSObjectReference>("DataTablesRemove", "#table");
+    ////    }
 
 
-   // }
+    //}
 
 
 

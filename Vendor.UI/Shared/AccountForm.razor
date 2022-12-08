@@ -2,23 +2,24 @@
 <EditForm Model="@Account" class="mb-4" OnValidSubmit="() => HandleAccountComplete()">
     <DataAnnotationsValidator />
     <ValidationSummary />
+
     <div class="company-signup-group input-group mb-4 shrink mt-4">
-        <span class="envelope input-group-text"><i alt="envelope icon" class="fa-solid fa-envelope"></i></span>
-        <label for="email" hidden>Enter Email</label>
-        <InputText @bind-Value="Account.Email" class="required form-control email" name="email" id="email" type="text" placeholder="Enter Email (Username)" />
+@*        <span class="envelope input-group-text"><i alt="envelope icon" class="fa-solid fa-envelope"></i></span>
+        *@        <label class="input-group-text col-sm-1 justify-content-center fw-bold" for="email">Email</label>
+        <InputText @bind-Value="Account.Email" class="required form-control email" name="email" id="email" type="text" placeholder="Email (Username)" />
     </div>
 
     <div class="company-signup-group input-group mb-4 shrink">
-        <span class="lock input-group-text"><i alt="lock icon" class="fa-solid fa-lock"></i></span>
-        <label for="password" hidden>Create Password</label>
-        <InputText @bind-Value="Account.Password" class="required form-control password" name="password" id="password" type="password" placeholder="Create Password" />
+@*        <span class="lock input-group-text"><i alt="lock icon" class="fa-solid fa-lock"></i></span>
+        *@        <label for="password" class="input-group-text col-sm-1 justify-content-center fw-bold">Password</label>
+        <InputText @bind-Value="Account.Password" class="required form-control password" name="password" id="password" type="password" placeholder="Password" />
     </div>
 
     @if (!IsEdit)
     {
         <div class="company-signup-group input-group shrink mb-4">
-            <span class="lock input-group-text"><i alt="lock-icon" class="fa-solid fa-lock"></i></span>
-            <label for="password2" hidden>Confirm Password</label>
+@*            <span class="lock input-group-text"><i alt="lock-icon" class="fa-solid fa-lock"></i></span>
+        *@            <label class="input-group-text col-sm-1 justify-content-center fw-bold" for="password2">Password</label>
             <input @bind="@password2" class="required form-control password2 @(password2 == null ? "" : "modified") @(Account.Password == password2 ? "valid" : "invalid")" id="password2" name="password2" type="password" placeholder="Confirm Password" />
         </div>
 

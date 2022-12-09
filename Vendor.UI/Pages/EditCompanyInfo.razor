@@ -31,7 +31,7 @@
             else
             {
                 <div class="create-account-container mb-4">
-                    <h3>Account:</h3>
+                    <h3 class="mb-4">Account:</h3>
                     <AccountForm OnSubmit="@HandleAccountSubmit" SaveAccountEror="@SaveAccountError" SaveAccountSuccess="@SaveAccountSuccess" IsEdit="true" Account="@Account" />
                 </div>
             }
@@ -39,7 +39,7 @@
         @if (InfoActive)
         {
             <div class="create-account-container mb-4">
-                <h3 class="mb-3">Company Information</h3>
+                <h3 class="mb-4">Company Information</h3>
             <CompanyInfoForm SaveCompanyInfoSuccess="@SaveCompanyInfoSuccess" SaveCompanyInfoError="@SaveCompanyInfoError" OnSubmit="@HandleCompanySubmit" IsEdit="true" Company="@Company" />
         </div>
         }
@@ -53,7 +53,7 @@
             else
             {
                 <div class="create-account-container mb-4">
-                    <h3 class="mb-3">Address</h3>
+                    <h3 class="mb-4">Address</h3>
                     <AddressForm SaveAddressSuccess="@SaveAddressSuccess" SaveAddressError="@SaveAddressError" OnSubmit="@HandleAddressSubmit" IsEdit="true" Address="@Address" />
                 </div>
             }

@@ -3,19 +3,23 @@
     <DataAnnotationsValidator />
     <ValidationSummary />
 
-    <div class="company-address-group input-group mb-1">
-        <label for="company-address" hidden>Street Address</label>
-        <InputText @bind-Value="@Address.Address_1" class="required form-control address" id="company-address" name="address" type="text" placeholder="Street Address" />
-        <label for="company-address2" hidden>Address Line 2 (No PO Box)</label>
-        <InputText @bind-Value="@Address.Address_2" class="form-control address2" id="company-address2" name="address-line-2" type="text" placeholder="Address Line 2 (No PO Box)" />
-        <label for="company-city" hidden>City</label>
-        <InputText @bind-Value="@Address.City" class="required form-control city" id="company-city" name="city" type="text" placeholder="City" />
+    <div class="company-address-group mb-1">
+       
+        <label for="company-address" class="fw-bold">Street Address</label>
+        <InputText @bind-Value="@Address.Address_1" class="form-control address mb-2" id="company-address" name="address" type="text" />
+
+        <label for="company-address2" class="fw-bold">Address Line 2 (No PO Box)</label>
+        <InputText @bind-Value="@Address.Address_2" class="form-control address2 mb-2" id="company-address2" name="address-line-2" type="text" />
+
+        <label for="company-city" class="fw-bold">City</label>
+        <InputText @bind-Value="@Address.City" class="form-control city mb-2" id="company-city" name="city" type="text" />
     </div>
 
-    <div class="company-address-group input-group mb-3">
-        <label for="state" hidden>State</label>
-        <InputSelect @bind-Value="@Address.State" name="state/region" class="gray form-select state" id="state">
-            <option value="">State</option>
+    <div class="company-address-group mb-3">
+        
+        <label for="state" class="fw-bold">State</label>
+        <InputSelect @bind-Value="@Address.State" name="state/region" class="form-select state mb-2" id="state">
+            <option value="">Choose a State...</option>
             <option value="Alabama">Alabama</option>
             <option value="Alaska">Alaska</option>
             <option value="Arizona">Arizona</option>
@@ -73,10 +77,12 @@
             <option value="Wyoming">Wyoming</option>
             <option value="Foreign">Foreign</option>
         </InputSelect>
-        <label for="company-postal" hidden>Postal Code</label>
-        <InputNumber @bind-Value="@Address.Postal_Code" class="required form-control zip" id="company-postal" name="postal-code" type="text" placeholder="Postal Code" />
-        <label for="country" hidden>Country</label>
-        <InputText @bind-Value="@Address.Country" class="required form-control country" id="country" type="text" name="country" placeholder="Country" />
+
+        <label for="company-postal" class="fw-bold" >Postal Code</label>
+        <InputNumber @bind-Value="@Address.Postal_Code" class="form-control zip mb-2" id="company-postal" name="postal-code" type="text" />
+
+        <label for="country" class="fw-bold">Country</label>
+        <InputText @bind-Value="@Address.Country" class="form-control country mb-4" id="country" type="text" name="country" />
     </div>
 
     @if (IsEdit)

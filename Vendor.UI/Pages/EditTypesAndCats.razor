@@ -5,55 +5,11 @@
 @inject StateContainer StateContainer
 
 <div class="main">
-    <p class="cat-title fs-5 fw-bold">Selected Categories:</p>
-    <div class="current-categories">
-
-        @if (CurrentCompanyCategories is not null && Categories is not null && Types is not null)
-        {
-            @foreach (var cat in CurrentCompanyCategories.OrderBy(cat => cat.Type_Id))
-            {
-                @foreach (var type in Types.Where(type => type.Id == cat.Type_Id))
-                {
-                    @foreach (var category in Categories.Where(category => category.Id == cat.Category_Id))
-                    {
-                        <div class="current-types-cats">
-                            <p><strong>@type.Type_Name:</strong> @category.Category_Name</p>
-                            <button @onclick="() => HandleCategoryRemove(category.Id)" class="btn btn-outline-danger btn-sm" type="button">Remove</button>
-                        </div>
-                        <br />
-                      
-                        
-                    }
-
-                }
-
-            }
-        } else 
-        {
-            <div>Loading...</div>
-        }
-    </div>
-
-      @if(CategoryError is not null)
-        {
-        <div class="alert alert-danger">@CategoryError</div>
-        }
-
-        @if(SuccessMessage is not null)
-        {
-        <div class="alert alert-success">@SuccessMessage</div>
-        }
-
-        @if (ErrorMessage is not null)
-        {
-        ErrorMessage = "There was an error while saving changes. Please try again.";
-        }
-
 
     <div class="types-categories-group mb-4">
         @if (Company is not null)
         {
-            <h3 class="prompt fs-3 fw-bold mb-4">Add More Types and Categories to the Company:</h3>
+            <h3 class="prompt fs-3 fw-bold mb-4">Edit/View Types and Categories for the Company: @Company.Name</h3>
         }
         <p class="fw-bold">
             Please check all types and categories that relate to the company.
@@ -79,22 +35,23 @@
                             {
                                 @if (type.Is_Checked)
                                 {
-                                    <li class="typeLi">
-                                    <label id="key" for="@type.Type_Name">
-                                        <input @key="@type.Id" checked id="@type.Type_Name" value="@type.Is_Checked" @onchange="() => HandleTypeChange(type.Id)" class="form-check-input type-check"
+                                    <li class="typeLi mb-1">
+                                        <label id="key" for="@type.Type_Name">
+                                            <input @key="@type.Id" checked id="@type.Type_Name" value="@type.Is_Checked" @onchange="() => HandleTypeChange(type.Id)" class="form-check-input type-check"
                                        Name="TypeCheckbox" type="checkbox" /> @type.Type_Name
-                                    </label>
-                                    <br />
-                                </li>
-                                } else
+                                        </label>
+                                        <br />
+                                    </li>
+                                }
+                                else
                                 {
-                                <li class="typeLi">
-                                    <label id="key" for="@type.Type_Name">
-                                        <input @key="@type.Id" value="@type.Is_Checked" id="@type.Type_Name" @onchange="() => HandleTypeChange(type.Id)" class="form-check-input type-check"
+                                    <li class="typeLi mb-1">
+                                        <label id="key" for="@type.Type_Name">
+                                            <input @key="@type.Id" value="@type.Is_Checked" id="@type.Type_Name" @onchange="() => HandleTypeChange(type.Id)" class="form-check-input type-check"
                                        Name="TypeCheckbox" type="checkbox" /> @type.Type_Name
-                                    </label>
-                                    <br />
-                                </li>
+                                        </label>
+                                        <br />
+                                    </li>
                                 }
                             }
 
@@ -124,26 +81,34 @@
                         {
                             @foreach (var cat in QueryableCategories)
                             {
-                                @foreach (var type in CheckedTypes.Where(type => type.Id == cat.Type_Id))
+                                using var context = ContextFactory.CreateDbContext();
+
+                                var UniqueType = context.Business_Types.FirstOrDefault(type => type.Id == cat.Type_Id);
+
+
+
+                                @if (cat.Is_Checked@* || CheckedCategories.Any(check => check.Id == cat.Id)*@)  //Keep in case of unexpected error
                                 {
-                                    @if (cat.Is_Checked)
-                                    {
-                                        <li class="catLi">
-                                            <label id="key" for="@cat.Category_Name">
-                                                <input @key="@cat.Id" checked value="@cat.Is_Checked" @onchange="() => HandleCategoryChange(cat.Id)" class="form-check-input cat-check" id="@cat.Category_Name"
-                                       name="@cat.Category_Name" type="checkbox" /><strong> @type.Type_Name:</strong> @cat.Category_Name
-                                            </label>
-                                            <br />
-                                        </li>
-                                    } else {
-                                        <li class="catLi">
-                                            <label id="key" for="@cat.Category_Name">
-                                                <input @key="cat.Id" value="@cat.Is_Checked" @onchange="() => HandleCategoryChange(cat.Id)" class="form-check-input cat-check" id="@cat.Category_Name"
-                                       name="@cat.Category_Name" type="checkbox" /><strong> @type.Type_Name:</strong> @cat.Category_Name
-                                            </label>
-                                            <br />
-                                        </li>
-                                    }
+
+                                    <li class="catLi mb-1">
+                                        <label id="key" for="@cat.Category_Name">
+                                            <input @key="@cat.Id" checked value="@cat.Is_Checked" @onchange="() => HandleCategoryChange(cat.Id)" class="form-check-input cat-check" id="@cat.Category_Name"
+                                       name="@cat.Category_Name" type="checkbox" /><strong> @UniqueType.Type_Name:</strong> @cat.Category_Name
+                                        </label>
+                                        <br />
+                                    </li>
+                                }
+                                else
+                                {
+                                    <li class="catLi mb-1">
+                                        <label id="key" for="@cat.Category_Name">
+                                            <input @key="cat.Id" value="@cat.Is_Checked" @onchange="() => HandleCategoryChange(cat.Id)" class="form-check-input cat-check" id="@cat.Category_Name"
+                                       name="@cat.Category_Name" type="checkbox" /><strong> @UniqueType.Type_Name:</strong> @cat.Category_Name
+                                        </label>
+                                        <br />
+                                    </li>
+
+
                                 }
                             }
                         }
@@ -152,11 +117,22 @@
                 </div>
 
             </div>
-
         </div>
+
+        <p class="fw-bold mt-3">Categories Saved: @CurrentCategoryCount</p>
+        <button @onclick="() => HandleCategoryClear()" style="align-self: flex-start" class="btn btn-outline-danger btn-sm">Clear Categories</button>
     </div>
 
     <button type="button" @onclick="() => HandleTypesCatsSubmit()" class="save-btn btn btn-success mb-3">Save Types and Changes</button>
+
+    @if (SuccessMessage is not null)
+    {
+        <div class="alert alert-success">@SuccessMessage</div>
+    }
+    @if (ErrorMessage is not null)
+    {
+        <div class="alert alert-danger">@ErrorMessage</div>
+    }
 
 
     <div class="panel company-panel mt-4">
@@ -165,7 +141,7 @@
             <p class="company-description desc">Manage companies that have registered</p>
         </div>
         <span class="building"><i alt="building icon" class="fa-solid fa-building fa-2x"></i></span>
-        <a href="/companies" @*@onclick="@HandleNavigationCompanyList"*@ class="stretched-link"></a>
+        <a href="/companies" @*@onclick="@HandleNavigationCompanyList" *@ class="stretched-link"></a>
     </div>
 
     <div class="panel home-panel mb-4 mt-4">
@@ -186,13 +162,13 @@
     public Company? Company { get; set; }
     public Business_Types? Type { get; set; }
     public Business_Categories? Category { get; set; }
-    private DateTime SignUpDate { get; set; }
     public Company_Types_Categories? CompanyTypeAndCat { get; set; }
     public List<Company_Types_Categories>? CompanyCategories = new List<Company_Types_Categories>();
 
     private Company_Types_Categories[]? CurrentCompanyCategories { get; set; }
     private Company_Types_Categories[]? CurrentCompanyTypes { get; set; }
     private Company_Types_Categories? CategoryRemove { get; set; }
+    private Company_Types_Categories? CurrentCategory { get; set; }
 
     private List<Business_Categories> FilteredCategories = new List<Business_Categories>();
 
@@ -218,12 +194,16 @@
     private string? SuccessMessage { get; set; }
     private string? ErrorMessage { get; set; }
 
+
     protected override async Task OnInitializedAsync()
     {
         using var context = ContextFactory.CreateDbContext();
         Company = await context.Companies.FirstOrDefaultAsync(comp => comp.Id == CompanyId);
         Types = await context.Business_Types.OrderBy(type => type.Type_Name).ToArrayAsync();
         Categories = await context.Business_Categories.OrderBy(cat => cat.Category_Name).ToArrayAsync();
+
+        CurrentCompanyCategories = await context.Company_Types_Categories.Where(comp => comp.CompanyId == CompanyId).ToArrayAsync();
+
 
         foreach (var type in Types)
         {
@@ -239,6 +219,40 @@
             await context.SaveChangesAsync();
         }
 
+        foreach (var comp in CurrentCompanyCategories)
+        {
+            var Cats = await context.Business_Categories.Where(cat => cat.Id == comp.Category_Id).ToArrayAsync();
+            foreach (var cat in Cats)
+            {
+                var Type = await context.Business_Types.FirstOrDefaultAsync(type => type.Id == cat.Type_Id);
+                var CategoryList = await context.Business_Categories.Where(category => category.Type_Id == Type.Id).ToArrayAsync();
+
+
+                Type.Is_Checked = true;
+                context.Update(Type);
+
+                foreach (var category in CategoryList)
+                {
+                    if (!FilteredCategories.Any(filter => filter.Id == category.Id))
+                    {
+                        FilteredCategories.Add(category);   //Renders All Categories for each Type checked
+                    }
+                }
+
+                cat.Is_Checked = true;
+                context.Update(cat);
+                await context.SaveChangesAsync();
+
+                if (!CheckedTypes.Any(type => type.Id == Type.Id))
+                {
+                    CheckedTypes.Add(Type);                 //helps render categories when a type is clicked
+                }
+
+                CheckedCategories.Add(cat);                 //helps database when saving changes
+
+            }
+        }
+
         await LoadData();
     }
 
@@ -249,10 +263,7 @@
         CurrentCompanyCategories = await context.Company_Types_Categories.Where(comp => comp.CompanyId == CompanyId).ToArrayAsync();
         CurrentCategoryCount = await context.Company_Types_Categories.Where(comp => comp.CompanyId == CompanyId).CountAsync();
 
-        if (CurrentCategoryCount > 1)
-        {
-            CategoryError = null;
-        }
+
 
         IQueryable<Business_Types> TypeQuery = context.Business_Types;
         TypeQuery = AddTypeFilter(TypeQuery);
@@ -280,7 +291,6 @@
         ErrorMessage = null;
 
     }
-
 
 
     private async Task HandleTypeChange(int TypeId)
@@ -333,8 +343,6 @@
     }
 
 
-
-
     private async Task HandleCategoryChange(int CatId)
     {
         using var context = ContextFactory.CreateDbContext();
@@ -345,7 +353,7 @@
 
         if (Category.Is_Checked)
         {
-            if (Category is not null)
+            if (Category is not null && !CheckedCategories.Any(cat => cat.Id == Category.Id))
             {
                 CheckedCategories.Add(Category);
             }
@@ -359,11 +367,20 @@
             }
         }
         await LoadCategories();
-        await LoadData();
     }
 
     private async Task HandleTypesCatsSubmit()
     {
+        using var context = ContextFactory.CreateDbContext();
+
+
+        foreach (var cat in CurrentCompanyCategories)
+        {
+            var dbCompTypeCat = await context.Company_Types_Categories.FirstOrDefaultAsync(comp => comp.Id == cat.Id);
+            context.Remove(dbCompTypeCat);
+            await context.SaveChangesAsync();  // Remove/deletes everything in database
+        }
+
 
         foreach (var cat in CheckedCategories)
         {
@@ -371,50 +388,40 @@
             if (CurrentCompanyCategories is not null)
             {
 
-                if (!CurrentCompanyCategories.Any(category => category.Category_Id == cat.Id))  //doesn't add already included categories into database
+                if (!CompanyCategories.Any(category => category.Category_Id == cat.Id))  //doesn't add already included categories into database
                 {
-                    FilteredCheckedCategories.Add(cat);
+                    if (Company is not null)
+                    {
+                        CompanyTypeAndCat = new();
+                        CompanyTypeAndCat.CompanyId = Company.Id;
+                        CompanyTypeAndCat.Category_Id = cat.Id;
+                        CompanyTypeAndCat.Type_Id = cat.Type_Id;
+                        if (CompanyCategories is not null)
+                        {
+                            CompanyCategories.Add(CompanyTypeAndCat); //Add eveything thats checked into database
+                        }
+                    }
                 }
 
             }
         }
-        foreach (var cat in FilteredCheckedCategories)
-        {
-            using var context = ContextFactory.CreateDbContext();
 
-            if (Company is not null)
-            {
-                CompanyTypeAndCat = new();
-                CompanyTypeAndCat.CompanyId = Company.Id;
-                CompanyTypeAndCat.Category_Id = cat.Id;
-                CompanyTypeAndCat.Type_Id = cat.Type_Id;
-                if (CompanyCategories is not null)
-                {
-                    CompanyCategories.Add(CompanyTypeAndCat);
-                }
-            }
-        }
-        if (CompanyCategories is not null && FilteredCheckedCategories.Count() != 0)
+        try
         {
-            try
-            {
-                using var context = ContextFactory.CreateDbContext();
-
-                context.Company_Types_Categories.AddRange(CompanyCategories);
-                await context.SaveChangesAsync();
-                CompanyCategories.Clear();
-                FilteredCheckedCategories.Clear();
-                await LoadData();
-                SuccessMessage = "Saved Type and category changes successfully!";
-            }
-            catch 
-            {
-                await LoadData();
-                ErrorMessage = "There was an error while saving changes. Please try again.";
-            }
+            context.Company_Types_Categories.AddRange(CompanyCategories);
+            await context.SaveChangesAsync();
+            CompanyCategories.Clear();
+            //FilteredCheckedCategories.Clear();
+            await LoadData();
+            SuccessMessage = "Saved Type and Category changes successfully!";
         }
+        catch
+        {
+            await LoadData();
+            ErrorMessage = "There was an error while saving changes. Please try again."; 
+        }
+
     }
-
 
 
     private async Task FilterKeyUp(KeyboardEventArgs e)
@@ -448,45 +455,49 @@
         return CatQuery;
     }
 
-    private async Task HandleCategoryRemove(int CategoryId)
+    private async Task HandleCategoryClear()
     {
-
         using var context = ContextFactory.CreateDbContext();
-        CategoryRemove = await context.Company_Types_Categories.FirstOrDefaultAsync(cat => cat.Category_Id == CategoryId);
 
 
-        if (CurrentCategoryCount > 1)
+        var isOk = await JS.InvokeAsync<bool>("confirm", $"Are you sure you want to reset all Type and Categories from the company? There's no going back.");
+
+        if (isOk)
         {
-            if (CategoryRemove is not null && Categories is not null)
+            try
             {
-                CategoryError = null;
-                foreach (var cat in Categories.Where(cat => cat.Id == CategoryRemove.Category_Id))
+                foreach (var cat in Categories)
                 {
-                    var isOk = await JS.InvokeAsync<bool>("confirm", $"Are you sure you want to remove the category {cat.Category_Name}?");
+                    cat.Is_Checked = false;
+                    context.Update(cat);
+                    await context.SaveChangesAsync();
+                    CheckedCategories.RemoveAll(check => check.Id == cat.Id);
+                }
+                foreach (var type in Types)
+                {
+                    type.Is_Checked = false;
+                    context.Update(type);
+                    await context.SaveChangesAsync();
+                    CheckedTypes.RemoveAll(type => type.Id == type.Id);
 
-                    if (isOk)
-                    {
-                        try
-                        {
-                            context.Company_Types_Categories.Remove(CategoryRemove);
-                            await context.SaveChangesAsync();
-                            await LoadData();
-                            SuccessMessage = "Removed successfully!";
-                        }
-                        catch
-                        {
-                            await LoadData();
-                            ErrorMessage = "There was an error while removing the Type and Category. Please try again.";
-                        }
                 }
+
+                foreach (var comp in CurrentCompanyCategories)
+                {
+                    context.Remove(comp);
+                    await context.SaveChangesAsync();
                 }
+
+                await LoadCategories();
+                await LoadData();
+                SuccessMessage = "Company Types and Categories Reset Successfully!";
             }
-        }
-        else if(CurrentCategoryCount <= 1) 
-        {
-            await LoadData();
-            CategoryError = "Cannot delete category, there needs to be at least one category selected. Please add a category before deleting.";
-        }
+            catch
+            {
+                await LoadData();
+                ErrorMessage = "There was an error while resetting Company Types and Categories. Please try again.";
+            }
+    }
     }
 
     private void HandleNavigationCompanyList()

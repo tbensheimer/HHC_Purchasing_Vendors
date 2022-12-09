@@ -49,7 +49,7 @@
 
                                 <p class="send fw-bold">Which company types should the notification be sent too?</p>
                                 <ul class="company-types mb-4">
-                                    <li>
+                                    <li class=" mb-1">
                                         @if (TypeAll)
                                         {
                                             <label for="select-all-type">
@@ -71,7 +71,7 @@
                                         {
                                             @if (type.Is_Checked)
                                             {
-                                                <li class="typeLi">
+                                                <li class="typeLi  mb-1">
                                                     <label id="key" for="@type.Type_Name">
                                                         <input @key="type.Id" checked id="@type.Type_Name" value="@type.Is_Checked" @onclick="() => HandleTypeChange(type.Id)" class="form-check-input type-check"
                                            Name="TypeCheckbox" type="checkbox" /> @type.Type_Name
@@ -81,7 +81,7 @@
                                             }
                                             else
                                             {
-                                                <li class="typeLi">
+                                                <li class="typeLi  mb-1">
                                                     <label id="key" for="@type.Type_Name">
                                                         <input @key="type.Id" id="@type.Type_Name" value="@type.Is_Checked" @onclick="() => HandleTypeChange(type.Id)" class="form-check-input type-check"
                                            Name="TypeCheckbox" type="checkbox" /> @type.Type_Name
@@ -111,7 +111,7 @@
 
                                 <p class="send fw-bold">Which company categories should the notification be sent too?</p>
                                 <ul class="company-categories mb-4">
-                                    <li>
+                                    <li class=" mb-1">
                                         @if (CategoryAll)
                                         {
                                             <label for="select-all-category">
@@ -137,7 +137,7 @@
 
                                                 @if (cat.Is_Checked)
                                                 {
-                                                    <li class="catLi">
+                                                    <li class="catLi  mb-1">
                                                         <label id="key" for="@cat.Category_Name">
                                                             <input @key="cat.Id" checked @onclick="() => HandleCategoryChange(cat.Id)" class="form-check-input cat-check" id="@cat.Category_Name"
                                            name="@cat.Category_Name" type="checkbox" /><strong>@type.Type_Name:</strong> @cat.Category_Name
@@ -147,7 +147,7 @@
                                                 }
                                                 else
                                                 {
-                                                    <li class="catLi">
+                                                    <li class="catLi  mb-1">
                                                         <label id="key" for="@cat.Category_Name">
                                                             <input @key="cat.Id" @onclick="() => HandleCategoryChange(cat.Id)" class="form-check-input cat-check" id="@cat.Category_Name"
                                            name="@cat.Category_Name" type="checkbox" /><strong>@type.Type_Name:</strong> @cat.Category_Name
@@ -181,7 +181,7 @@
                                 <p class="send fw-bold">Which companies should the notification be sent too?</p>
 
                                 <ul class="company-send-list mb-4">
-                                    <li>
+                                    <li class="mb-1">
                                         @if (CompanyAll)
                                         {
                                             <label for="select-all-company">
@@ -205,7 +205,7 @@
                                             {
                                                 if (company.Is_Checked)
                                                 {
-                                                    <li>
+                                                    <li class=" mb-1">
                                                         <label for="company-checkbox">
                                                             <input @onclick="() => HandleCompanyChange(company.Id)" @key="company.Id" checked type="checkbox" class="form-check-input" id="company-checkbox" />
                                                             @company.Name
@@ -216,7 +216,7 @@
                                                 {
 
 
-                                                    <li>
+                                                    <li class=" mb-1">
                                                         <label for="company-checkbox">
                                                             <input @onclick="() => HandleCompanyChange(company.Id)" @key="company.Id" type="checkbox" class="form-check-input" id="company-checkbox" />
                                                             @company.Name
@@ -299,8 +299,7 @@
                                 <p>Thank you,</p>
                                 <p>Health and Hospital Corporation - Purchasing Department</p>
                                 <p>Marion County Health Department</p>
-                                @*                              <img width="150" src="cid:imageId">
-                            *@
+                                <br/>
                             </EditorContent>
                         </BlazoredTextEditor>
                     </div>
@@ -577,6 +576,7 @@
         Categories = await context.Business_Categories.OrderBy(cat => cat.Category_Name).ToArrayAsync();
         CompanyTypesCats = await context.Company_Types_Categories.ToArrayAsync();
         Companies = await context.Companies.ToArrayAsync();
+        NotifsHistory = await context.NotificationsList.ToArrayAsync();
 
 
         foreach (var type in Types)

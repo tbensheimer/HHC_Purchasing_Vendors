@@ -121,7 +121,7 @@
                                         {
                                             @if (type.Is_Checked)
                                             {
-                                                <li class="typeLi">
+                                                <li class="typeLi mb-1">
                                                     <label id="key" for="@type.Type_Name">
                                                         <input @key="type.Id" checked id="@type.Type_Name" value="@type.Is_Checked" @onclick="() => HandleTypeChange(type.Id)" class="form-check-input type-check"
                                            Name="TypeCheckbox" type="checkbox" /> @type.Type_Name
@@ -131,7 +131,7 @@
                                             }
                                             else
                                             {
-                                                <li class="typeLi">
+                                                <li class="typeLi mb-1">
                                                     <label id="key" for="@type.Type_Name">
                                                         <input @key="type.Id" id="@type.Type_Name" value="@type.Is_Checked" @onclick="() => HandleTypeChange(type.Id)" class="form-check-input type-check"
                                            Name="TypeCheckbox" type="checkbox" /> @type.Type_Name
@@ -172,7 +172,7 @@
 
                                                 @if (cat.Is_Checked)
                                                 {
-                                                    <li class="catLi">
+                                                    <li class="catLi mb-1">
                                                         <label id="key" for="@cat.Category_Name">
                                                             <input @key="cat.Id" checked @onclick="() => HandleCategoryChange(cat.Id)" class="form-check-input cat-check" id="@cat.Category_Name"
                                            name="@cat.Category_Name" type="checkbox" /><strong>@type.Type_Name:</strong> @cat.Category_Name
@@ -182,7 +182,7 @@
                                                 }
                                                 else
                                                 {
-                                                    <li class="catLi">
+                                                    <li class="catLi mb-1">
                                                         <label id="key" for="@cat.Category_Name">
                                                             <input @key="cat.Id" @onclick="() => HandleCategoryChange(cat.Id)" class="form-check-input cat-check" id="@cat.Category_Name"
                                            name="@cat.Category_Name" type="checkbox" /><strong>@type.Type_Name:</strong> @cat.Category_Name
@@ -201,13 +201,14 @@
 
                     </div>
                     <p class="fw-bold mt-3">Contacts Selected: @CategoryCount</p>
+                      <button style="align-self: flex-start;" type="button" @onclick="() => HandleTypesCatsSubmit()" class="btn btn-primary">Next</button>
+                <p class="mt-3">Note: Once you hit next, you won't be able to go back and edit information. You can log in to your account and make necessary edits after the registration is complete.</p>
                     @if (ErrorMessage is not null)
                     {
                         <div class="alert alert-danger">@ErrorMessage</div>
                     }
                 </div>
-                <button type="button" @onclick="() => HandleTypesCatsSubmit()" class="btn btn-primary">Next</button>
-                <p class="mt-3">Note: Once you hit next, you won't be able to go back and edit information. You can log in to your account and make necessary edits after the registration is complete.</p>
+              
             </form>
         </div>
 

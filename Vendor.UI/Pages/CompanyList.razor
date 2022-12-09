@@ -93,75 +93,22 @@
                                     </div>
                                 </td>
                             }
-                            @*<td><a class="edit-link" href="/edit/companyinfo/@company.Id"><i alt="building icon" class="link-icon-building fa-solid fa-building"></i></a></td>
-                <td><a class="edit-link" href="/edit/company-contacts/@company.Id"><i alt="address book icon" class="link-icon-book fa-solid fa-address-book"></i></a></td>
-                <td><a class="edit-link" href="/edit/company-types-and-categories/@company.Id"><i alt="briefcase icon" class="link-icon-case fa-solid fa-briefcase"></i></a></td>*@
+         
                             <td>
-
-
-
-                                <div class="dropdown" id="toggleDropdown">
-                                    <button class="btn btn-sm btn-secondary dropdown-btn" type="button" @onclick="() => HandleDropdown(company.Id)">
-                                        <span>Edit Company</span>
-                                    </button>
-
-                                    <ul id="@company.Id" style="list-style: none; display: flex; flex-direction:column; padding-left: 0; height: auto;" class="dropdown-list hidden">
-                                        <li class="mt-1 mb-1">
-                                            <a class="btn btn-sm btn-outline-secondary fw-bold" href="/edit/companyinfo/@company.Id">
-                                                Information
-                                            </a>
-                                        </li>
-                                        <li class="mt-1 mb-1">
-                                            <a class="btn btn-sm btn-outline-primary fw-bold" href="/edit/company-contacts/@company.Id">
-                                                Contacts
-                                            </a>
-                                        </li>
-                                        <li class="mt-1 mb-1">
-                                            <a class="btn btn-sm btn-outline-success fw-bold" href="/edit/company-types-and-categories/@company.Id">
-                                                Types/Categories
-                                            </a>
-                                        </li>
-                                        <li class="mt-1 mb-1">
-                                            <button @onclick="() => HandleCompanyDelete(company.Id)" id="trash" style="height: auto; margin: 5px 0;" class="remove btn btn-sm btn-outline-danger">Remove</button>
-                                        </li>
-                                    </ul>
-
-                                </div>
-
-
                                 <div class="dropdown">
-                                    <button class="btn btn-primary btn-sm dropdown-toggle text-left" id="actionDropdownButton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                                         Actions
                                     </button>
-                                    <div class="dropdown-menu" aria-labelledby="actionDropdownButton">
-
-                                        <ul id="@company.Id" style="list-style: none; display: flex; flex-direction:column; padding-left: 0; height: auto;" class="dropdown-list hidden">
-                                            <li class="mt-1 mb-1">
-                                                <a class="btn btn-sm btn-outline-secondary fw-bold" href="/edit/companyinfo/@company.Id">
-                                                    Information
-                                                </a>
-                                            </li>
-                                            <li class="mt-1 mb-1">
-                                                <a class="btn btn-sm btn-outline-primary fw-bold" href="/edit/company-contacts/@company.Id">
-                                                    Contacts
-                                                </a>
-                                            </li>
-                                            <li class="mt-1 mb-1">
-                                                <a class="btn btn-sm btn-outline-success fw-bold" href="/edit/company-types-and-categories/@company.Id">
-                                                    Types/Categories
-                                                </a>
-                                            </li>
-                                            <li class="mt-1 mb-1">
-                                                <button @onclick="() => HandleCompanyDelete(company.Id)" id="trash" style="height: auto; margin: 5px 0;" class="remove btn btn-sm btn-outline-danger">Remove</button>
-                                            </li>
-                                        </ul>
-
-                                    </div>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item text-secondary fw-bold" href="/edit/companyinfo/@company.Id"><i class="fa-solid fa-circle-info"></i> Information</a></li>
+                                        <li><a class="dropdown-item text-primary fw-bold" href="/edit/company-contacts/@company.Id"><i class="fa-solid fa-address-book"></i> Contacts</a></li>
+                                        <li><a class="dropdown-item text-success fw-bold" href="/edit/company-types-and-categories/@company.Id"><i class="fa-solid fa-briefcase"></i> Types/Categories</a></li>
+                                        <li class="mt-1 mb-1"><button @onclick="() => HandleCompanyDelete(company.Id)" id="trash" style="height: auto; margin: 5px 0;" class="dropdown-item text-danger"><i class="fa-solid fa-trash-can"></i> Remove</button></li>
+                                    </ul>
                                 </div>
 
                             </td>
-@*                            <td><button @onclick="() => HandleCompanyDelete(company.Id)" id="trash" style="height: auto; margin: 5px 0;" class="remove btn btn-sm btn-danger"><span><i alt="trash icon" id="trash-icon" class="fa-solid fa-trash white"></i></span></button></td>
-*@                        </tr>
+                        </tr>
                     }
                 }
             </tbody>
@@ -238,22 +185,23 @@
     }
 
 
-    //protected override async void OnAfterRender(bool firstRender)
-    //{
+    protected override async void OnAfterRender(bool firstRender)
+    {
 
-    //    if (Companies is not null && !DataTablePresent)
-    //    {
-    //        DataTablePresent = true;
-    //        await JS.InvokeAsync<IJSObjectReference>("DataTablesAdd", "#table");
-    //    }
-    ////    //else if (DataTablePresent && Companies is not null)
-    ////    //{
-    ////    //    DataTablePresent = false;
-    ////    //    await JS.InvokeAsync<IJSObjectReference>("DataTablesRemove", "#table");
-    ////    }
+        if (Companies is not null && !DataTablePresent)
+        {
+            DataTablePresent = true;
+            await JS.InvokeAsync<string>("DataTablesAdd", "#table");
+        }
+        //else if (DataTablePresent && Companies is not null)
+        //{
+        //    DataTablePresent = false;
+        //    await JS.InvokeAsync<IJSObjectReference>("DataTablesRemove", "#table");
+        //}
 
 
-    //}
+
+    }
 
 
 

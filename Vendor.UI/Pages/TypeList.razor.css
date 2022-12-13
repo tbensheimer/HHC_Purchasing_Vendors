@@ -1,9 +1,4 @@
-﻿namespace Vendor.UI.Pages
-{
-}
-
-
-.main {
+﻿.main {
     display: flex;
     flex-direction: column;
     font-family: Arial, Helvetica, sans-serif;
@@ -13,22 +8,6 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-gap: 30px;
-}
-
-.white-background {
-    background-color: white !important;
-}
-
-.todo {
-    color: rgb(90, 89, 89);
-}
-
-.send-radio-div {
-    font-size: 0.8rem;
-}
-
-#number-days {
-    width: 3rem;
 }
 
 .panel {
@@ -70,8 +49,8 @@ i {
 }
 
 table th {
-    background-color: rgb(250, 226, 206) !important;
-    border: 1px solid white !important;
+/*    background-color: rgb(250, 226, 206) !important;
+*/    border: 1px solid white !important;
     border-bottom: 1px solid black !important;
     padding: 4px !important;
 }
@@ -81,3 +60,19 @@ table td {
     padding: 10px !important;
 }
 
+@media (max-width: 1050px) {
+
+    .panel {
+        width: 90%;
+        max-width: 22rem;
+        background-color: white;
+    }
+
+        .panel .desc {
+            width: 99%;
+        }
+
+    .home-panel {
+        background-color: white;
+    }
+}

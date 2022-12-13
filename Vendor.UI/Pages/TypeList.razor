@@ -6,102 +6,114 @@
 
 
 <main class="main">
-<h3>Types and Categories List</h3>
+    <h3 class="mb-4">Types and Categories List</h3>
 
 
-@if (Types is not null)
-{
+    @if (Types is not null)
+    {
 
-    <ul class="pagination mb-2 mt-4 justify-content-center">
-        <li class="page-item  @(CurrentPage == 1 ? "disabled" : "")">
-            <a class="page-link" href="/types-and-categories-list/@(CurrentPage - 1)">Previous</a>
-        </li>
-        @for (int i = 1; i <= TotalPages; i++)
-        {
-            <li class="page-item @(CurrentPage == i ? "active" : "")">
-                <a class="page-link numbers" href="/types-and-categories-list/@i">@i</a>
-            </li>
-        }
-        <li class="page-item  @(CurrentPage == TotalPages ? "disabled" : "")">
-            <a class="page-link" href="/types-and-categories-list/@(CurrentPage + 1)">Next</a>
-        </li>
+        @*<ul class="pagination mb-2 mt-4 justify-content-center">
+    <li class="page-item  @(CurrentPage == 1 ? "disabled" : "")">
+    <a class="page-link" href="/types-and-categories-list/@(CurrentPage - 1)">Previous</a>
+    </li>
+    @for (int i = 1; i <= TotalPages; i++)
+    {
+    <li class="page-item @(CurrentPage == i ? "active" : "")">
+    <a class="page-link numbers" href="/types-and-categories-list/@i">@i</a>
+    </li>
+    }
+    <li class="page-item  @(CurrentPage == TotalPages ? "disabled" : "")">
+    <a class="page-link" href="/types-and-categories-list/@(CurrentPage + 1)">Next</a>
+    </li>
     </ul>
 
     <div class="mb-2 justify-content-end">
-        <input type="text" @onkeyup="@TextFilterKeyUp" @bind-value="@FilterString" placeholder="Filter Types..." />
-        <button class="btn btn-sm btn-secondary" @onclick="ButtonFilterClick">Filter</button>
+    <input type="text" @onkeyup="@TextFilterKeyUp" @bind-value="@FilterString" placeholder="Filter Types..." />
+    <button class="btn btn-sm btn-secondary" @onclick="ButtonFilterClick">Filter</button>
     </div>
+    *@
 
+        <div style="box-shadow: 0px 0px 10px 4px rgb(230, 228, 228);" class="card w-50 mb-3">
+            <div class="card-body">
+                <h5 class="card-title fw-bold mb-2">Add a Type</h5>
+                <EditForm Model="@BType">
+                    <label for="input-type" hidden>Add Type</label>
+                    <InputText style="box-shadow: 0px 0px 1px 1px rgb(230, 228, 228);" @bind-Value="@InputType" id="input-type" type="text" name="input-type" class="form-control mb-3" placeholder=" Add a Type" />
+                </EditForm>
+                <button @onclick="() => HandleTypeAdd()" type="button" class="fw-bold btn btn-primary btn-sm">Add Type</button>
+            </div>
+        </div>
 
-    <table id="type-table" class="table table-hover">
-        <thead>
-            <tr>
-                <th>Types</th>
-                <th>#</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var type in Types)
-            {
-                <tr>
-                    <td>
-                        <label for="@type.Id" hidden>@type.Type_Name</label>
-                        <input style="box-shadow: 0px 0px 2px 2px rgb(230, 228, 228)" type="text" class="form-control" name="@type.Type_Name" @bind-value="@type.Type_Name" id="@type.Id" />
-                    </td>
-                    <td>
-                        <a @onclick="() => HandleCategoryEdit(type.Id)" href="/category-list/type/@type.Id" style="background-color: rgb(150, 149, 149) !important" class="btn btn-secondary fw-bold btn-sm">Manage Categories</a>
-                        <button style="width: 146px; border: none !imporant; background-color: rgb(172, 84, 84) !important" @onclick="() => HandleTypeRemove(type.Id)" class="fw-bold btn btn-danger btn-sm">Remove Type</button>
-                </td>
-                </tr>
-            }
-            <tr class="input-row">
-                <td>
-                    <EditForm Model="@BType">
-                        <label for="input-type" hidden>Add Type</label>
-                        <InputText style="box-shadow: 0px 0px 2px 2px rgb(230, 228, 228);" @bind-Value="@InputType" id="input-type" type="text" name="input-type" class="form-control" placeholder=" Add a Type" />
-                    </EditForm>
-
-                </td>
-                <td><button @onclick="() => HandleTypeAdd()" type="button" class="fw-bold btn btn-primary btn-sm">Add Type</button></td>
-            </tr>
-
-        </tbody>
-    </table>
-
-    @if (SuccessMessage is not null)
-    {
-        <div class="alert alert-success">@SuccessMessage</div>
-    }
-
-    @if (ErrorMessage is not null)
-    {
-        <div class="alert alert-danger">@ErrorMessage</div>
-    }
-
-<button style="align-self: flex-start;" @onclick="() => HandleTypeSave()" type="button" class="btn btn-success btn-sm fw-bold">Save Changes</button>
-
-    <ul class="pagination mb-2 mt-2 justify-content-center">
-        <li class="page-item  @(CurrentPage == 1 ? "disabled" : "")">
-            <a class="page-link" href="/types-and-categories-list/@(CurrentPage - 1)">Previous</a>
-        </li>
-        @for (int i = 1; i <= TotalPages; i++)
+        @if (SuccessMessage is not null)
         {
-            <li class="page-item @(CurrentPage == i ? "active" : "")">
-                <a class="page-link numbers" href="/types-and-categories-list/@i">@i</a>
-            </li>
+            <div class="alert alert-success">@SuccessMessage</div>
         }
-        <li class="page-item  @(CurrentPage == TotalPages ? "disabled" : "")">
-            <a class="page-link" href="/types-and-categories-list/@(CurrentPage + 1)">Next</a>
-        </li>
-    </ul>
 
-}
-else
-{
-    <div>Loading...</div>
-}
+        @if (ErrorMessage is not null)
+        {
+            <div class="alert alert-danger">@ErrorMessage</div>
+        }
 
- 
+        <div class="row">
+            <div class="col-12">
+                <div class="card" style="box-shadow: 0px 0px 10px 4px rgb(230, 228, 228);">
+                    <div class="card-body">
+
+        <table id="type-table" class="table table-hover">
+            <thead>
+                <tr>
+                    <th style="background-color: white;">Types</th>
+                                    <th style="background-color: white;">#</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var type in Types)
+                {
+                    <tr>
+                        <td>
+                            <label for="@type.Id" hidden>@type.Type_Name</label>
+                            <input type="text" class="form-control" name="@type.Type_Name" @bind-value="@type.Type_Name" id="@type.Id" />
+                        </td>
+                        <td>
+                            <a @onclick="() => HandleCategoryEdit(type.Id)" href="/category-list/type/@type.Id" style="background-color: gray !important" class="btn btn-secondary fw-bold btn-sm">Manage Categories</a>
+                            <button style="width: 146px; border: none !imporant;" @onclick="() => HandleTypeRemove(type.Id)" class="fw-bold btn btn-danger btn-sm">Remove Type</button>
+                        </td>
+                    </tr>
+                }
+
+            </tbody>
+        </table>
+
+                    </div>
+                </div>
+            </div>
+        
+        </div>
+
+        <button style="align-self: flex-start; background-color: #0acf97; border-color: #0acf97" @onclick="() => HandleTypeSave()" type="button" class="btn btn-success btn-sm fw-bold mt-3">Save Changes</button>
+
+        @*   <ul class="pagination mb-2 mt-2 justify-content-center">
+    <li class="page-item  @(CurrentPage == 1 ? "disabled" : "")">
+    <a class="page-link" href="/types-and-categories-list/@(CurrentPage - 1)">Previous</a>
+    </li>
+    @for (int i = 1; i <= TotalPages; i++)
+    {
+    <li class="page-item @(CurrentPage == i ? "active" : "")">
+    <a class="page-link numbers" href="/types-and-categories-list/@i">@i</a>
+    </li>
+    }
+    <li class="page-item  @(CurrentPage == TotalPages ? "disabled" : "")">
+    <a class="page-link" href="/types-and-categories-list/@(CurrentPage + 1)">Next</a>
+    </li>
+    </ul>*@
+
+    }
+    else
+    {
+        <div>Loading...</div>
+    }
+
+
     <div class="panel home-panel mb-4 mt-4">
         <div class="layout">
             <h2 class="home-header fs-4 fw-bold title">Home Page</h2>
@@ -135,62 +147,59 @@ else
 
     private string? ErrorMessage { get; set; }
 
+    private bool DataTablePresent { get; set; }
+
 
     protected override async Task OnParametersSetAsync()
     {
         await LoadData();
     }
 
-   //protected override async Task OnAfterRenderAsync(bool firstRender)
-   // {
+    protected override async void OnAfterRender(bool firstRender)
+    {
 
-   //     if (firstRender)
-   //     {
-   //         await JS.InvokeAsync<IJSObjectReference>("DataTablesAdd", "#type-table");
-   //     }
-    //}
-
-    //public void Dispose()
-    //{
-    //    JS.InvokeAsync<IJSObjectReference>("DataTablesRemove", "#type-table");
-    //}
+        if (Types is not null && !DataTablePresent)
+        {
+            DataTablePresent = true;
+            await JS.InvokeAsync<string>("DataTablesAdd", "#type-table");
+        }
+    }
 
     private async Task LoadData()
     {
-        if (CurrentPage is null or < 1)
-        {
-            NavigationManager.NavigateTo("/types-and-categories-list/1");
-            return;
-        }
+        //if (CurrentPage is null or < 1)
+        //{
+        //    NavigationManager.NavigateTo("/types-and-categories-list/1");
+        //    return;
+        //}
 
 
+        //using var context = ContextFactory.CreateDbContext();
+        //var ItemsToSkip = (CurrentPage.Value - 1) * ItemsPerPage;
+
+        //IQueryable<Business_Types> TypeCountQuery = context.Business_Types;
+        //TypeCountQuery = AddFilter(TypeCountQuery);
+        //var TypeCount = await TypeCountQuery.CountAsync();
+        //TotalPages = TypeCount == 0 ? 1 : Math.Ceiling((double)TypeCount / ItemsPerPage);
+
+
+        //if (CurrentPage > TotalPages)
+        //{
+        //    NavigationManager.NavigateTo($"/types-and-categories-list/{TotalPages}");
+        //    return;
+        //}
+
+        //StateContainer.TypeListPage = CurrentPage.Value;
+
+
+        //IQueryable<Business_Types> TypeQuery = context.Business_Types;
+        //TypeQuery = AddFilter(TypeQuery);
         using var context = ContextFactory.CreateDbContext();
-        var ItemsToSkip = (CurrentPage.Value - 1) * ItemsPerPage;
 
-
-
-
-        IQueryable<Business_Types> TypeCountQuery = context.Business_Types;
-        TypeCountQuery = AddFilter(TypeCountQuery);
-        var TypeCount = await TypeCountQuery.CountAsync();
-        TotalPages = TypeCount == 0 ? 1 : Math.Ceiling((double)TypeCount / ItemsPerPage);
-
-
-        if (CurrentPage > TotalPages)
-        {
-            NavigationManager.NavigateTo($"/types-and-categories-list/{TotalPages}");
-            return;
-        }
-
-        StateContainer.TypeListPage = CurrentPage.Value;
-
-
-        IQueryable<Business_Types> TypeQuery = context.Business_Types;
-        TypeQuery = AddFilter(TypeQuery);
-        Types = await TypeQuery
+        Types = await context.Business_Types
         .OrderBy(type => type.Type_Name)
-        .Skip(ItemsToSkip)
-        .Take(ItemsPerPage)
+        //.Skip(ItemsToSkip)
+        //.Take(ItemsPerPage)
         .ToArrayAsync();
 
 
@@ -216,7 +225,7 @@ else
                         await context.SaveChangesAsync();
                         SuccessMessage = "Type changes saved successfully!";
                     }
-                    catch 
+                    catch
                     {
                         ErrorMessage = "There was an error while saving Type changes. Please try again.";
                     }
@@ -243,7 +252,7 @@ else
                         await LoadData();
                         SuccessMessage = "Type changes saved successfully!";
                     }
-                    catch 
+                    catch
                     {
                         await LoadData();
                         ErrorMessage = "There was an error while saving Type changes. Please try again.";
@@ -304,35 +313,35 @@ else
                 InputType = null;
                 SuccessMessage = "Added Type successfully!";
             }
-            catch 
+            catch
             {
                 await LoadData();
                 ErrorMessage = "There was an error while adding the Type. Please try again.";
             }
-    }
-    }
-
-
-    private IQueryable<Business_Types> AddFilter(IQueryable<Business_Types> typeQuery)
-    {
-        if (!string.IsNullOrWhiteSpace(FilterString))
-        {
-            return typeQuery.Where(type => type.Type_Name != null && type.Type_Name.Contains(this.FilterString));
-        }
-        return typeQuery;
-    }
-
-    private async Task TextFilterKeyUp(KeyboardEventArgs e)
-    {
-        if (e.Key == "Enter")
-        {
-            await LoadData();
         }
     }
 
-    private async Task ButtonFilterClick()
-    {
-        await LoadData();
-    }
+
+    //private IQueryable<Business_Types> AddFilter(IQueryable<Business_Types> typeQuery)
+    //{
+    //    if (!string.IsNullOrWhiteSpace(FilterString))
+    //    {
+    //        return typeQuery.Where(type => type.Type_Name != null && type.Type_Name.Contains(this.FilterString));
+    //    }
+    //    return typeQuery;
+    //}
+
+    //private async Task TextFilterKeyUp(KeyboardEventArgs e)
+    //{
+    //    if (e.Key == "Enter")
+    //    {
+    //        await LoadData();
+    //    }
+    //}
+
+    //private async Task ButtonFilterClick()
+    //{
+    //    await LoadData();
+    //}
 
 }

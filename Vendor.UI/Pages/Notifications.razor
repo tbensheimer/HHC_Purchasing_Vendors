@@ -9,6 +9,8 @@
 @using System.IO;
 @using System.Reflection
 @using System.Text.RegularExpressions
+@using System.Globalization
+@using Meziantou.Framework
 
 <main class="main mt-4">
 
@@ -21,7 +23,7 @@
 
                 <form action="#" id="notif-form">
 
-                    <div class="tab mt-4">
+                    <div class="tab">
                         <button type="button" @onclick="(e => DisplayTab(1))" class="@((tab1) ? "active" : "")">
                             <span alt="user icon" class="oi oi-briefcase"></span><br />
                             <span class="d-none d-sm-inline">Types</span>
@@ -239,9 +241,9 @@
                         </div>
                     }
 
-                   
-                        <p style="font-size: 20" class="fw-bold">Selected Companies: @SelectedCompaniesCount</p>
-                    
+
+                    <p style="font-size: 20" class="fw-bold">Selected Companies: @SelectedCompaniesCount</p>
+
 
                     <label for="subject-line" hidden>Subject Line</label>
                     <input @bind-value="SubjectLine" class="required form-control mb-2" id="subject-line" name="subject-line" type="text" placeholder="Subject Line" />
@@ -285,7 +287,7 @@
 
                                 <span class="ql-formats">
                                     <button class="ql-link"></button>
-                                    <button class="ql-image" data-toggle="tooltip" data-placement="bottom" title="Insert Image"></button>
+                                    <InputFile OnChange="e => LoadFiles(e)" multiple></InputFile>
                                 </span>
                             </ToolbarContent>
                             <EditorContent>
@@ -299,9 +301,22 @@
                                 <p>Thank you,</p>
                                 <p>Health and Hospital Corporation - Purchasing Department</p>
                                 <p>Marion County Health Department</p>
-                                <br/>
+                                <br />
+                                <div class="col-md-4 p-3">
+                                </div>
                             </EditorContent>
                         </BlazoredTextEditor>
+
+                        @foreach (var file in uploadedFiles)
+                        {
+                            <div>
+                                @file.FileName
+                                <progress value="@file.UploadedBytes" max="@file.Size"></progress>
+                                @file.UploadedPercentage.ToString("F1")%
+                                (@FormatBytes(file.UploadedBytes) / @FormatBytes(file.Size))
+                            </div>
+
+                        }
                     </div>
 
                     <button type="button" disabled="@IsBusy" @onclick="@HandleNotifSubmit" class="btn btn-primary submit">Send Notification</button>
@@ -349,12 +364,12 @@
                             <tr>
                                 <td>@notifs.Title</td>
                                 <td>
-                                    <button style="color: rgb(80, 80, 250); text-decoration: underline" type="button" class="btn" @onclick="() => ModalShow(notifs.Id)">
+                                    <button style="color: rgb(80, 80, 250); text-decoration: underline" type="button" class="btn" data-bs-toggle="modal" data-bs-target="#emailContents" @onclick="() => ModalShowEmailContents(notifs.Id)">
                                         @((MarkupString)notifs.Body.Substring(0, 15))
                                     </button>
                                 </td>
                                 <td>
-                                    <button class="btn btn-secondary btn-sm" @onclick="() => ModalShowCompanyList(notifs.Id)">Click to see Recipients</button>
+                                    <button class="btn btn-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#emailRecipients" @onclick="() => ModalShowEmailRecipients(notifs.Id)">Click to see Recipients</button>
                                 </td>
                                 <td>@notifs.Date_Sent</td>
                             </tr>
@@ -369,76 +384,56 @@
 
 
         //Modal Start
-        @if (ShowModal)
-        {
-            <div class="modal fade show" id="myModal" style="display:block" aria-modal="true" role="dialog">
-                <div class="modal-dialog modal-dialog-scrollable">
-                    <div class="modal-content">
+        <div class="modal fade" id="emailContents" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div style="flex-direction: column !important;" class="modal-header">
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <h4 class="modal-title justify-content-center">Notification Id: <strong>@NotificationId</strong></h4>
+                        <h5 class="justify-content-center">Subject: <strong>@NotificationSubjectLine</strong></h5>
+                    </div>
+                    <div class="modal-body">
+                        @if (NotificationBody is not null)
+                        {
+                            <p>@((MarkupString)NotificationBody)</p>
+                        }
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+                //Modal End
 
-                        <!-- Modal Header -->
-                        <div style="flex-direction: column;" class="modal-header">
+                //Modal Start
+        <div class="modal fade" id="emailRecipients" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div style="flex-direction: column !important;" class="modal-header">
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <h4 class="modal-title">Notification Id: <strong>@NotificationId</strong></h4>
 
-                            <h4 class="modal-title mb-3">Notification Id: <strong>@NotificationId</strong></h4>
-                            <h5>Subject: <strong>@NotificationSubjectLine</strong></h5>
+                    </div>
+                    <div class="modal-body">
+                        <h5 style="text-decoration: underline">Recipients:</h5>
 
-                        </div>
-
-                        <!-- Modal body -->
-                        <div class="modal-body">
-                            @if (NotificationBody is not null)
+                        <ul>
+                            @if (ListOfCompanies is not null)
                             {
-                                <p>@((MarkupString)NotificationBody)</p>
-                            }
-                        </div>
-
-                        <!-- Modal footer -->
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" @onclick="@ModalCancel">Close</button>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-        }
-        //Modal End
-
-        //Modal Start
-        @if (ShowListModal)
-        {
-            <div class="modal fade show" id="myModal" style="display:block" aria-modal="true" role="dialog">
-                <div class="modal-dialog modal-dialog-scrollable">
-                    <div class="modal-content">
-
-                        <!-- Modal Header -->
-                        <div style="flex-direction: column;" class="modal-header">
-
-                            <h4 class="modal-title">Notification Id: <strong>@NotificationId</strong></h4>
-                        </div>
-
-                        <!-- Modal body -->
-                        <div class="modal-body">
-                            <h5 style="text-decoration: underline">Recipients:</h5>
-
-                            <ul>
-                                @if (ListOfCompanies is not null)
+                                @foreach (var comp in ListOfCompanies)
                                 {
-                                    @foreach (var comp in ListOfCompanies)
-                                    {
-                                        <li>@comp</li>
-                                    }
+                                    <li>@comp</li>
                                 }
-                            </ul>
-                        </div>
-
-                        <!-- Modal footer -->
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" @onclick="@ModalCancel">Close</button>
-                        </div>
-
+                            }
+                        </ul>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                     </div>
                 </div>
             </div>
-        }
+        </div>
         //Modal End
 
 
@@ -455,15 +450,95 @@
 
     <div class="tab-div">
         <button @onclick="@SendNotifsActive" class="tab1-btn send-notifs-content @(SendNotifs == true ? "active-page" : "")" type="button">Send Notifications</button>
-        <button @onclick="@PrevNotifsActive" class="tab2-btn btn prev-notifs-content @(PrevNotifs == true ? "active-page" : "")" type="button">Previous Notifications</button>
+        <button disabled="@IsLoading" @onclick="@PrevNotifsActive" class="tab2-btn btn prev-notifs-content @(PrevNotifs == true ? "active-page" : "")" type="button">Previous Notifications</button>
     </div>
 
 
 </main>
 
 @code {
+    List<FileUploadProgress> uploadedFiles = new();
+    IReadOnlyList<IBrowserFile>? filesList;
+    private List<IBrowserFile> loadedFiles = new();
+
+    MailMessage message = new MailMessage();
 
 
+
+    private async ValueTask LoadFiles(InputFileChangeEventArgs e)
+    {
+        var files = e.GetMultipleFiles(maximumFileCount: 100);
+        filesList = e.GetMultipleFiles(maximumFileCount: 100);
+
+
+        var startIndex = uploadedFiles.Count;
+
+        // Add all files to the UI
+        foreach (var file in files)
+        {
+            var progress = new FileUploadProgress(file.Name, file.Size);
+            uploadedFiles.Add(progress);
+        }
+
+
+
+        // We don't want to refresh the UI too frequently,
+        // So, we use a timer to update the UI every few hundred milliseconds
+        await using var timer = new Timer(_ => InvokeAsync(() => StateHasChanged()));
+        timer.Change(TimeSpan.FromMilliseconds(500), TimeSpan.FromMilliseconds(500));
+
+        // Upload files
+        byte[] buffer = System.Buffers.ArrayPool<byte>.Shared.Rent(4096);
+        try
+        {
+            foreach (var file in files)
+            {
+
+                //MemoryStream ms = new MemoryStream();
+
+                using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
+                while (await stream.ReadAsync(buffer) is int read && read > 0)
+                {
+                    uploadedFiles[startIndex].UploadedBytes += read;
+                    // TODO Do something with the file chunk, such as save it
+                    // to a database or a local file system
+
+                    //file.OpenReadStream().CopyTo(ms);
+                    //var fileBytes = ms.ToArray();
+
+                    //Attachment fileAttch = new Attachment(new MemoryStream(fileBytes), file.ContentType);
+                    //message.Attachments.Add(fileAttch);
+
+
+                    //
+                    var readData = buffer.AsMemory().Slice(0, read);
+                }
+
+                startIndex++;
+            }
+        }
+        finally
+        {
+            System.Buffers.ArrayPool<byte>.Shared.Return(buffer);
+
+            // Update the UI with the final progress
+            StateHasChanged();
+        }
+    }
+
+    // Use the Meziantou.Framework.ByteSize NuGet package.
+    // You could also use Humanizer
+    string FormatBytes(long value)
+    => ByteSize.FromBytes(value).ToString("fi2", CultureInfo.CurrentCulture);
+
+    record FileUploadProgress(string FileName, long Size)
+    {
+        public long UploadedBytes { get; set; }
+        public double UploadedPercentage => (double)UploadedBytes / (double)Size * 100d;
+    }
+
+
+    //
     private bool tab1 = true;
     private bool tab2 = false;
     private bool tab3 = false;
@@ -525,52 +600,16 @@
     private List<string> ListOfCompanies = new List<string>();
     bool ShowListModal = false;
     private MarkupString myMarkup { get; set; }
-    //string imageDataUri;
 
-    bool ShowModal = false;
     private string? EmailToPerson { get; set; }
     private string? TemplateEmail { get; set; }
 
-    private async Task ModalShow(int NotifId)
-    {
-        using var context = ContextFactory.CreateDbContext();
-        Notif = await context.NotificationsList.FirstOrDefaultAsync(notif => notif.Id == NotifId);
-        myMarkup = new MarkupString($"{Notif.Body}");
+    private bool IsLoading { get; set; }
 
-        ShowModal = true;
-        NotificationId = Notif.Id;
-        NotificationSubjectLine = Notif.Title;
-        NotificationBody = myMarkup;
-
-    }
-    private async Task ModalShowCompanyList(int NotifId)
-    {
-        ListOfCompanies.Clear();
-
-        using var context = ContextFactory.CreateDbContext();
-
-        var CompaniesSent = await context.Notification_Recipients.Where(rec => rec.NotificationsId == NotifId).ToListAsync();
-        NotificationId = NotifId;
-
-        if (CompaniesSent is not null)
-        {
-            foreach (var comp in CompaniesSent)
-            {
-                ListOfCompanies.Add(comp.CompanyName);
-            }
-        }
-        ShowListModal = true;
-
-    }
-
-    void ModalCancel()
-    {
-        ShowModal = false;
-        ShowListModal = false;
-    }
 
     protected override async Task OnInitializedAsync()
     {
+        IsLoading = true;
         using var context = ContextFactory.CreateDbContext();
         Types = await context.Business_Types.OrderBy(type => type.Type_Name).ToArrayAsync();
         Categories = await context.Business_Categories.OrderBy(cat => cat.Category_Name).ToArrayAsync();
@@ -633,6 +672,7 @@
         SelectedCompaniesCount = SelectedCompanies.Where(comp => !comp.Is_Deleted && !comp.Disabled_From_Notifications).Count();
         NotificationsCount = await context.NotificationsList.CountAsync();
 
+        IsLoading = false;
     }
 
     public void DisplayTab(int TabNumber)
@@ -735,7 +775,7 @@
             try
             {
                 var sClient = new SmtpClient("SMTP.HHCORP.ORG");
-                var message = new MailMessage();
+           //     var message = new MailMessage();
 
                 sClient.Port = 25;
                 sClient.UseDefaultCredentials = false;
@@ -764,6 +804,20 @@
                 companyLogo.ContentId = "logo";
                 message.Attachments.Add(companyLogo);
 
+
+
+                //foreach (var file in filesList)
+                //{
+                //    var content = new MemoryStream();
+                //    await using FileStream fs = new (content, FileAccess.Read);
+                //    await file.OpenReadStream().CopyToAsync(fs);
+
+                    
+                    
+                //}
+
+              
+
                 var Template = QuillContent + "<img width='150' src='cid:logo'>";
 
                 StateHasChanged();
@@ -777,7 +831,7 @@
                     {
                         if (person is not null)
                         {
-                            EmailToPerson = $"{person.FirstName} {person.LastName},";           
+                            EmailToPerson = $"{person.FirstName} {person.LastName},";
                             StateHasChanged();
 
 
@@ -802,7 +856,7 @@
                 Notif.Body = "To Recipients," + QuillContent + "<img width='150' src='logo.PNG' />";
                 Notif.Date_Sent = DateTime.Now;
                 Notif.Created_By = "test@hhcorp.org";
-                
+
 
                 context.NotificationsList.Add(Notif);
                 await context.SaveChangesAsync();
@@ -1102,5 +1156,35 @@
         }
     }
 
+
+    private async Task ModalShowEmailContents(int NotifId)
+    {
+        using var context = ContextFactory.CreateDbContext();
+        Notif = await context.NotificationsList.FirstOrDefaultAsync(notif => notif.Id == NotifId);
+        myMarkup = new MarkupString($"{Notif.Body}");
+
+        NotificationId = Notif.Id;
+        NotificationSubjectLine = Notif.Title;
+        NotificationBody = myMarkup;
+
+    }
+    private async Task ModalShowEmailRecipients(int NotifId)
+    {
+        ListOfCompanies.Clear();
+
+        using var context = ContextFactory.CreateDbContext();
+
+        var CompaniesSent = await context.Notification_Recipients.Where(rec => rec.NotificationsId == NotifId).ToListAsync();
+        NotificationId = NotifId;
+
+        if (CompaniesSent is not null)
+        {
+            foreach (var comp in CompaniesSent)
+            {
+                ListOfCompanies.Add(comp.CompanyName);
+            }
+        }
+
+    }
 
 }

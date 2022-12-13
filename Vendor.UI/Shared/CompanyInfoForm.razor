@@ -15,7 +15,7 @@
         <label for="company-name" class="fw-bold">Company Name</label>
         <InputText @bind-Value="@Company.Name" class="form-control name mb-2" id="company-name" name="company-name" type="text" />
 
-        <label for="id" class="fw-bold">Social Security Number or Employee Identification Number</label>
+        <label for="id" class="fw-bold">Social Security Number or Federal I.D Number</label>
         <InputNumber @bind-Value="@Company.Fed_Id_SSN" id="id" class="form-control id mb-2" type="text" name="federal-id-or-ssn-number" />
 
         <label class="fw-bold" for="supp-cat">Supplier Category</label>
@@ -43,7 +43,7 @@
 
         @if (Company.Diversity_Certification == "Other")
         {
-            <label for="other-div-cert fw-bold">Describe Diversity Certification</label>
+            <label for="other-div-cert" class="fw-bold">Describe Diversity Certification</label>
             <InputText required @bind-Value="@Company.Other_Diversity_Certification" id="other-div-cert" class="form-control other-div-cert mb-2" type="text" name="other-description-of-diversity-certification" />
         }
 

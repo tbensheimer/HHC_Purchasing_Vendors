@@ -1,36 +1,12 @@
-﻿namespace Vendor.UI.Pages {
-}
-
-.main {
+﻿.main {
     display: flex;
     flex-direction: column;
     font-family: Arial, Helvetica, sans-serif;
 }
 
-.grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-gap: 30px;
-}
-
-.white-background {
-    background-color: white !important;
-}
-
-.todo {
-    color: rgb(90, 89, 89);
-}
-
-.send-radio-div {
-    font-size: 0.8rem;
-}
-
-#number-days {
-    width: 3rem;
-}
-
 #table th {
     padding: 10px !important;
+    background-color: rgb(250, 226, 206);
 }
 
 .panel {
@@ -54,10 +30,6 @@
     width: 90%;
 }
 
-.gray {
-    color: gray !important;
-}
-
 i {
     color: rgb(202, 200, 200);
 }
@@ -71,9 +43,6 @@ i {
     font-weight: 500;
 }
 
-.table th {
-    background-color: rgb(250, 226, 206);
-}
 
 .table {
     background-color: rgb(251, 244, 238);
@@ -81,27 +50,9 @@ i {
     width: 100%;
 }
 
-.table-container {
-    width: 45%;
-    min-width: 18rem;
-    max-width: 35rem;
-}
-
-.pagination .page-link {
-    padding: 5px !important;
-}
-
-.pagination .numbers {
-    padding: 5px 15px !important;
-}
-
 
 .companies-data {
     width: 100%;
-}
-
-.white {
-    color: white;
 }
 
 .table td, .table th {
@@ -116,290 +67,11 @@ i {
     display: flex;
 }
 
-.form-check-input:hover {
-    cursor: pointer;
-}
-
-
-.border th {
-    border: 1px solid white;
-}
-
-
-.types-td-btn {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: relative;
-}
-
-.types-td i {
-    color: rgb(61, 59, 59);
-    position: absolute;
-    right: 10px;
-}
-
-
-.content-div {
-    background-color: rgb(255, 255, 255);
-    transition: transform 5s;
-    position: relative;
-    bottom: 10px;
-    border-radius: 10px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-    .content-div li {
-        width: 70% !important;
-    }
-
-
-#notif-form {
-    background-color: rgb(230, 240, 251);
-    padding: 15px;
-    border-radius: 10px;
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 1rem;
-}
-
-    #notif-form input {
-        align-self: start
-    }
-
-.col-12 {
-    background-color: white;
-}
-
-.col-xl-6 {
-    width: 100%;
-}
-
 td {
     padding: 5px 0;
 }
 
-.company-types, .company-categories, .company-send-list {
-    background-color: white;
-    list-style-type: none;
-    border-radius: 10px;
-    overflow-y: scroll;
-    padding: 10px 15px;
-    height: 12rem;
-}
-
-.submit {
-    margin: 0 auto;
-    width: 12rem;
-    border-radius: 10px;
-}
-
-.previous-notifs-group {
-    background-color: rgb(181, 179, 179);
-    width: 90%;
-    min-width: 21rem;
-    border-radius: 10px;
-    padding: 10px 15px;
-}
-
-.prev-notif-message {
-    background-color: rgb(240, 237, 237);
-    border-radius: 10px;
-    padding: 5px;
-}
-
-.prev-notif {
-    overflow-y: scroll;
-    height: 28rem;
-    background-color: rgb(202, 200, 200);
-    padding: 10px;
-    border-radius: 15px;
-}
-
-.category {
-    font-size: 1.1rem;
-    padding: 10px;
-    border-radius: 10px;
-}
-
-.rotate {
-    transform: rotateZ(180deg);
-}
-
-
-
-.ql-toolbar {
-    background-color: rgb(245, 234, 204);
-    width: 100%;
-}
-
-.ql-editor {
-    background-color: white;
-    min-height: 10rem;
-    width: 100%;
-}
-
-.tabs-content {
-    position: relative;
-    width: 50%;
-    min-width: 23rem;
-    max-width: 70rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    border-radius: 10px;
-    background-color: rgb(230, 240, 251);
-    border: solid 1px black;
-}
-
-.tab1-btn, .tab2-btn {
-    position: absolute;
-    top: -36px;
-    background-color: aliceblue;
-    color: black;
-    border: none;
-    border-radius: 10px 10px 0 0;
-    padding: 6px;
-    font-family: Arial, Helvetica, sans-serif;
-    font-weight: bold;
-}
-
-.tab1-btn {
-    left: 8px
-}
-
-.tab2-btn {
-    left: 164px;
-}
-
-.active-tab, .active-page {
-    background-color: rgb(70, 112, 252) !important;
-    color: white;
-    display: default;
-}
-
-.active-tab {
-    height: 5rem;
-}
-
-.editable {
-    border: solid black 1px !important;
-    background-color: rgb(255, 253, 253) !important;
-    align-self: center !important;
-}
-
-.hidden {
-    display: none !important;
-}
-
-/*.dropdown .dropdown-list {
-    display: none !important;
-}
-
-.dropdown:hover .dropdown-list {
-    display: block !important;
-}*/
-
-.input-category-div {
-    display: flex;
-    justify-content: space-between;
-    align-content: center;
-}
-
-.category-input {
-    width: 75%;
-    border-radius: 10px;
-    padding: 2px;
-}
-
-.notifications-group {
-    width: 90%;
-    min-width: 21rem;
-}
-
-.notif-title {
-    margin-bottom: 70px;
-}
-
-.modal-header {
-    text-align: center;
-}
-
-.mini-modal-body1 li, .mini-modal-body2 li {
-    list-style: none;
-    margin-bottom: 2px;
-}
-
-.mini-modal-body1, .mini-modal-body2 {
-    overflow-y: scroll;
-    height: 15rem;
-}
-
-.mini-modal-body1 {
-    background-color: antiquewhite;
-    padding: 10px;
-    border-radius: 10px;
-}
-
-.mini-modal-body2 {
-    background-color: rgb(222, 234, 249);
-    padding: 10px;
-    border-radius: 10px;
-}
-
-.delete-modal {
-    font-family: Arial, Helvetica, sans-serif;
-    position: absolute;
-    top: 25%;
-    left: 25%;
-    background-color: white;
-    border-radius: 10px;
-    box-shadow: 10px 10px 1000px 100px #888888;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.gray-out {
-    background-color: #888888;
-    width: 100%;
-    height: 100%;
-    overflow: scroll;
-    z-index: 100;
-}
-
-.edit-link {
-    background-color: white !important;
-    border: .1px solid black;
-    border-radius: 3px;
-    padding: 4px 8px !important;
-}
-
-.link-icon-book {
-    color: rgb(62, 118, 240)
-}
-
-.link-icon-building {
-    color: #888888;
-}
-
-.link-icon-case {
-    color: rgb(100, 145, 100);
-}
-
-
-
-@media (max-width: 900px) {
-
-    .grid {
-        grid-template-columns: 1fr;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
+@media (max-width: 1050px) {
 
     .panel {
         width: 90%;
@@ -414,72 +86,4 @@ td {
     .home-panel {
         background-color: white;
     }
-
-    .contacts-table, .contacts-table thead, .contacts-table tbody, .contacts-table th, .contacts-table td, .contacts-table tr {
-        display: block;
-    }
-
-        /* Hide table headers (but not display: none;, for accessibility) */
-        .contacts-table th, .contacts-table .header-rows {
-            display: none;
-        }
-
-        .contacts-table tr {
-            border: 1px solid rgb(31, 30, 30);
-            padding: 5px;
-            border-radius: 10px;
-            width: 100%;
-            max-width: 30rem;
-            margin-bottom: 15px;
-        }
-
-        .contacts-table td {
-            /* Behave  like a "row" */
-            border: none;
-            border-bottom: 1px solid #ccc;
-            position: relative;
-            padding-left: 50%;
-            width: 100%;
-        }
-
-            .contacts-table td:before {
-                /* Now like a table header */
-                position: absolute;
-                top: 6px;
-                left: -65px;
-                width: 100%;
-                height: 0px;
-                padding-right: 10px;
-            }
-
-            /*
-Label the data
-*/
-            .contacts-table td:nth-of-type(1):before {
-                content: "First Name";
-                font-weight: bold;
-            }
-
-            .contacts-table td:nth-of-type(2):before {
-                content: "Last Name";
-                font-weight: bold;
-            }
-
-            .contacts-table td:nth-of-type(3):before {
-                content: "Email";
-                font-weight: bold;
-            }
-
-            .contacts-table td:nth-of-type(4):before {
-                content: "Phone Number";
-                font-weight: bold;
-            }
 }
-
-@media (max-width: 450px) {
-
-    .companies-data tbody tr th, .companies-data tbody tr td {
-        font-size: .8rem;
-    }
-}
-

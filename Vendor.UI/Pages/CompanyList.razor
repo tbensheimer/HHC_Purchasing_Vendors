@@ -72,8 +72,9 @@
                 {
                     @if (!company.Is_Deleted)
                     {
+
                         <tr>
-                            <td><button class="btn" style="border:none; background-color: transparent !important;  @(company.Disabled_From_Notifications == true ? "color:#9b9999;" : "") background-color: #f9fafb;" id="company">@company.Name</button></td>
+                            <td><div><button class="btn" style="border:none; background-color: transparent !important;  @(company.Disabled_From_Notifications == true ? "color:#9b9999;" : "") background-color: #f9fafb;" id="company">@company.Name</button></div></td>
 
                             @if (company.Disabled_From_Notifications)
                             {
@@ -100,10 +101,10 @@
                                         Actions
                                     </button>
                                     <ul class="dropdown-menu">
-                                        <li><a class="dropdown-item text-secondary fw-bold" href="/edit/companyinfo/@company.Id"><i class="fa-solid fa-circle-info"></i> Information</a></li>
-                                        <li><a class="dropdown-item text-primary fw-bold" href="/edit/company-contacts/@company.Id"><i class="fa-solid fa-address-book"></i> Contacts</a></li>
-                                        <li><a class="dropdown-item text-success fw-bold" href="/edit/company-types-and-categories/@company.Id"><i class="fa-solid fa-briefcase"></i> Types/Categories</a></li>
-                                        <li class="mt-1 mb-1"><button @onclick="() => HandleCompanyDelete(company.Id)" id="trash" style="height: auto; margin: 5px 0;" class="dropdown-item text-danger"><i class="fa-solid fa-trash-can"></i> Remove</button></li>
+                                        <li><a class="dropdown-item text-secondary fw-bold" href="/edit/companyinfo/@company.Id"><span><i style="color: #6c757d" class="fa-solid fa-circle-info"></i></span> Information</a></li>
+                                        <li><a class="dropdown-item text-primary fw-bold" href="/edit/company-contacts/@company.Id"><span><i style="color: #0b5ed7;" class="fa-solid fa-address-book"></i></span> Contacts</a></li>
+                                        <li><a class="dropdown-item text-success fw-bold" href="/edit/company-types-and-categories/@company.Id"><span><i style="color: #198754;" class="fa-solid fa-briefcase"></i></span> Types/Categories</a></li>
+                                        <li class="mt-1 mb-1"><button @onclick="() => HandleCompanyDelete(company.Id)" id="trash" style="height: auto; margin: 5px 0;" class="dropdown-item text-danger fw-bold"><span><i style="color: #dc3545;" class="fa-solid fa-trash-can"></i></span> Remove</button></li>
                                     </ul>
                                 </div>
 
@@ -193,14 +194,7 @@
             DataTablePresent = true;
             await JS.InvokeAsync<string>("DataTablesAdd", "#table");
         }
-        //else if (DataTablePresent && Companies is not null)
-        //{
-        //    DataTablePresent = false;
-        //    await JS.InvokeAsync<IJSObjectReference>("DataTablesRemove", "#table");
-        //}
-
-
-
+      
     }
 
 
@@ -288,6 +282,7 @@
                 await LoadData();
 
                 SuccessRemoveMessage = "Company successfully removed!";
+
 
             }
         }

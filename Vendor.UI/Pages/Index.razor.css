@@ -1,8 +1,4 @@
-﻿namespace Vendor.UI.Pages
-{
-}
-
-.main {
+﻿.main {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -15,20 +11,8 @@
     grid-gap: 30px;
 }
 
-.white-background {
-    background-color: white !important;
-}
-
 .todo {
     color: rgb(90, 89, 89);
-}
-
-.send-radio-div {
-    font-size: 0.8rem;
-}
-
-#number-days {
-    width: 3rem;
 }
 
 .panel {

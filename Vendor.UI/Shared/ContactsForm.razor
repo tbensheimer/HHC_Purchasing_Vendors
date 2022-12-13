@@ -86,7 +86,9 @@
                 <td>
                     <label for="number" hidden>Phone Number</label>
                     <input @bind-value="@Number" id="number" pattern="[0-9]{10}" max="10" type="text" name="contacts-phone-number" class="form-control" placeholder=" Phone Number" />                </td>
-                <td></td>
+                <td>
+                    <button style="width: 60px;" type="button" @onclick="() => HandleContactAdd()" class="add-contact btn btn-primary btn-sm"><span><i alt="plus sign icon" class="fa-regular fa-plus"></i> Add</span></button>
+                </td>
             </tr>
 
         </tbody>
@@ -100,7 +102,6 @@
         <div class="alert alert-success">@SuccessMessage</div>
     }
 
-    <button type="button" @onclick="() => HandleContactAdd()" class="add-contact btn btn-primary btn-sm mb-4"><span><i alt="plus sign icon" class="fa-regular fa-plus"></i></span> Add Contact</button>
     <br />
     @if (IsEdit)
     {

@@ -174,12 +174,12 @@
     private List<Company> List { get; set; } = new List<Company>();
     public Company? Company { get; set; }
     [Parameter]
-    public int? CurrentPage { get; set; }
-    private const int ItemsPerPage = 10;
-    private double TotalPages { get; set; }
-    private string? FilterString { get; set; }
+    //public int? CurrentPage { get; set; }
+    //private const int ItemsPerPage = 10;
+    //private double TotalPages { get; set; }
+    //private string? FilterString { get; set; }
 
-    private string? SuccessMessage { get; set; }
+    public string? SuccessMessage { get; set; }
     private string? ErrorMessage { get; set; }
     private bool DataTablePresent { get; set; }
     private bool ShowDropdown = false;
@@ -196,7 +196,7 @@
     protected override async void OnAfterRender(bool firstRender)
     {
 
-        if (Companies is not null/* && !DataTablePresent*/)
+        if (Companies is not null && !DataTablePresent)
         {
             DataTablePresent = true;
             await JS.InvokeAsync<string>("DataTablesAddString");
@@ -295,7 +295,8 @@
                     .OrderBy(comp => comp.Name)
                     .ToArrayAsync();
 
-                    await LoadData();
+                    ErrorMessage = null;
+
                     SuccessMessage = "Company successfully removed!";
 
                 }

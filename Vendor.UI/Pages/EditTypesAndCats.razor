@@ -373,6 +373,12 @@
     {
         using var context = ContextFactory.CreateDbContext();
 
+        if (!CheckedCategories.Any())
+        {
+            ErrorMessage = "Need at least one category checked to save changes. Please try again. (Select Other if none of the categories apply)";
+            return;
+        }
+
 
         foreach (var cat in CurrentCompanyCategories)
         {

@@ -161,7 +161,7 @@
         if (Types is not null && !DataTablePresent)
         {
             DataTablePresent = true;
-            await JS.InvokeAsync<string>("DataTablesDraw");
+            await JS.InvokeAsync<string>("DataTablesAdd", "#type-table");
         }
     }
 

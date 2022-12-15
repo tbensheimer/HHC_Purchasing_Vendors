@@ -1,8 +1,12 @@
-﻿
+﻿@inject IJSRuntime JS
+@inject HttpClient Http
+
+
+
 <EditForm Model="@Address" class="mb-4" OnValidSubmit="() => HandleAddressComplete()">
     <DataAnnotationsValidator />
     <ValidationSummary />
-
+    <div id="container">
     <div class="company-address-group mb-1">
        
         <label for="company-address" class="fw-bold">Street Address</label>
@@ -79,12 +83,13 @@
         </InputSelect>
 
         <label for="company-postal" class="fw-bold" >Postal Code</label>
-        <InputNumber @bind-Value="@Address.Postal_Code" class="form-control zip mb-2" id="company-postal" name="postal-code" type="text" />
+        <InputNumber @oninput="(e) => zip = e.Value.ToString()" @onkeyup="() => GetData()"  @bind-Value="@Address.Postal_Code" class="form-control zip mb-2" id="company-postal" name="postal-code" type="text" />
 
         <label for="country" class="fw-bold">Country</label>
         <InputText @bind-Value="@Address.Country" class="form-control country mb-4" id="country" type="text" name="country" />
     </div>
 
+    <div class="label-error"></div>
     @if (IsEdit)
     {
         @if (SaveAddressSuccess is not null)
@@ -104,6 +109,7 @@
         <p>Note: Once you hit next, you won't be able to go back and edit information. You can log in to your account and make necessary edits after the registration is complete.</p>
 
     }
+    </div>
 </EditForm>
 
 @code {
@@ -122,12 +128,33 @@
     [Parameter]
     public string? SaveAddressError { get; set; }
 
+    private string? zip { get; set; }
+
     private async Task HandleAddressComplete()
     {
         if (OnSubmit.HasDelegate)
         {
             await OnSubmit.InvokeAsync(true);
         }
+    }
+
+
+    async Task GetData()
+    {
+        if (zip.Length == 5)
+        {
+            Console.WriteLine("true");
+            var response = await Http.GetAsync($"https://www.zipcodeapi.com/rest/26oC3XxqXizBt4moiGd0h4Kc4iRuFQDGLJKaZbGg5eaZDqwI1LYHVOygJtxniIRw/info.json/{zip}/degrees");
+            var data = await response.Content.ReadAsStringAsync();
+
+            Console.WriteLine(data);
+        }
+        else
+        {
+            Console.WriteLine("false");
+
+        }
+
     }
 
 }

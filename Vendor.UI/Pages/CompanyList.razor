@@ -49,11 +49,21 @@
 
     </div>*@
 
-        @if (SuccessRemoveMessage is not null)
+        <a href="/register" style="align-self: flex-start !important;" class="fw-bold btn btn-sm btn-primary mb-3">Add Company</a>
+
+        @if (SuccessMessage is not null)
         {
-            <div class="alert alert-success text-al">@SuccessRemoveMessage</div>
+            <div class="alert alert-success">@SuccessMessage</div>
+        }
+        @if(ErrorMessage is not null)
+        {
+            <div class="alert alert-danger">@ErrorMessage</div>
         }
 
+         <div class="row">
+            <div class="col-12">
+                <div class="card" style="box-shadow: 0px 0px 10px 4px rgb(230, 228, 228);">
+                    <div class="card-body">
 
         <table class="companies-data table border table table-responsive table-hover" id="table">
             <thead>
@@ -96,7 +106,7 @@
                             }
          
                             <td>
-                                <div class="dropdown">
+                                <div class="dropdown" id="dropdown">
                                     <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                                         Actions
                                     </button>
@@ -107,13 +117,18 @@
                                         <li class="mt-1 mb-1"><button @onclick="() => HandleCompanyDelete(company.Id)" id="trash" style="height: auto; margin: 5px 0;" class="dropdown-item text-danger fw-bold"><span><i style="color: #dc3545;" class="fa-solid fa-trash-can"></i></span> Remove</button></li>
                                     </ul>
                                 </div>
-
                             </td>
                         </tr>
                     }
                 }
             </tbody>
         </table>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
 
         @*<ul class="pagination mb-4 mt-4 justify-content-center">
     <li class="page-item  @(CurrentPage == 1 ? "disabled" : "")">
@@ -153,7 +168,7 @@
     //    {
     //        _db = db;
     //       }
-    //
+        //
 
     private Company[]? Companies { get; set; }
     private List<Company> List { get; set; } = new List<Company>();
@@ -164,21 +179,13 @@
     private double TotalPages { get; set; }
     private string? FilterString { get; set; }
 
-    private string? SuccessRemoveMessage { get; set; }
+    private string? SuccessMessage { get; set; }
+    private string? ErrorMessage { get; set; }
     private bool DataTablePresent { get; set; }
     private bool ShowDropdown = false;
     private string SelectedWord = "Edit";
 
 
-    protected override async Task OnInitializedAsync()
-    {
-        using var context = ContextFactory.CreateDbContext();
-
-        Companies = await context.Companies
-               .Where(comp => comp.Is_Deleted != true)
-           .OrderBy(comp => comp.Name)
-           .ToArrayAsync();
-    }
 
     protected override async Task OnParametersSetAsync()
     {
@@ -189,12 +196,13 @@
     protected override async void OnAfterRender(bool firstRender)
     {
 
-        if (Companies is not null && !DataTablePresent)
+        if (Companies is not null/* && !DataTablePresent*/)
         {
             DataTablePresent = true;
-            await JS.InvokeAsync<string>("DataTablesAdd", "#table");
+            await JS.InvokeAsync<string>("DataTablesAddString");
+
         }
-      
+
     }
 
 
@@ -236,7 +244,8 @@
     .OrderBy(comp => comp.Name)
     .ToArrayAsync();
 
-        SuccessRemoveMessage = null;
+        SuccessMessage = null;
+
     }
 
     //private async Task TextFilterKeyUp(KeyboardEventArgs e)
@@ -266,23 +275,34 @@
     {
 
         using var context = ContextFactory.CreateDbContext();
-        Company = await context.Companies.FirstOrDefaultAsync(comp => comp.Id == Id);
+        var dbCompany = await context.Companies.FirstOrDefaultAsync(comp => comp.Id == Id);
 
-        if (Company is not null)
+        if (dbCompany is not null)
         {
-            var isOk = await JS.InvokeAsync<bool>("confirm", $"Are you sure you want to delete Company {Company.Name}?");
+            var isOk = await JS.InvokeAsync<bool>("confirm", $"Are you sure you want to delete Company {dbCompany.Name}?");
 
             if (isOk)
             {
-                Company.Is_Deleted = true;
-                //context.Remove(Company);
-                context.Update(Company);
-                await context.SaveChangesAsync();
-                //await Dispose();
-                await LoadData();
+                try
+                {
+                    dbCompany.Is_Deleted = true;
+                    // context.Remove(Company);
+                    context.Companies.Update(dbCompany);
+                    await context.SaveChangesAsync();
 
-                SuccessRemoveMessage = "Company successfully removed!";
+                    Companies = await context.Companies
+                    .Where(comp => comp.Is_Deleted != true)
+                    .OrderBy(comp => comp.Name)
+                    .ToArrayAsync();
 
+                    await LoadData();
+                    SuccessMessage = "Company successfully removed!";
+
+                }
+                catch{
+                    await LoadData();
+                    ErrorMessage = "There was an error while removing Company. Please try again";
+                }
 
             }
         }
@@ -306,19 +326,6 @@
             context.Update(Company);
             await context.SaveChangesAsync();
         }
-        await LoadData();
-
-    }
-
-    //private async Task Dispose()
-    //{
-    //    DataTablePresent = false;
-    //    await JS.InvokeAsync<IJSObjectReference>("DataTablesRemove", "#table");
-    //}
-
-    private async Task HandleDropdown(int Id)
-    {
-        await JS.InvokeAsync<IJSObjectReference>("ToggleDropdown", Id);
 
     }
 

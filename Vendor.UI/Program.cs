@@ -13,6 +13,7 @@ builder.Services.AddDbContextFactory<VendorDataDbContext>(
     opt => opt.UseSqlServer(builder.Configuration.GetConnectionString("VendorsDb"),
     optionsBuilder => optionsBuilder.MigrationsAssembly("Vendor.UI")));
 builder.Services.AddScoped<StateContainer>();
+builder.Services.AddHttpClient();
 
 var app = builder.Build();
  

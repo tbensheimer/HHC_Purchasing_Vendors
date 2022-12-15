@@ -6,75 +6,91 @@
 
 
 <main class="main">
-@if (Type is not null)
-{
-    <h3 class="mb-4">Categories for Type: <strong>@Type.Type_Name</strong></h3>
-}
+    @if (Type is not null)
+    {
+        <h3 class="mb-4">Categories for Type: <strong>@Type.Type_Name</strong></h3>
+    }
 
 
-@if(CatList is not null)
-{
-        <div class="mb-2 justify-content-end">
-            <input type="text" @onkeyup="@TextFilterKeyUp" @bind-value="@FilterString" placeholder="Filter Categories..." />
-            <button class="btn btn-sm btn-secondary" @onclick="ButtonFilterClick">Filter</button>
+    @if (CatList is not null)
+    {
+        @*  <div class="mb-2 justify-content-end">
+    <input type="text" @onkeyup="@TextFilterKeyUp" @bind-value="@FilterString" placeholder="Filter Categories..." />
+    <button class="btn btn-sm btn-secondary" @onclick="ButtonFilterClick">Filter</button>
+    </div>*@
+
+        <div style="box-shadow: 0px 0px 10px 4px rgb(230, 228, 228);" class="card w-50 mb-3">
+            <div class="card-body">
+                <h5 class="card-title fw-bold mb-2">Add a Category</h5>
+                <EditForm Model="@BCat">
+                    <label for="input-cat" hidden>Add Category</label>
+                    <InputText style="box-shadow: 0px 0px 1px 1px rgb(230, 228, 228);" @bind-Value="@InputCat" id="input-cat" type="text" name="input-cat" class="form-control mb-3" placeholder=" Add a Category" />
+                </EditForm>
+                <button @onclick="() => HandleCatAdd()" type="button" class="fw-bold btn btn-primary btn-sm">Add Category</button>
+            </div>
         </div>
 
-    <table class="table table-hover">
-        <thead>
-            <tr>
-            <th>Category</th>
-            <th>#</th>
-            </tr>
-        </thead>
-        <tbody>
+        @if (SuccessMessage is not null)
+        {
+            <div class="alert alert-success">@SuccessMessage</div>
+        }
 
-            @foreach(var cat in CatList)
-            {
-                <tr>
-                    <td>
-                        <label for="@cat.Id" hidden>@cat.Category_Name</label>
-                        <input style="box-shadow: 0px 0px 2px 2px rgb(230, 228, 228);" type="text" class="form-control" name="@cat.Category_Name" @bind-value="@cat.Category_Name" id="@cat.Id" />
-                    </td>
-                    <td>
-                        <button style="background-color: rgb(172, 84, 84) !important" @onclick="() => HandleCatRemove(cat.Id)" class="fw-bold btn btn-danger btn-sm">Remove Category</button>
-                    </td>
-                </tr>
-            }
+        @if (ErrorMessage is not null)
+        {
+            <div class="alert alert-danger">@ErrorMessage</div>
+        }
 
-            <tr class="input-row">
-                <td>
-                    <EditForm Model="@BCat">
-                        <label for="input-cat" hidden>Add Category</label>
-                        <InputText style="box-shadow: 0px 0px 2px 2px rgb(230, 228, 228);" @bind-Value="@InputCat" id="input-cat" type="text" name="input-cat" class="form-control" placeholder=" Add a Category" />
-                    </EditForm>
+        <div class="row">
+            <div class="col-12">
+                <div class="card" style="box-shadow: 0px 0px 10px 4px rgb(230, 228, 228);">
+                    <div class="card-body">
 
-                </td>
-                <td><button @onclick="() => HandleCatAdd()" type="button" class="fw-bold btn btn-primary btn-sm">Add Type</button></td>
-            </tr>
+                        <table id="category-table" class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Category</th>
+                                    <th>#</th>
+                                </tr>
+                            </thead>
+                            <tbody>
 
-        </tbody>
-    </table>
+                                @foreach (var cat in CatList)
+                                {
+                                    <tr>
+                                        <td>
+                                            <label for="@cat.Id" hidden>@cat.Category_Name</label>
+                                            <input type="text" class="form-control" name="@cat.Category_Name" @bind-value="@cat.Category_Name" id="@cat.Id" />
+                                        </td>
+                                        <td>
+                                            <button style="width: 146px; border: none !imporant;" @onclick="() => HandleCatRemove(cat.Id)" class="fw-bold btn btn-danger btn-sm">Remove Category</button>
+                                        </td>
+                                    </tr>
+                                }
 
-    @if(SuccessMessage is not null)
+                            </tbody>
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <button style="align-self: flex-start; background-color: #0acf97; border-color: #0acf97" @onclick="() => HandleCategorySave()" type="button" class="btn btn-success btn-sm fw-bold mt-3">Save Changes</button>
+    }
+    else
     {
-        <div class="alert alert-success">@SuccessMessage</div>
+        <div>Loading...</div>
     }
 
-    @if(ErrorMessage is not null)
-    {
-        <div class="alert alert-danger">@ErrorMessage</div>
-    }
-    <button style="align-self: flex-start !important;" @onclick="() => HandleCategorySave()" type="button" class="btn btn-success btn-sm fw-bold mb-4">Save Changes</button>
-}
-
-   <div class="panel type-cat-panel">
-    <div class="layout">
-      <h2 class="notif-header fs-4 fw-bold title">Vendor Types</h2>
-      <p class="notif-description desc">Manage vendor types that companies can subscribe to</p>
-      </div>
-      <span class="briefcase"><i alt="briefcase icon" class="fa-solid fa-briefcase fa-2x"></i></span>
+    <div class="panel type-cat-panel">
+        <div class="layout">
+            <h2 class="notif-header fs-4 fw-bold title">Vendor Types</h2>
+            <p class="notif-description desc">Manage vendor types that companies can subscribe to</p>
+        </div>
+        <span class="briefcase"><i alt="briefcase icon" class="fa-solid fa-briefcase fa-2x"></i></span>
         <a @onclick="@HandleNavigationTypeList" class="stretched-link"></a>
-        </div>
+    </div>
 
     <div class="panel home-panel mb-4 mt-4">
         <div class="layout">
@@ -107,10 +123,22 @@
 
     private string? FilterString { get; set; }
 
+    private bool DataTablePresent { get; set; }
+
+
+    protected override async void OnAfterRender(bool firstRender)
+    {
+
+        if (CatList is not null && !DataTablePresent)
+        {
+            DataTablePresent = true;
+            await JS.InvokeAsync<string>("DataTablesAdd", "#category-table");
+        }
+    }
 
     protected override async Task OnParametersSetAsync()
     {
-        await LoadData();   
+        await LoadData();
     }
 
     private async Task LoadData()
@@ -118,9 +146,9 @@
         using var context = ContextFactory.CreateDbContext();
 
 
-        IQueryable<Business_Categories> CatQuery = context.Business_Categories;
-        CatQuery = AddFilter(CatQuery);
-        CatList = await CatQuery
+        //IQueryable<Business_Categories> CatQuery = context.Business_Categories;
+        //CatQuery = AddFilter(CatQuery);
+        CatList = await context.Business_Categories
         .Where(cat => cat.Type_Id == TypeId)
         .ToArrayAsync();
 
@@ -150,7 +178,8 @@
                     await LoadData();
                     SuccessMessage = "Category successfully removed!";
                 }
-                catch {
+                catch
+                {
                     await LoadData();
                     ErrorMessage = "There was an error while deleting category. Please try again.";
                 }
@@ -175,7 +204,8 @@
                 InputCat = null;
                 SuccessMessage = "Category successfully added!";
             }
-            catch{
+            catch
+            {
                 await LoadData();
                 ErrorMessage = "There was an error in adding a Category. Please try again.";
             }
@@ -200,37 +230,38 @@
                         await LoadData();
                         SuccessMessage = "Category changes saved successfully!";
                     }
-                    catch{
+                    catch
+                    {
                         await LoadData();
                         ErrorMessage = "There was an error while saving category changes. Please try again.";
                     }
+                }
             }
-            }
         }
 
     }
 
-     private IQueryable<Business_Categories> AddFilter(IQueryable<Business_Categories> catQuery)
-    {
-        if (!string.IsNullOrWhiteSpace(FilterString))
-        {
-            return catQuery.Where(cat => cat.Category_Name != null && cat.Category_Name.Contains(this.FilterString));
-        }
-        return catQuery;
-    }
+    // private IQueryable<Business_Categories> AddFilter(IQueryable<Business_Categories> catQuery)
+    //{
+    //    if (!string.IsNullOrWhiteSpace(FilterString))
+    //    {
+    //        return catQuery.Where(cat => cat.Category_Name != null && cat.Category_Name.Contains(this.FilterString));
+    //    }
+    //    return catQuery;
+    //}
 
-    private async Task TextFilterKeyUp(KeyboardEventArgs e)
-    {
-        if (e.Key == "Enter")
-        {
-            await LoadData();
-        }
-    }
+    //private async Task TextFilterKeyUp(KeyboardEventArgs e)
+    //{
+    //    if (e.Key == "Enter")
+    //    {
+    //        await LoadData();
+    //    }
+    //}
 
-    private async Task ButtonFilterClick()
-    {
-        await LoadData();
-    }
+    //private async Task ButtonFilterClick()
+    //{
+    //    await LoadData();
+    //}
 
 
     private void HandleNavigationTypeList()

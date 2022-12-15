@@ -44,8 +44,8 @@ i {
 
 
 table th {
-    background-color: rgb(250, 226, 206) !important;
-    border: 1px solid white !important;
+/*    background-color: rgb(250, 226, 206) !important;
+*/    border: 1px solid white !important;
     border-bottom: 1px solid black !important;
     padding: 4px !important;
 }

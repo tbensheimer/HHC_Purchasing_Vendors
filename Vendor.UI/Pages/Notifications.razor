@@ -494,7 +494,7 @@
             foreach (var file in files)
             {
 
-                //MemoryStream ms = new MemoryStream();
+                using var ms = new MemoryStream();
 
                 using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
                 while (await stream.ReadAsync(buffer) is int read && read > 0)
@@ -503,23 +503,22 @@
                     // TODO Do something with the file chunk, such as save it
                     // to a database or a local file system
 
-                    //file.OpenReadStream().CopyTo(ms);
-                    //var fileBytes = ms.ToArray();
-
-                    //Attachment fileAttch = new Attachment(new MemoryStream(fileBytes), file.ContentType);
-                    //message.Attachments.Add(fileAttch);
-
-
                     //
                     var readData = buffer.AsMemory().Slice(0, read);
+                    await ms.WriteAsync(readData);
                 }
+                var attachment = new Attachment(ms, file.ContentType);
 
+              
+
+                message.Attachments.Add(attachment);
                 startIndex++;
             }
         }
         finally
         {
             System.Buffers.ArrayPool<byte>.Shared.Return(buffer);
+            //timer.Dispose();
 
             // Update the UI with the final progress
             StateHasChanged();
@@ -775,7 +774,7 @@
             try
             {
                 var sClient = new SmtpClient("SMTP.HHCORP.ORG");
-           //     var message = new MailMessage();
+              //  var message = new MailMessage();
 
                 sClient.Port = 25;
                 sClient.UseDefaultCredentials = false;
@@ -806,15 +805,15 @@
 
 
 
-                //foreach (var file in filesList)
-                //{
-                //    var content = new MemoryStream();
-                //    await using FileStream fs = new (content, FileAccess.Read);
-                //    await file.OpenReadStream().CopyToAsync(fs);
+                foreach (var file in filesList)
+                {
+
+                    var attachment = new Attachment(file.OpenReadStream(), file.ContentType);
+
+                    message.Attachments.Add(attachment);
 
                     
-                    
-                //}
+                }
 
               
 

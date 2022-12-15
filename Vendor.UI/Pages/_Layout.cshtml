@@ -12,10 +12,10 @@
     <link href="css/site.css" rel="stylesheet" />
     <link href="Vendor.UI.styles.css" rel="stylesheet" />
 
-   <component type="typeof(HeadOutlet)" render-mode="ServerPrerendered" />
+    <component type="typeof(HeadOutlet)" render-mode="ServerPrerendered" />
     <link href="//cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
 
-  <script src="https://kit.fontawesome.com/21a81ba6b6.js" crossorigin="anonymous"></script>
+    <script src="https://kit.fontawesome.com/21a81ba6b6.js" crossorigin="anonymous"></script>
     <link href="//cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     <link href="//cdn.quilljs.com/1.3.6/quill.bubble.css" rel="stylesheet">
     <link rel="stylesheet" href="_content/Radzen.Blazor/css/material-base.css">
@@ -39,7 +39,7 @@
 
     <script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
-  <script src="_framework/blazor.server.js"></script>
+    <script src="_framework/blazor.server.js"></script>
     <script src="scripts/blazorInterop.js"></script>
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
     <script src="_content/Blazored.TextEditor/quill-blot-formatter.min.js"></script>
@@ -51,13 +51,64 @@
 
     <script>
 
+        //function GetAddressFromZip(zip) {
+        //    if (zip.length == 5) {
+        //        const city = document.querySelector("#company-city");
+        //        const state = document.querySelector("#state");
+        //        const country = document.querySelector("#country");
+
+        //        console.log(true)
+        //            var clientKey = "26oC3XxqXizBt4moiGd0h4Kc4iRuFQDGLJKaZbGg5eaZDqwI1LYHVOygJtxniIRw";
+        //            var url = "https://www.zipcodeapi.com/rest/" + clientKey + "/info.json/" + zip + "/degrees";
+
+        //            fetch(url, {
+        //                mode: "no-cors",
+        //                method: "get"
+        //            })
+        //            .then(response => response.json())
+        //            .then(data => {
+        //                console.log(data)
+        //            })
+
+        //    } else {
+        //        console.log(false)
+        //    }
+        //}
+
+        function DataTablesDraw() {
+            $(function () {
+                setTimeout(() => {
+                    $("#table").DataTable().draw()
+                }, 500)
+            })
+        }
+
         function DataTablesAdd(table) {
             $(function () {
                 $(table).DataTable().destroy();
             })
-         
-            $(function() {
+
+            $(function () {
                 $(table).DataTable();
+
+            });
+        }
+
+        function DataTablesAddString() {
+            $(function () {
+                $("#table").DataTable().destroy();
+            })
+
+            $(function () {
+                $('#table').DataTable({
+                    stateSave: true
+                });
+
+                const table = $("#table").DataTable();
+
+                setTimeout(() => {
+                    table.draw()
+                }, 1000)
             });
         }
 
@@ -67,23 +118,26 @@
                 $(table).DataTable().destroy();
             })
 
-           
-                $(function () {
-                    $(table).DataTable({
-                        "order": [[3, 'desc']]
-                    });
+
+            $(function () {
+                $(table).DataTable({
+                    "order": [[3, 'desc']]
                 });
+            });
 
         }
 
         function DataTablesRemove(table) {
-     
-         //   setTimeout(() => {
-            $(function() {
+
+            $(function () {
                 $(table).DataTable().destroy();
             })
-          //  }, 200);
-           
+
+        }
+
+        function RemoveDropdown(id) {
+            let dropdown = document.getElementById(id);
+            return dropdown.parentNode.removeChild(dropdown);
         }
 
     </script>

@@ -20,8 +20,7 @@ namespace Vendor.Data.Models
         [Required]
         public string? State { get; set; } = default!;
         [Required]
-        //[RegularExpression(@"^[0-9]{5}$|^[0-9]{5}-?[0-9]{4}$", ErrorMessage = "Invalid Postal Code Format. Format: XXXXX or XXXXXXXXX")]
-        //[RegularExpression(@"^((\d{5}-\d{4})|(\d{5})|([A-Z]\d[A-Z]\s\d[A-Z]\d))$", ErrorMessage = "Invalid Postal Code. Format: XXXXX, XXX, XXX XXX")]
+        [RegularExpression(@"^((\d{5}-\d{4})|(\d{5})|([A-Z]\d[A-Z]\s\d[A-Z]\d))$", ErrorMessage = "Invalid Postal Code. Format: XXXXX, XXXXX-XXXX, AXA XAX (Where A is upperCase alphabetic character and X is a numeric digit)")]
         public string? Postal_Code { get; set; }
         [Required]
         [StringLength(350)]

@@ -24,7 +24,5 @@ namespace Vendor.Data.Models
 
         public bool Contact_Deleted { get; set; }
 
-        public static List<Authorized_Contacts> Contact = new();
-
     }
 }

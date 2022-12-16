@@ -1,6 +1,43 @@
 ﻿@inject IJSRuntime JS
-@inject HttpClient Http
+@inject HttpClient httpClient
 
+@*<form id="address-form" action="" method="get" autocomplete="off">
+    <p class="title">Sample address form for North America</p>
+    <p class="note"><em>* = required field</em></p>
+    <label class="full-field">
+        <!-- Avoid the word "address" in id, name, or label text to avoid browser autofill from conflicting with Place Autocomplete. Star or comment bug https://crbug.com/587466 to request Chromium to honor autocomplete="off" attribute. -->
+        <span class="form-label">Deliver to*</span>
+        <input id="ship-address"
+               name="ship-address"
+               required
+               autocomplete="off" />
+    </label>
+    <label class="full-field">
+        <span class="form-label">Apartment, unit, suite, or floor #</span>
+        <input id="address2" name="address2" />
+    </label>
+    <label class="full-field">
+        <span class="form-label">City*</span>
+        <input id="locality" name="locality" required />
+    </label>
+    <label class="slim-field-left">
+        <span class="form-label">State/Province*</span>
+        <input id="state" name="state" required />
+    </label>
+    <label class="slim-field-right" for="postal_code">
+        <span class="form-label">Postal code*</span>
+        <input id="postcode" name="postcode" required />
+    </label>
+    <label class="full-field">
+        <span class="form-label">Country/Region*</span>
+        <input id="country" name="country" required />
+    </label>
+    <button type="button" class="my-button">Save address</button>
+
+    <!-- Reset button provided for development testing convenience.
+    Not recommended for user-facing forms due to risk of mis-click when aiming for Submit button. -->
+    <input type="reset" value="Clear form" />
+</form>*@
 
 
 <EditForm Model="@Address" class="mb-4" OnValidSubmit="() => HandleAddressComplete()">
@@ -9,14 +46,14 @@
     <div id="container">
     <div class="company-address-group mb-1">
        
-        <label for="company-address" class="fw-bold">Street Address</label>
-        <InputText @bind-Value="@Address.Address_1" class="form-control address mb-2" id="company-address" name="address" type="text" />
+        <label for="company-location" class="fw-bold">Street Address</label>
+        <InputText autocomplete="off" @bind-Value="@Address.Address_1" class="form-control address mb-2" id="company-location" name="location" type="text" />
 
         <label for="company-address2" class="fw-bold">Address Line 2 (No PO Box)</label>
         <InputText @bind-Value="@Address.Address_2" class="form-control address2 mb-2" id="company-address2" name="address-line-2" type="text" />
 
         <label for="company-city" class="fw-bold">City</label>
-        <InputText @bind-Value="@Address.City" class="form-control city mb-2" id="company-city" name="city" type="text" />
+        <InputText @bind-Value="@Address.City" class="form-control city mb-2" id="locality" name="city" type="text" />
     </div>
 
     <div class="company-address-group mb-3">
@@ -83,7 +120,7 @@
         </InputSelect>
 
         <label for="company-postal" class="fw-bold" >Postal Code</label>
-        <InputNumber @oninput="(e) => zip = e.Value.ToString()" @onkeyup="() => GetData()"  @bind-Value="@Address.Postal_Code" class="form-control zip mb-2" id="company-postal" name="postal-code" type="text" />
+        <InputText @bind-Value="@Address.Postal_Code" class="form-control zip mb-2" id="company-postal" name="postal-code" type="text" />
 
         <label for="country" class="fw-bold">Country</label>
         <InputText @bind-Value="@Address.Country" class="form-control country mb-4" id="country" type="text" name="country" />
@@ -128,7 +165,14 @@
     [Parameter]
     public string? SaveAddressError { get; set; }
 
-    private string? zip { get; set; }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JS.InvokeVoidAsync("initAutocomplete");
+            StateHasChanged();
+        }    
+    }
 
     private async Task HandleAddressComplete()
     {
@@ -138,23 +182,5 @@
         }
     }
 
-
-    async Task GetData()
-    {
-        if (zip.Length == 5)
-        {
-            Console.WriteLine("true");
-            var response = await Http.GetAsync($"https://www.zipcodeapi.com/rest/26oC3XxqXizBt4moiGd0h4Kc4iRuFQDGLJKaZbGg5eaZDqwI1LYHVOygJtxniIRw/info.json/{zip}/degrees");
-            var data = await response.Content.ReadAsStringAsync();
-
-            Console.WriteLine(data);
-        }
-        else
-        {
-            Console.WriteLine("false");
-
-        }
-
-    }
 
 }

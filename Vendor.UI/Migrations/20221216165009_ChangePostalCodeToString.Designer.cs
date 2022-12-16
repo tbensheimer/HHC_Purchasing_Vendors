@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Vendor.Data.Models;
 
@@ -11,9 +12,10 @@ using Vendor.Data.Models;
 namespace Vendor.UI.Migrations
 {
     [DbContext(typeof(VendorDataDbContext))]
-    partial class VendorDataDbContextModelSnapshot : ModelSnapshot
+    [Migration("20221216165009_ChangePostalCodeToString")]
+    partial class ChangePostalCodeToString
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

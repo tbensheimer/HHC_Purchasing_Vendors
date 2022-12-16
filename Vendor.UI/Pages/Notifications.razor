@@ -12,6 +12,7 @@
 @using System.Globalization
 @using Meziantou.Framework
 
+
 <main class="main mt-4">
 
     @if (SendNotifs)
@@ -306,7 +307,7 @@
                                 </div>
                             </EditorContent>
                         </BlazoredTextEditor>
-
+                      
                         @foreach (var file in uploadedFiles)
                         {
                             <div>
@@ -457,87 +458,7 @@
 </main>
 
 @code {
-    List<FileUploadProgress> uploadedFiles = new();
-    IReadOnlyList<IBrowserFile>? filesList;
-    private List<IBrowserFile> loadedFiles = new();
 
-    MailMessage message = new MailMessage();
-
-
-
-    private async ValueTask LoadFiles(InputFileChangeEventArgs e)
-    {
-        var files = e.GetMultipleFiles(maximumFileCount: 100);
-        filesList = e.GetMultipleFiles(maximumFileCount: 100);
-
-
-        var startIndex = uploadedFiles.Count;
-
-        // Add all files to the UI
-        foreach (var file in files)
-        {
-            var progress = new FileUploadProgress(file.Name, file.Size);
-            uploadedFiles.Add(progress);
-        }
-
-
-
-        // We don't want to refresh the UI too frequently,
-        // So, we use a timer to update the UI every few hundred milliseconds
-        await using var timer = new Timer(_ => InvokeAsync(() => StateHasChanged()));
-        timer.Change(TimeSpan.FromMilliseconds(500), TimeSpan.FromMilliseconds(500));
-
-        // Upload files
-        byte[] buffer = System.Buffers.ArrayPool<byte>.Shared.Rent(4096);
-        try
-        {
-            foreach (var file in files)
-            {
-
-                using var ms = new MemoryStream();
-
-                using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
-                while (await stream.ReadAsync(buffer) is int read && read > 0)
-                {
-                    uploadedFiles[startIndex].UploadedBytes += read;
-                    // TODO Do something with the file chunk, such as save it
-                    // to a database or a local file system
-
-                    //
-                    var readData = buffer.AsMemory().Slice(0, read);
-                    await ms.WriteAsync(readData);
-                }
-                var attachment = new Attachment(ms, file.ContentType);
-
-              
-
-                message.Attachments.Add(attachment);
-                startIndex++;
-            }
-        }
-        finally
-        {
-            System.Buffers.ArrayPool<byte>.Shared.Return(buffer);
-            //timer.Dispose();
-
-            // Update the UI with the final progress
-            StateHasChanged();
-        }
-    }
-
-    // Use the Meziantou.Framework.ByteSize NuGet package.
-    // You could also use Humanizer
-    string FormatBytes(long value)
-    => ByteSize.FromBytes(value).ToString("fi2", CultureInfo.CurrentCulture);
-
-    record FileUploadProgress(string FileName, long Size)
-    {
-        public long UploadedBytes { get; set; }
-        public double UploadedPercentage => (double)UploadedBytes / (double)Size * 100d;
-    }
-
-
-    //
     private bool tab1 = true;
     private bool tab2 = false;
     private bool tab3 = false;
@@ -605,6 +526,254 @@
 
     private bool IsLoading { get; set; }
 
+    private MemoryStream fileContents { get; set; }
+
+    /////////////////////////////////////////////////////
+
+    List<FileUploadProgress> uploadedFiles = new();
+    private List<IBrowserFile> loadedFiles = new();
+
+    MailMessage message = new MailMessage();
+
+    StreamWriter writer { get; set; }
+
+
+
+    private async ValueTask LoadFiles(InputFileChangeEventArgs e)
+    {
+
+        var files = e.GetMultipleFiles(maximumFileCount: 100);
+
+        var startIndex = uploadedFiles.Count;
+
+        // Add all files to the UI
+        foreach (var file in files)
+        {
+            var progress = new FileUploadProgress(file.Name, file.Size);
+            uploadedFiles.Add(progress);
+        }
+
+        // We don't want to refresh the UI too frequently,
+        // So, we use a timer to update the UI every few hundred milliseconds
+        await using var timer = new Timer(_ => InvokeAsync(() => StateHasChanged()));
+        timer.Change(TimeSpan.FromMilliseconds(500), TimeSpan.FromMilliseconds(500));
+
+        // Upload files
+        byte[] buffer = System.Buffers.ArrayPool<byte>.Shared.Rent(4096);
+        try
+        {
+
+            foreach (var file in files)
+            {
+
+                //     using var ms = new MemoryStream();
+
+                using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
+                while (await stream.ReadAsync(buffer) is int read && read > 0)
+                {
+                    uploadedFiles[startIndex].UploadedBytes += read;
+                    // TODO Do something with the file chunk, such as save it
+                    // to a database or a local file system
+
+                    //
+                    var readData = buffer.AsMemory().Slice(0, read);
+                    //    await ms.WriteAsync(readData);
+
+                }
+
+                var fileByte = new byte[stream.Length];
+
+                fileContents = new MemoryStream(fileByte);
+                await stream.CopyToAsync(fileContents);
+
+                var bytebuffer = fileContents.ToArray();
+
+                var byteString = Convert.ToBase64String(bytebuffer);
+                var conversion = Convert.FromBase64String(byteString);
+
+                // writer = new StreamWriter(fileContents); 
+                //using var writer = new StreamWriter(fileContents);
+
+                //writer.WriteLine("Comma,Separated,Values,...");
+                //writer.Flush();
+
+                //writer.Flush();
+
+                fileContents.Position = 0;
+
+                message.Attachments.Add(new Attachment(fileContents, file.Name));
+
+                //fs.Close();
+                //fs.Dispose();
+                //binaryReader.Close();
+
+                startIndex++;
+            }
+
+
+
+
+
+        }
+        finally
+        {
+            System.Buffers.ArrayPool<byte>.Shared.Return(buffer);
+
+            //timer.Dispose();
+
+            // Update the UI with the final progress
+            StateHasChanged();
+        }
+    }
+
+    // Use the Meziantou.Framework.ByteSize NuGet package.
+    // You could also use Humanizer
+    string FormatBytes(long value)
+    => ByteSize.FromBytes(value).ToString("fi2", CultureInfo.CurrentCulture);
+
+    record FileUploadProgress(string FileName, long Size)
+    {
+        public long UploadedBytes { get; set; }
+        public double UploadedPercentage => (double)UploadedBytes / (double)Size * 100d;
+    }
+
+    //////////////////////////////////////////////////////////
+
+    private async void HandleNotifSubmit()
+    {
+        using var context = ContextFactory.CreateDbContext();
+
+        if (IsBusy)
+        {
+            return;
+        }
+        IsBusy = true;
+        IsBusyMessage = "Sending...";
+        SendNotifError = null;
+        SendNotifSuccess = null;
+
+        if (SelectedCompaniesCount == 0 || SelectedCompaniesCount is null)
+        {
+            IsBusy = false;
+            IsBusyMessage = null;
+            SendNotifError = "Please select at least one company to send the notification to.";
+            return;
+        }
+        if (Quill is not null)
+        {
+
+            try
+            {
+                var sClient = new SmtpClient("SMTP.HHCORP.ORG");
+              //  var message = new MailMessage();
+
+                sClient.Port = 25;
+                sClient.UseDefaultCredentials = false;
+
+                if (SubjectLine is null)
+                {
+                    SendNotifSuccess = null;
+                    SendNotifError = "Please provide a subject line.";
+                    return;
+                }
+                else
+                {
+                    SendNotifError = null;
+                    message.Subject = SubjectLine;
+                }
+
+
+                message.From = new MailAddress("test@hhcorp.org");
+                message.IsBodyHtml = true;
+
+                QuillContent = await this.Quill.GetHTML();
+
+                var bytes = Convert.FromBase64String($"{StateContainer.LogoImage}");
+                var contents = new MemoryStream(bytes);
+                Attachment companyLogo = new Attachment(contents, "Logo.png", "image/png");
+                companyLogo.ContentId = "logo";
+                message.Attachments.Add(companyLogo);
+
+                StateHasChanged();
+
+                foreach (var company in SelectedCompanies)
+                {
+                    
+                    var CompanyContacts = await context.Authorized_Contacts.Where(contact => contact.CompanyId == company.Id && !contact.Contact_Deleted).ToArrayAsync();
+
+                    foreach (var person in CompanyContacts)
+                    {
+                        if (person is not null)
+                        {
+                            EmailToPerson = $"{person.FirstName} {person.LastName},";
+                            StateHasChanged();
+
+
+                            message.To.Clear();            //So each email is sent to person one at a time: prevents other companies seeing their competitors
+                            message.To.Add(new MailAddress($"{person.Email}"));
+
+                        }
+                        var Template = QuillContent + "<img width='150' src='cid:logo'>";
+
+                        TemplateEmail = EmailToPerson + Template;
+                        message.Body = TemplateEmail;
+
+                        sClient.Send(message);
+                        TemplateEmail = "";
+
+
+                    }
+                    EmailToPerson = "";
+
+                }
+
+
+
+                Notif = new Data.Models.Notifications();
+                Notif.Title = SubjectLine;
+                Notif.Body = "To Recipients," + QuillContent + "<img width='150' src='logo.PNG' />";
+                Notif.Date_Sent = DateTime.Now;
+                Notif.Created_By = "test@hhcorp.org";
+
+
+                context.NotificationsList.Add(Notif);
+                await context.SaveChangesAsync();
+
+
+
+
+                foreach (var company in SelectedCompanies)
+                {
+                    RecipientObject = new Notification_Recipient();
+                    RecipientObject.NotificationsId = Notif.Id;
+                    RecipientObject.CompanyId = company.Id;
+                    RecipientObject.CompanyName = company.Name;
+                    context.Notification_Recipients.Add(RecipientObject);
+                    await context.SaveChangesAsync();
+                }
+                await LoadData();
+                SendNotifSuccess = "Sent Successfully!";
+
+            }
+            catch
+            {
+                SendNotifError = "There was an error while sending the notification. Please try again.";
+            }
+            finally
+            {
+                IsBusy = false;
+                IsBusyMessage = null;
+                StateHasChanged();
+            }
+
+        }
+
+    }
+
+
+
+
+    //////////////////////////////////////////////////////////
 
     protected override async Task OnInitializedAsync()
     {
@@ -748,148 +917,148 @@
     //    return alternateView;
     //}
 
-    private async void HandleNotifSubmit()
-    {
-        using var context = ContextFactory.CreateDbContext();
+    //private async void HandleNotifSubmit()
+    //{
+    //    using var context = ContextFactory.CreateDbContext();
 
-        if (IsBusy)
-        {
-            return;
-        }
-        IsBusy = true;
-        IsBusyMessage = "Sending...";
-        SendNotifError = null;
-        SendNotifSuccess = null;
+    //    if (IsBusy)
+    //    {
+    //        return;
+    //    }
+    //    IsBusy = true;
+    //    IsBusyMessage = "Sending...";
+    //    SendNotifError = null;
+    //    SendNotifSuccess = null;
 
-        if (SelectedCompaniesCount == 0 || SelectedCompaniesCount is null)
-        {
-            IsBusy = false;
-            IsBusyMessage = null;
-            SendNotifError = "Please select at least one company to send the notification to.";
-            return;
-        }
-        if (Quill is not null)
-        {
+    //    if (SelectedCompaniesCount == 0 || SelectedCompaniesCount is null)
+    //    {
+    //        IsBusy = false;
+    //        IsBusyMessage = null;
+    //        SendNotifError = "Please select at least one company to send the notification to.";
+    //        return;
+    //    }
+    //    if (Quill is not null)
+    //    {
 
-            try
-            {
-                var sClient = new SmtpClient("SMTP.HHCORP.ORG");
-              //  var message = new MailMessage();
+    //        try
+    //        {
+    //            var sClient = new SmtpClient("SMTP.HHCORP.ORG");
+    //          //  var message = new MailMessage();
 
-                sClient.Port = 25;
-                sClient.UseDefaultCredentials = false;
+    //            sClient.Port = 25;
+    //            sClient.UseDefaultCredentials = false;
 
-                if (SubjectLine is null)
-                {
-                    SendNotifSuccess = null;
-                    SendNotifError = "Please provide a subject line.";
-                    return;
-                }
-                else
-                {
-                    SendNotifError = null;
-                    message.Subject = SubjectLine;
-                }
-
-
-                message.From = new MailAddress("test@hhcorp.org");
-                message.IsBodyHtml = true;
-
-                QuillContent = await this.Quill.GetHTML();
-
-                var bytes = Convert.FromBase64String($"{StateContainer.LogoImage}");
-                var contents = new MemoryStream(bytes);
-                Attachment companyLogo = new Attachment(contents, "Logo.png", "image/png");
-                companyLogo.ContentId = "logo";
-                message.Attachments.Add(companyLogo);
+    //            if (SubjectLine is null)
+    //            {
+    //                SendNotifSuccess = null;
+    //                SendNotifError = "Please provide a subject line.";
+    //                return;
+    //            }
+    //            else
+    //            {
+    //                SendNotifError = null;
+    //                message.Subject = SubjectLine;
+    //            }
 
 
+    //            message.From = new MailAddress("test@hhcorp.org");
+    //            message.IsBodyHtml = true;
 
-                foreach (var file in filesList)
-                {
+    //            QuillContent = await this.Quill.GetHTML();
 
-                    var attachment = new Attachment(file.OpenReadStream(), file.ContentType);
+    //            var bytes = Convert.FromBase64String($"{StateContainer.LogoImage}");
+    //            var contents = new MemoryStream(bytes);
+    //            Attachment companyLogo = new Attachment(contents, "Logo.png", "image/png");
+    //            companyLogo.ContentId = "logo";
+    //            message.Attachments.Add(companyLogo);
 
-                    message.Attachments.Add(attachment);
+
+
+    //            foreach (var file in filesList)
+    //            {
+
+    //                var attachment = new Attachment(file.OpenReadStream(), file.ContentType);
+
+    //                message.Attachments.Add(attachment);
 
                     
-                }
+    //            }
 
               
 
-                var Template = QuillContent + "<img width='150' src='cid:logo'>";
+    //            var Template = QuillContent + "<img width='150' src='cid:logo'>";
 
-                StateHasChanged();
+    //            StateHasChanged();
 
-                foreach (var company in SelectedCompanies)
-                {
+    //            foreach (var company in SelectedCompanies)
+    //            {
 
-                    var CompanyContacts = await context.Authorized_Contacts.Where(contact => contact.CompanyId == company.Id && !contact.Contact_Deleted).ToArrayAsync();
+    //                var CompanyContacts = await context.Authorized_Contacts.Where(contact => contact.CompanyId == company.Id && !contact.Contact_Deleted).ToArrayAsync();
 
-                    foreach (var person in CompanyContacts)
-                    {
-                        if (person is not null)
-                        {
-                            EmailToPerson = $"{person.FirstName} {person.LastName},";
-                            StateHasChanged();
-
-
-                            message.To.Clear();            //So each email is sent to person one at a time: prevents other companies seeing their competitors
-                            message.To.Add(new MailAddress($"{person.Email}"));
-
-                        }
-
-                        TemplateEmail = EmailToPerson + Template;
-                        message.Body = TemplateEmail;
-                        TemplateEmail = "";
-
-                        sClient.Send(message);
-                    }
-                    EmailToPerson = "";
-                }
+    //                foreach (var person in CompanyContacts)
+    //                {
+    //                    if (person is not null)
+    //                    {
+    //                        EmailToPerson = $"{person.FirstName} {person.LastName},";
+    //                        StateHasChanged();
 
 
+    //                        message.To.Clear();            //So each email is sent to person one at a time: prevents other companies seeing their competitors
+    //                        message.To.Add(new MailAddress($"{person.Email}"));
 
-                Notif = new Data.Models.Notifications();
-                Notif.Title = SubjectLine;
-                Notif.Body = "To Recipients," + QuillContent + "<img width='150' src='logo.PNG' />";
-                Notif.Date_Sent = DateTime.Now;
-                Notif.Created_By = "test@hhcorp.org";
+    //                    }
 
+    //                    TemplateEmail = EmailToPerson + Template;
+    //                    message.Body = TemplateEmail;
+    //                    TemplateEmail = "";
 
-                context.NotificationsList.Add(Notif);
-                await context.SaveChangesAsync();
+    //                    sClient.Send(message);
+    //                }
+    //                EmailToPerson = "";
+    //            }
 
 
 
+    //            Notif = new Data.Models.Notifications();
+    //            Notif.Title = SubjectLine;
+    //            Notif.Body = "To Recipients," + QuillContent + "<img width='150' src='logo.PNG' />";
+    //            Notif.Date_Sent = DateTime.Now;
+    //            Notif.Created_By = "test@hhcorp.org";
 
-                foreach (var company in SelectedCompanies)
-                {
-                    RecipientObject = new Notification_Recipient();
-                    RecipientObject.NotificationsId = Notif.Id;
-                    RecipientObject.CompanyId = company.Id;
-                    RecipientObject.CompanyName = company.Name;
-                    context.Notification_Recipients.Add(RecipientObject);
-                    await context.SaveChangesAsync();
-                }
-                await LoadData();
-                SendNotifSuccess = "Sent Successfully!";
 
-            }
-            catch
-            {
-                SendNotifError = "There was an error while sending the notification. Please try again.";
-            }
-            finally
-            {
-                IsBusy = false;
-                IsBusyMessage = null;
-                StateHasChanged();
-            }
+    //            context.NotificationsList.Add(Notif);
+    //            await context.SaveChangesAsync();
 
-        }
 
-    }
+
+
+    //            foreach (var company in SelectedCompanies)
+    //            {
+    //                RecipientObject = new Notification_Recipient();
+    //                RecipientObject.NotificationsId = Notif.Id;
+    //                RecipientObject.CompanyId = company.Id;
+    //                RecipientObject.CompanyName = company.Name;
+    //                context.Notification_Recipients.Add(RecipientObject);
+    //                await context.SaveChangesAsync();
+    //            }
+    //            await LoadData();
+    //            SendNotifSuccess = "Sent Successfully!";
+
+    //        }
+    //        catch
+    //        {
+    //            SendNotifError = "There was an error while sending the notification. Please try again.";
+    //        }
+    //        finally
+    //        {
+    //            IsBusy = false;
+    //            IsBusyMessage = null;
+    //            StateHasChanged();
+    //        }
+
+    //    }
+
+    //}
 
 
 

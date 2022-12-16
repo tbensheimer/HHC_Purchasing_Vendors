@@ -1,5 +1,8 @@
 ﻿@using Microsoft.AspNetCore.Components.Web
 @namespace Vendor.UI.Pages
+
+@*@namespace Blazor_Radzen_Google_Places_Autocomplete.Pages
+*@
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 
 <!DOCTYPE html>
@@ -45,35 +48,114 @@
     <script src="_content/Blazored.TextEditor/quill-blot-formatter.min.js"></script>
     <script src="_content/Blazored.TextEditor/Blazored-BlazorQuill.js"></script>
 
+
     <script src="//cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
     <script src="_content/Radzen.Blazor/Radzen.Blazor.js"></script>
 
+    <script async
+            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAhZXnUK9Ah_lOHPM-1HOhbG5ztSOSF7ns&libraries=places&callback=initMap">
+    </script>
     <script>
 
-        //function GetAddressFromZip(zip) {
-        //    if (zip.length == 5) {
-        //        const city = document.querySelector("#company-city");
-        //        const state = document.querySelector("#state");
-        //        const country = document.querySelector("#country");
+        function initAutocomplete() {
 
-        //        console.log(true)
-        //            var clientKey = "26oC3XxqXizBt4moiGd0h4Kc4iRuFQDGLJKaZbGg5eaZDqwI1LYHVOygJtxniIRw";
-        //            var url = "https://www.zipcodeapi.com/rest/" + clientKey + "/info.json/" + zip + "/degrees";
+            let autocomplete;
+            let address1Field;
+            let address2Field;
+            let postalField;
+            let event = new Event('change');
 
-        //            fetch(url, {
-        //                mode: "no-cors",
-        //                method: "get"
-        //            })
-        //            .then(response => response.json())
-        //            .then(data => {
-        //                console.log(data)
-        //            })
+            fillInAddress = (autocomplete) => {
 
-        //    } else {
-        //        console.log(false)
-        //    }
-        //}
+                // Get the place details from the autocomplete object.
+                const place = autocomplete.getPlace();
+
+                let address1 = "";
+                let postcode = "";
+
+                // Get each component of the address from the place details,
+                // and then fill-in the corresponding field on the form.
+                // place.address_components are google.maps.GeocoderAddressComponent objects
+                // which are documented at http://goo.gle/3l5i5Mr
+                if (place) {
+                    for (const component of place.address_components) {
+                        const componentType = component.types[0];
+
+                        switch (componentType) {
+                            case "street_number": {
+                                address1 = `${component.long_name} ${address1}`;
+                                break;
+                            }
+
+                            case "route": {
+                                address1 += component.short_name;
+                                break;
+                            }
+
+                            case "postal_code": {
+                                postcode = `${component.long_name}${postcode}`;
+                                break;
+                            }
+
+                            case "postal_code_suffix": {
+                                postcode = `${postcode}-${component.long_name}`;
+                                break;
+                            }
+                            case "locality":
+                               let locality = document.querySelector("#locality");
+                               locality.value = component.long_name;
+                               locality.dispatchEvent(event);
+                                break;
+
+                            case "administrative_area_level_1": {
+                               let state = document.querySelector("#state");
+                               state.value = component.long_name;
+                               state.dispatchEvent(event);
+                                break;
+                            }
+                            case "country":
+                                let country = document.querySelector("#country");
+                                country.value = component.long_name;
+                                country.dispatchEvent(event);
+                                if(country.value == "Canada") {
+                                    state.value = "Foreign";
+                                    state.dispatchEvent(event);
+                                }
+                                break;
+                        }
+                    }
+
+
+                    address1Field.value = address1;
+                    address1Field.dispatchEvent(event);
+                    postalField.value = postcode;
+                    postalField.dispatchEvent(event);
+                    // After filling the form with address components from the Autocomplete
+                    // prediction, set cursor focus on the second address line to encourage
+                    // entry of subpremise information such as apartment, unit, or floor number.
+                    address2Field.focus();
+                }
+            }
+
+
+            address1Field = document.querySelector("#company-location");
+            address2Field = document.querySelector("#company-address2");
+            postalField = document.querySelector("#company-postal");
+            // Create the autocomplete object, restricting the search predictions to
+            // addresses in the US and Canada.
+            autocomplete = new google.maps.places.Autocomplete(address1Field, {
+                componentRestrictions: { country: ["us", "ca"] },
+                fields: ["address_components", "geometry"],
+                types: ["address"],
+            });
+            address1Field.focus();
+            // When the user selects an address from the drop-down, populate the
+            // address fields in the form.
+            autocomplete.addListener("place_changed", function () { fillInAddress(autocomplete) });
+
+
+        }
 
         function DataTablesDraw() {
             $(function () {

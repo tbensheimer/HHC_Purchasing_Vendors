@@ -46,8 +46,8 @@ namespace Vendor.Data.Models
                 );
 
             modelBuilder.Entity<Address>().HasData(
-                new Address { Id = 1, CompanyId = 1, Address_1 = "127 Beechwood Dr", City = "Weldoe", State = "New York", Postal_Code = 46879, Country = "USA"},
-                new Address { Id = 2, CompanyId = 2, Address_1 = "1255 Dutchwood Dr", City = "Weldoe", State = "New York", Postal_Code = 46879, Country = "USA" }
+                new Address { Id = 1, CompanyId = 1, Address_1 = "127 Beechwood Dr", City = "Weldoe", State = "New York", Postal_Code = "46879", Country = "USA"},
+                new Address { Id = 2, CompanyId = 2, Address_1 = "1255 Dutchwood Dr", City = "Weldoe", State = "New York", Postal_Code = "46879", Country = "USA" }
                 );
 
             modelBuilder.Entity<Authorized_Contacts>().HasData(

@@ -255,8 +255,7 @@
                                         {
                                             @* @foreach (var company in Companies.Where(comp => comp.Id == rcompany.CompanyId))
                             {*@
-                                            var context = ContextFactory.CreateDbContext();
-                                            var company = context.Companies.FirstOrDefault(comp => comp.Id == rcompany.CompanyId);
+                                            var company = Companies.FirstOrDefault(comp => comp.Id == rcompany.CompanyId);
 
                                             if (company is not null)
                                             {
@@ -931,7 +930,6 @@
 
                 break;
         }
-        //MAYBE add LoadData at beginning of function?
     }
 
     private void NextButtonClick(int tab)
@@ -1186,7 +1184,7 @@
 
                 foreach (var company in CompanyTypesCats.Where(comp => comp.Category_Id == CatId))
                 {
-                    var Company = context.Companies.FirstOrDefault(comp => comp.Id == company.CompanyId); ////////
+                    var Company = context.Companies.FirstOrDefault(comp => comp.Id == company.CompanyId);
 
 
                     if (!RelatedCompanies.Any(comp => comp.CompanyId == company.CompanyId) && !Company.Disabled_From_Notifications && !Company.Is_Deleted)
@@ -1232,25 +1230,28 @@
     private async Task HandleCompanyChange(ChangeEventArgs args, int CompanyId)
     {
         bool IsSelected = (bool)args.Value;
-        using var context = ContextFactory.CreateDbContext();
-        Company = await context.Companies.FirstOrDefaultAsync(comp => comp.Id == CompanyId);
+        //using var context = ContextFactory.CreateDbContext();
+        Company = Companies.FirstOrDefault(comp => comp.Id == CompanyId);
         //Company.Is_Checked = !Company.Is_Checked;
         //context.Update(Company);
         //await context.SaveChangesAsync();
 
-        if (IsSelected && !Company.Disabled_From_Notifications)
+        if (Company is not null)
         {
-            SelectedCompanies.Add(Company);
+            if (IsSelected)
+            {
+                SelectedCompanies.Add(Company);
+            }
+
+            if (!IsSelected)
+            {
+                SelectedCompanies.RemoveAll(comp => comp.Id == CompanyId);
+                CompanyAll = false;
+            }
         }
 
-        if (!IsSelected)
-        {
-            SelectedCompanies.RemoveAll(comp => comp.Id == CompanyId);
-            CompanyAll = false;
-        }
-
-        await LoadData();
-        SelectedCompaniesCount = SelectedCompanies.Where(comp => !comp.Is_Deleted && !comp.Disabled_From_Notifications).Count();
+      //  await LoadData();
+        SelectedCompaniesCount = SelectedCompanies.Count();
         StateHasChanged();
     }
 
@@ -1293,7 +1294,7 @@
 
     }
 
-    private async Task HandleCategoryAll()
+    private void HandleCategoryAll()
     {
 
         CategoryAll = !CategoryAll;
@@ -1363,24 +1364,24 @@
             //}
 
         }
-        await LoadData();
+      //  await LoadData();
         StateHasChanged();
     }
 
-    private async Task HandleCompanyAll()
+    private void HandleCompanyAll()
     {
-        using var context = ContextFactory.CreateDbContext();
+     //   using var context = ContextFactory.CreateDbContext();
         CompanyAll = !CompanyAll;
 
         if (CompanyAll)
         {
             foreach (var company in RelatedCompanies)
             {
-                var Company = await context.Companies.FirstOrDefaultAsync(comp => comp.Id == company.CompanyId && !comp.Disabled_From_Notifications);
+                var Company = Companies.FirstOrDefault(comp => comp.Id == company.CompanyId);
 
                 if (Company is not null)
                 {
-                    if (!SelectedCompanies.Any(company => company.Id == Company.Id))
+                    if (!SelectedCompanies.Any(company => company.Id == Company.Id) && !Company.Disabled_From_Notifications && !Company.Is_Deleted)
                     {
                         SelectedCompanies.Add(Company);
                     }
@@ -1393,13 +1394,16 @@
         {
             foreach (var company in RelatedCompanies)
             {
-                var Company = await context.Companies.FirstOrDefaultAsync(comp => comp.Id == company.CompanyId && !comp.Disabled_From_Notifications);
+                var Company = Companies.FirstOrDefault(comp => comp.Id == company.CompanyId);
 
-                SelectedCompanies.RemoveAll(sel => sel.Id == Company.Id);
+                if (Company is not null)
+                {
+                    SelectedCompanies.RemoveAll(sel => sel.Id == Company.Id);
+                }
             }
         }
-        await LoadData();
-        SelectedCompaniesCount = SelectedCompanies.Where(comp => !comp.Is_Deleted && !comp.Disabled_From_Notifications).Count();
+    //    await LoadData();
+        SelectedCompaniesCount = SelectedCompanies.Count();
         StateHasChanged();
     }
 

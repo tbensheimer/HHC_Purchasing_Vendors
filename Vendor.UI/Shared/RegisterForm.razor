@@ -167,8 +167,9 @@
                                     {
                                         @foreach (var cat in QueryableCategories)
                                         {
-                                            @foreach (var type in CheckedTypes.Where(type => type.Id == cat.Type_Id))
-                                            {
+                                            
+                                            var type = Types.FirstOrDefault(type => type.Id == cat.Type_Id);
+
                                                 @if (CheckedCategories.Any(checkedcat => checkedcat.Id == cat.Id))
                                                 {
                                                     <li class="catLi mb-1">
@@ -203,7 +204,7 @@
                                                     </li>
                                                 }*@
                                             }
-                                        }
+                                        
                                     }
                                 </ul>
 
@@ -557,8 +558,8 @@
         //await context.SaveChangesAsync();
 
         bool IsSelected = (bool)args.Value;
-        using var context = ContextFactory.CreateDbContext();
-        Type = await context.Business_Types.FirstOrDefaultAsync(type => type.Id == TypeId);
+        // using var context = ContextFactory.CreateDbContext();
+        Type = Types.FirstOrDefault(type => type.Id == TypeId);
 
         if (IsSelected)
         {
@@ -576,19 +577,19 @@
             }
         }
 
-        await LoadCategories();
-        await LoadData();
+      await LoadCategories();
+      //  LoadData();
     }
 
     private async Task LoadCategories()
     {
-        using var context = ContextFactory.CreateDbContext();
+        //   using var context = ContextFactory.CreateDbContext();
 
         FilteredCategories.Clear();
 
         foreach (var type in CheckedTypes)
         {
-            var CatList = await context.Business_Categories.Where(cat => cat.Type_Id == type.Id).ToArrayAsync();
+            var CatList = Categories.Where(cat => cat.Type_Id == type.Id);
 
             foreach (var cat in CatList)
             {
@@ -599,14 +600,15 @@
             }
 
         }
+        await LoadData();
     }
 
-    private async Task HandleCategoryChange(ChangeEventArgs args,int CatId)
+    private void HandleCategoryChange(ChangeEventArgs args,int CatId)
     {
 
         bool IsSelected = (bool)args.Value;
         using var context = ContextFactory.CreateDbContext();
-        Category = await context.Business_Categories.FirstOrDefaultAsync(cat => cat.Id == CatId);
+        Category = Categories.FirstOrDefault(cat => cat.Id == CatId);
         //Category.Is_Checked = !Category.Is_Checked;
         //context.Update(Category);
         //await context.SaveChangesAsync();
@@ -627,12 +629,13 @@
 
         CategoryCount = CheckedCategories.Count();
 
-        await LoadCategories();
-        await LoadData();
+       // await LoadCategories();
+       // await LoadData();
     }
 
     private async Task HandleTypesCatsSubmit()
     {
+                    using var context = ContextFactory.CreateDbContext();
 
         if (CategoryCount == 0)
         {
@@ -640,14 +643,11 @@
             return;
         }
 
-
         foreach (var cat in CheckedCategories)
         {
-            using var context = ContextFactory.CreateDbContext();
 
             if (Company is not null)
             {
-
                 CompanyTypeAndCat = new Company_Types_Categories();
                 CompanyTypeAndCat.CompanyId = Company.Id;
                 CompanyTypeAndCat.Category_Id = cat.Id;
@@ -656,15 +656,11 @@
                 {
                     CompanyCategories.Add(CompanyTypeAndCat);
                 }
-
             }
-
         }
 
         if (CompanyCategories is not null)
         {
-            using var context = ContextFactory.CreateDbContext();
-
             context.Company_Types_Categories.AddRange(CompanyCategories);
             await context.SaveChangesAsync();
 

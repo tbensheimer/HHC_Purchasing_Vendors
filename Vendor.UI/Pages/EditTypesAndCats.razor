@@ -94,11 +94,8 @@
                         {
                             @foreach (var cat in QueryableCategories)
                             {
-                                using var context = ContextFactory.CreateDbContext();
 
-                                var UniqueType = context.Business_Types.FirstOrDefault(type => type.Id == cat.Type_Id);
-
-
+                                var UniqueType = Types.FirstOrDefault(type => type.Id == cat.Type_Id);
 
                                 @*@if (cat.Is_Checked || CheckedCategories.Any(check => check.Id == cat.Id))  //Keep in case of unexpected error
                                 {*@
@@ -286,7 +283,7 @@
 
         }
 
-            
+
 
 
 
@@ -369,8 +366,8 @@
     {
 
         bool IsSelected = (bool)args.Value;
-        using var context = ContextFactory.CreateDbContext();
-        Type = await context.Business_Types.FirstOrDefaultAsync(type => type.Id == TypeId);
+        //  using var context = ContextFactory.CreateDbContext();
+        Type = Types.FirstOrDefault(type => type.Id == TypeId);
         //Type.Is_Checked = !Type.Is_Checked;
         //context.Update(Type);
         //await context.SaveChangesAsync();
@@ -389,18 +386,18 @@
         }
 
         await LoadCategories();
-        await LoadData();
+        // await LoadData();
     }
 
     private async Task LoadCategories()
     {
-        using var context = ContextFactory.CreateDbContext();
+        //   using var context = ContextFactory.CreateDbContext();
 
         FilteredCategories.Clear();
 
         foreach (var type in CheckedTypes)
         {
-            var CatList = await context.Business_Categories.Where(cat => cat.Type_Id == type.Id).ToArrayAsync();
+            var CatList = Categories.Where(cat => cat.Type_Id == type.Id);
 
             foreach (var cat in CatList)
             {
@@ -411,15 +408,16 @@
             }
 
         }
+        await LoadData();
     }
 
 
-    private async Task HandleCategoryChange(ChangeEventArgs args, int CatId)
+    private void HandleCategoryChange(ChangeEventArgs args, int CatId)
     {
 
         bool IsSelected = (bool)args.Value;
-        using var context = ContextFactory.CreateDbContext();
-        Category = await context.Business_Categories.FirstOrDefaultAsync(cat => cat.Id == CatId);
+       // using var context = ContextFactory.CreateDbContext();
+        Category = Categories.FirstOrDefault(cat => cat.Id == CatId);
 
         //Category.Is_Checked = !Category.Is_Checked;
         //context.Update(Category);
@@ -437,7 +435,7 @@
         {
                 CheckedCategories.RemoveAll(cat => cat.Id == CatId);
         }
-        await LoadCategories();
+       // await LoadCategories();
     }
 
     private async Task HandleTypesCatsSubmit()

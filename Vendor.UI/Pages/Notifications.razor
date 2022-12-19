@@ -836,7 +836,12 @@
         Types = await context.Business_Types.OrderBy(type => type.Type_Name).ToArrayAsync();
         Categories = await context.Business_Categories.OrderBy(cat => cat.Category_Name).ToArrayAsync();
         CompanyTypesCats = await context.Company_Types_Categories.ToArrayAsync();
-        Companies = await context.Companies.ToArrayAsync();
+
+        Companies = await context.Companies.Where(comp => comp.Is_Deleted == false)
+        .Where(comp => comp.Disabled_From_Notifications == false)
+        .OrderBy(comp => comp.Name)
+        .ToArrayAsync();
+
         NotifsHistory = await context.NotificationsList.ToArrayAsync();
 
 
@@ -1116,11 +1121,10 @@
 
 
 
-    private async Task HandleTypeChange(ChangeEventArgs args, int TypeId)
+    private void HandleTypeChange(ChangeEventArgs args, int TypeId)
     {
         bool IsSelected = (bool)args.Value;
-        using var context = ContextFactory.CreateDbContext();
-        Type = await context.Business_Types.FirstOrDefaultAsync(type => type.Id == TypeId);
+        Type = Types.FirstOrDefault(type => type.Id == TypeId);
         //Type.Is_Checked = !Type.Is_Checked;
         //context.Update(Type);
         //await context.SaveChangesAsync();
@@ -1139,19 +1143,17 @@
             TypeAll = false;
         }
 
-        await LoadCategories();
-        await LoadData();
+        LoadCategories();
     }
 
-    private async Task LoadCategories()
+    private void LoadCategories()
     {
-        using var context = ContextFactory.CreateDbContext();
 
         FilteredCategories.Clear();
 
         foreach (var type in CheckedTypes)
         {
-            var CatList = await context.Business_Categories.Where(cat => cat.Type_Id == type.Id).ToArrayAsync();
+            var CatList = Categories.Where(cat => cat.Type_Id == type.Id);
 
             foreach (var cat in CatList)
             {
@@ -1166,11 +1168,10 @@
 
     }
 
-    private async Task HandleCategoryChange(ChangeEventArgs args, int CatId)
+    private void HandleCategoryChange(ChangeEventArgs args, int CatId)
     {
         bool IsSelected = (bool)args.Value;
-        using var context = ContextFactory.CreateDbContext();
-        Category = await context.Business_Categories.FirstOrDefaultAsync(cat => cat.Id == CatId);
+        Category = Categories.FirstOrDefault(cat => cat.Id == CatId);
         //Category.Is_Checked = !Category.Is_Checked;
         //context.Update(Category);
         //await context.SaveChangesAsync();
@@ -1184,12 +1185,14 @@
 
                 foreach (var company in CompanyTypesCats.Where(comp => comp.Category_Id == CatId))
                 {
-                    var Company = context.Companies.FirstOrDefault(comp => comp.Id == company.CompanyId);
+                    var Company = Companies.FirstOrDefault(comp => comp.Id == company.CompanyId);
 
-
-                    if (!RelatedCompanies.Any(comp => comp.CompanyId == company.CompanyId) && !Company.Disabled_From_Notifications && !Company.Is_Deleted)
+                    if (Company is not null)
                     {
-                        RelatedCompanies.Add(company);
+                        if (!RelatedCompanies.Any(comp => comp.CompanyId == company.CompanyId) && !Company.Disabled_From_Notifications && !Company.Is_Deleted)
+                        {
+                            RelatedCompanies.Add(company);
+                        }
                     }
                 }
 
@@ -1211,11 +1214,13 @@
                 {
                     foreach (var company in CompanyTypesCats.Where(company => company.Category_Id == cat.Id))
                     {
-                        var Company = context.Companies.FirstOrDefault(comp => comp.Id == company.CompanyId); ////////
-
-                        if (!RelatedCompanies.Any(comp => comp.CompanyId == company.CompanyId) && !Company.Disabled_From_Notifications && !Company.Is_Deleted)
+                        var Company = Companies.FirstOrDefault(comp => comp.Id == company.CompanyId); ////////
+                        if (Company is not null)
                         {
-                            RelatedCompanies.Add(company); //This allows to add company back in if they have other categories that were checked
+                            if (!RelatedCompanies.Any(comp => comp.CompanyId == company.CompanyId) && !Company.Disabled_From_Notifications && !Company.Is_Deleted)
+                            {
+                                RelatedCompanies.Add(company); //This allows to add company back in if they have other categories that were checked
+                            }
                         }
                     }
                 }
@@ -1227,7 +1232,7 @@
         //await LoadData();
     }
 
-    private async Task HandleCompanyChange(ChangeEventArgs args, int CompanyId)
+    private void HandleCompanyChange(ChangeEventArgs args, int CompanyId)
     {
         bool IsSelected = (bool)args.Value;
         //using var context = ContextFactory.CreateDbContext();
@@ -1255,7 +1260,7 @@
         StateHasChanged();
     }
 
-    private async Task HandleTypeAll()
+    private void HandleTypeAll()
     {
         //using var context = ContextFactory.CreateDbContext();
         TypeAll = !TypeAll;
@@ -1288,8 +1293,8 @@
                 CheckedTypes.RemoveAll(Type => Type.Id == type.Id);
             }
         }
-        await LoadCategories();
-        await LoadData();
+        LoadCategories();
+       // await LoadData();
         StateHasChanged();
 
     }

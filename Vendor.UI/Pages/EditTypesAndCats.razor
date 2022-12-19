@@ -33,16 +33,29 @@
                         {
                             @foreach (var type in QueryableTypes)
                             {
-                                @if (type.Is_Checked)
+                                @* @if (type.Is_Checked)
+                                {*@
+                                @if (CheckedTypes.Any(check => check.Id == type.Id))
                                 {
                                     <li class="typeLi mb-1">
                                         <label id="key" for="@type.Type_Name">
-                                            <input @key="@type.Id" checked id="@type.Type_Name" value="@type.Is_Checked" @onchange="() => HandleTypeChange(type.Id)" class="form-check-input type-check"
+                                            <input @key="@type.Id" checked id="@type.Type_Name" value="@type.Is_Checked" @onchange="(args) => HandleTypeChange(args, type.Id)" class="form-check-input type-check"
                                        Name="TypeCheckbox" type="checkbox" /> @type.Type_Name
                                         </label>
                                         <br />
                                     </li>
                                 }
+                                else
+                                {
+                                     <li class="typeLi mb-1">
+                                        <label id="key" for="@type.Type_Name">
+                                            <input @key="@type.Id" id="@type.Type_Name" value="@type.Is_Checked" @onchange="(args) => HandleTypeChange(args, type.Id)" class="form-check-input type-check"
+                                       Name="TypeCheckbox" type="checkbox" /> @type.Type_Name
+                                        </label>
+                                        <br />
+                                    </li>
+                                }
+                                @* }
                                 else
                                 {
                                     <li class="typeLi mb-1">
@@ -52,7 +65,7 @@
                                         </label>
                                         <br />
                                     </li>
-                                }
+                                }*@
                             }
 
                         }
@@ -87,17 +100,29 @@
 
 
 
-                                @if (cat.Is_Checked@* || CheckedCategories.Any(check => check.Id == cat.Id)*@)  //Keep in case of unexpected error
+                                @*@if (cat.Is_Checked || CheckedCategories.Any(check => check.Id == cat.Id))  //Keep in case of unexpected error
+                                {*@
+                                @if (CheckedCategories.Any(check => check.Id == cat.Id))
                                 {
-
                                     <li class="catLi mb-1">
                                         <label id="key" for="@cat.Category_Name">
-                                            <input @key="@cat.Id" checked value="@cat.Is_Checked" @onchange="() => HandleCategoryChange(cat.Id)" class="form-check-input cat-check" id="@cat.Category_Name"
+                                            <input @key="@cat.Id" checked value="@cat.Is_Checked" @onchange="(args) => HandleCategoryChange(args, cat.Id)" class="form-check-input cat-check" id="@cat.Category_Name"
                                        name="@cat.Category_Name" type="checkbox" /><strong> @UniqueType.Type_Name:</strong> @cat.Category_Name
                                         </label>
                                         <br />
                                     </li>
                                 }
+                                else
+                                {
+                                     <li class="catLi mb-1">
+                                        <label id="key" for="@cat.Category_Name">
+                                            <input @key="@cat.Id" value="@cat.Is_Checked" @onchange="(args) => HandleCategoryChange(args, cat.Id)" class="form-check-input cat-check" id="@cat.Category_Name"
+                                       name="@cat.Category_Name" type="checkbox" /><strong> @UniqueType.Type_Name:</strong> @cat.Category_Name
+                                        </label>
+                                        <br />
+                                    </li>
+                                }
+                                @* }
                                 else
                                 {
                                     <li class="catLi mb-1">
@@ -109,7 +134,7 @@
                                     </li>
 
 
-                                }
+                                }*@
                             }
                         }
                     </ul>
@@ -205,31 +230,49 @@
         CurrentCompanyCategories = await context.Company_Types_Categories.Where(comp => comp.CompanyId == CompanyId).ToArrayAsync();
 
 
-        foreach (var type in Types)
-        {
-            type.Is_Checked = false;
-            context.Update(type);
-            await context.SaveChangesAsync();
-        }
 
-        foreach (var cat in Categories)
-        {
-            cat.Is_Checked = false;
-            context.Update(cat);
-            await context.SaveChangesAsync();
-        }
+
+        //foreach (var type in Types)
+        //{
+        //    type.Is_Checked = false;
+        //    context.Update(type);
+        //    await context.SaveChangesAsync();
+        //}
+
+        //foreach (var cat in Categories)
+        //{
+        //    cat.Is_Checked = false;
+        //    context.Update(cat);
+        //    await context.SaveChangesAsync();
+        //}
 
         foreach (var comp in CurrentCompanyCategories)
         {
-            var Cats = await context.Business_Categories.Where(cat => cat.Id == comp.Category_Id).ToArrayAsync();
-            foreach (var cat in Cats)
+
+            foreach (var type in Types.Where(type => type.Id == comp.Type_Id))
             {
-                var Type = await context.Business_Types.FirstOrDefaultAsync(type => type.Id == cat.Type_Id);
-                var CategoryList = await context.Business_Categories.Where(category => category.Type_Id == Type.Id).ToArrayAsync();
+                if (!CheckedTypes.Any(check => check.Id == type.Id))
+                {
+                    CheckedTypes.Add(type);
+                }
+            }
 
+            foreach (var cat in Categories.Where(cat => cat.Id == comp.Category_Id))
+            {
+                if (!CheckedCategories.Any(check => check.Id == cat.Id))
+                {
+                    CheckedCategories.Add(cat);
+                }
 
-                Type.Is_Checked = true;
-                context.Update(Type);
+                if (!FilteredCategories.Any(check => check.Id == cat.Id))
+                {
+                    FilteredCategories.Add(cat);
+                }
+            }
+
+            foreach (var type in CheckedTypes)
+            {
+                var CategoryList = await context.Business_Categories.Where(category => category.Type_Id == type.Id).ToArrayAsync();
 
                 foreach (var category in CategoryList)
                 {
@@ -238,20 +281,49 @@
                         FilteredCategories.Add(category);   //Renders All Categories for each Type checked
                     }
                 }
-
-                cat.Is_Checked = true;
-                context.Update(cat);
-                await context.SaveChangesAsync();
-
-                if (!CheckedTypes.Any(type => type.Id == Type.Id))
-                {
-                    CheckedTypes.Add(Type);                 //helps render categories when a type is clicked
-                }
-
-                CheckedCategories.Add(cat);                 //helps database when saving changes
-
             }
+
+
         }
+
+            
+
+
+
+
+
+        //////////////////////////////////
+        //var Cats = await context.Business_Categories.Where(cat => cat.Id == comp.Category_Id).ToArrayAsync();
+        //foreach (var cat in Cats)
+        //{
+        //    var Type = await context.Business_Types.FirstOrDefaultAsync(type => type.Id == cat.Type_Id);
+        //    var CategoryList = await context.Business_Categories.Where(category => category.Type_Id == Type.Id).ToArrayAsync();
+
+
+        //    Type.Is_Checked = true;
+        //    context.Update(Type);
+
+        //    foreach (var category in CategoryList)
+        //    {
+        //        if (!FilteredCategories.Any(filter => filter.Id == category.Id))
+        //        {
+        //            FilteredCategories.Add(category);   //Renders All Categories for each Type checked
+        //        }
+        //    }
+
+        //    cat.Is_Checked = true;
+        //    context.Update(cat);
+        //    await context.SaveChangesAsync();
+
+        //    if (!CheckedTypes.Any(type => type.Id == Type.Id))
+        //    {
+        //        CheckedTypes.Add(Type);                 //helps render categories when a type is clicked
+        //    }
+
+        //    CheckedCategories.Add(cat);                 //helps database when saving changes
+
+        //}
+
 
         await LoadData();
     }
@@ -293,28 +365,27 @@
     }
 
 
-    private async Task HandleTypeChange(int TypeId)
+    private async Task HandleTypeChange(ChangeEventArgs args, int TypeId)
     {
+
+        bool IsSelected = (bool)args.Value;
         using var context = ContextFactory.CreateDbContext();
         Type = await context.Business_Types.FirstOrDefaultAsync(type => type.Id == TypeId);
-        Type.Is_Checked = !Type.Is_Checked;
-        context.Update(Type);
-        await context.SaveChangesAsync();
+        //Type.Is_Checked = !Type.Is_Checked;
+        //context.Update(Type);
+        //await context.SaveChangesAsync();
 
-        if (Type.Is_Checked)
+        if (IsSelected)
         {
-            if (Type is not null)
+            if (Type is not null && !CheckedTypes.Any(check => check.Id == TypeId))
             {
                 CheckedTypes.Add(Type);
             }
         }
 
-        if (!Type.Is_Checked)
+        if (!IsSelected)
         {
-            if (Type is not null)
-            {
-                CheckedTypes.RemoveAll(type => type.Id == TypeId);
-            }
+            CheckedTypes.RemoveAll(type => type.Id == TypeId);
         }
 
         await LoadCategories();
@@ -329,11 +400,11 @@
 
         foreach (var type in CheckedTypes)
         {
-            var CatList = await context.Business_Categories.ToArrayAsync();
+            var CatList = await context.Business_Categories.Where(cat => cat.Type_Id == type.Id).ToArrayAsync();
 
             foreach (var cat in CatList)
             {
-                if (cat.Type_Id == type.Id && type.Is_Checked)
+                if (!FilteredCategories.Any(filter => filter.Id == cat.Id))
                 {
                     FilteredCategories.Add(cat);
                 }
@@ -343,28 +414,28 @@
     }
 
 
-    private async Task HandleCategoryChange(int CatId)
+    private async Task HandleCategoryChange(ChangeEventArgs args, int CatId)
     {
+
+        bool IsSelected = (bool)args.Value;
         using var context = ContextFactory.CreateDbContext();
         Category = await context.Business_Categories.FirstOrDefaultAsync(cat => cat.Id == CatId);
-        Category.Is_Checked = !Category.Is_Checked;
-        context.Update(Category);
-        await context.SaveChangesAsync();
 
-        if (Category.Is_Checked)
+        //Category.Is_Checked = !Category.Is_Checked;
+        //context.Update(Category);
+        //await context.SaveChangesAsync();
+
+        if (IsSelected)
         {
-            if (Category is not null && !CheckedCategories.Any(cat => cat.Id == Category.Id))
+            if (Category is not null && !CheckedCategories.Any(cat => cat.Id == CatId))
             {
                 CheckedCategories.Add(Category);
             }
         }
 
-        if (!Category.Is_Checked)
+        if (!IsSelected)
         {
-            if (Category is not null)
-            {
                 CheckedCategories.RemoveAll(cat => cat.Id == CatId);
-            }
         }
         await LoadCategories();
     }
@@ -417,7 +488,6 @@
             context.Company_Types_Categories.AddRange(CompanyCategories);
             await context.SaveChangesAsync();
             CompanyCategories.Clear();
-            //FilteredCheckedCategories.Clear();
             await LoadData();
             SuccessMessage = "Saved Type and Category changes successfully!";
         }
@@ -474,16 +544,16 @@
             {
                 foreach (var cat in Categories)
                 {
-                    cat.Is_Checked = false;
-                    context.Update(cat);
-                    await context.SaveChangesAsync();
+                    //cat.Is_Checked = false;
+                    //context.Update(cat);
+                    //await context.SaveChangesAsync();
                     CheckedCategories.RemoveAll(check => check.Id == cat.Id);
                 }
                 foreach (var type in Types)
                 {
-                    type.Is_Checked = false;
-                    context.Update(type);
-                    await context.SaveChangesAsync();
+                    //type.Is_Checked = false;
+                    //context.Update(type);
+                    //await context.SaveChangesAsync();
                     CheckedTypes.RemoveAll(type => type.Id == type.Id);
 
                 }
@@ -506,9 +576,5 @@
     }
     }
 
-    private void HandleNavigationCompanyList()
-    {
-        NavigationManager.NavigateTo($"/companies/{StateContainer.CompanyInfoPage}");
-    }
-
+ 
 }

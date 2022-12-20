@@ -449,10 +449,7 @@
 
     private async Task HandleAccountComplete(int tab)
     {
-        //if (PasswordMatch)
-        // {
-        DisplayTab(tab + 1);
-
+     
 
         if (Account is not null && Company is not null)
         {
@@ -460,8 +457,9 @@
             Account.CompanyId = Company.Id;
             context.Accounts.Add(Account);
             await context.SaveChangesAsync();
+            DisplayTab(tab + 1);
+
         }
-        //  }
     }
 
     private async Task HandleCompanySubmit(bool isValid)

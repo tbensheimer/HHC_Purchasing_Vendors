@@ -482,11 +482,107 @@
                 Company.Other_Diversity_Certification = "";
             }
             Company.Sign_Up = SignUpDate;
+
+            var id = Company.Fed_Id_SSN.ToString();
+
+            //string encryptPassword = genPassword();
+
+            //string encryptedText = EncryptText(id, encryptPassword);
+
+            //string decryptedText = DecryptText(encryptedText, encryptPassword);
+
+
             context.Companies.Add(Company);
             await context.SaveChangesAsync();
         }
         DisplayTab(tab + 1);
     }
+
+    //public static string genPassword()
+    //{
+    //    var random = new RNGCryptoServiceProvider();
+
+    //    // Maximum length of salt
+    //    int max_length = 32;
+
+    //    // Empty salt array
+    //    byte[] salt = new byte[max_length];
+
+    //    // Build the random bytes
+    //    random.GetNonZeroBytes(salt);
+
+    //    // Return the string encoded salt
+    //    return Convert.ToBase64String(salt);
+    //}
+
+    //public static string EncryptText(string input, string password)
+    //{
+    //    // Get the bytes of the string
+    //    byte[] bytesToBeEncrypted = Encoding.UTF8.GetBytes(input);
+    //    // Hash the password with SHA256
+    //    byte[] passwordBytes = SHA256.Create().ComputeHash(Encoding.UTF8.GetBytes(password));
+    //    byte[] bytesEncrypted = null;
+    //    // The salt bytes must be at least 8 bytes. Private key
+    //    byte[] saltBytes = new byte[] { 111, 27, 3, 11, 18, 4, 19, 27 };
+
+    //    using (MemoryStream ms = new MemoryStream())
+    //    {
+    //        using (RijndaelManaged AES = new RijndaelManaged())
+    //        {
+    //            AES.KeySize = 256;
+    //            AES.BlockSize = 128;
+
+    //            var key = new Rfc2898DeriveBytes(passwordBytes, saltBytes, 1000);
+    //            AES.Key = key.GetBytes(AES.KeySize / 8);
+    //            AES.IV = key.GetBytes(AES.BlockSize / 8);
+
+    //            AES.Mode = CipherMode.CBC;
+
+    //            using (var cs = new CryptoStream(ms, AES.CreateEncryptor(), CryptoStreamMode.Write))
+    //            {
+    //                cs.Write(bytesToBeEncrypted, 0, bytesToBeEncrypted.Length);
+    //                cs.Close();
+    //            }
+    //            bytesEncrypted = ms.ToArray();
+    //        }
+    //    }
+
+    //    return Convert.ToBase64String(bytesEncrypted);
+    //}
+
+
+    //public static string DecryptText(string input, string password)
+    //{
+    //    // Get the bytes of the string
+    //    byte[] bytesToBeDecrypted = Convert.FromBase64String(input);
+    //    byte[] passwordBytes = SHA256.Create().ComputeHash(Encoding.UTF8.GetBytes(password));
+    //    byte[] bytesDecrypted = null;
+    //    // The salt bytes must be at least 8 bytes. Private key.
+    //    byte[] saltBytes = new byte[] { 111, 27, 3, 11, 18, 4, 19, 27 };
+
+    //    using (MemoryStream ms = new MemoryStream())
+    //    {
+    //        using (RijndaelManaged AES = new RijndaelManaged())
+    //        {
+    //            AES.KeySize = 256;
+    //            AES.BlockSize = 128;
+
+    //            var key = new Rfc2898DeriveBytes(passwordBytes, saltBytes, 1000);
+    //            AES.Key = key.GetBytes(AES.KeySize / 8);
+    //            AES.IV = key.GetBytes(AES.BlockSize / 8);
+    //            AES.Mode = CipherMode.CBC;
+
+    //            using (var cs = new CryptoStream(ms, AES.CreateDecryptor(), CryptoStreamMode.Write))
+    //            {
+    //                cs.Write(bytesToBeDecrypted, 0, bytesToBeDecrypted.Length);
+    //                cs.Close();
+    //            }
+    //            bytesDecrypted = ms.ToArray();
+    //        }
+    //    }
+
+    //    return Encoding.UTF8.GetString(bytesDecrypted);
+    //}
 
     private async Task HandleAddressSubmit(bool isValid)
     {
@@ -607,7 +703,7 @@
     {
 
         bool IsSelected = (bool)args.Value;
-        using var context = ContextFactory.CreateDbContext();
+     //   using var context = ContextFactory.CreateDbContext();
         Category = Categories.FirstOrDefault(cat => cat.Id == CatId);
         //Category.Is_Checked = !Category.Is_Checked;
         //context.Update(Category);

@@ -303,7 +303,7 @@
                     <label for="subject-line" hidden>Subject Line</label>
                     <input @bind-value="SubjectLine" class="required form-control mb-2" id="subject-line" name="subject-line" type="text" placeholder="Subject Line" />
 
-                    <div class="quill-div mb-2">
+                    <div style="padding-bottom: 10px;" class="quill-div mb-2">
                         <BlazoredTextEditor @ref="@Quill">
                             <ToolbarContent>
                                 <select class="ql-font">
@@ -342,7 +342,6 @@
 
                                 <span class="ql-formats">
                                     <button class="ql-link"></button>
-                                    <InputFile OnChange="e => LoadFiles(e)" multiple></InputFile>
                                 </span>
                             </ToolbarContent>
                             <EditorContent>
@@ -361,15 +360,27 @@
                                 </div>
                             </EditorContent>
                         </BlazoredTextEditor>
+                        <InputFile style="padding: 15px;" OnChange="e => LoadFiles(e)" multiple></InputFile>
 
                         @foreach (var file in uploadedFiles)
                         {
-                            <div>
+                            <div style="border: solid black 1px; padding: 5px; margin: 5px; border-radius: 5px; display: flex; justify-content: space-between; align-items: center;">
+                                @if(file.UploadedPercentage == 100)
+                                {
+                                <button style="color: blue; text-decoration: underline;" type="button" class="btn btn-sm btn-light">@file.FileName</button> 
+                                }
+                                else
+                                {
                                 @file.FileName
+                                }
                                 <progress value="@file.UploadedBytes" max="@file.Size"></progress>
                                 @file.UploadedPercentage.ToString("F1")%
                                 (@FormatBytes(file.UploadedBytes) / @FormatBytes(file.Size))
+                                <button @onclick="() => RemoveFile(file)" type="button" class="btn btn-sm btn-light"><span><i style="color: gray;" class="fa-solid fa-trash"></i></span></button>
                             </div>
+
+                            var uploadedFile = loadedFiles.FirstOrDefault(loaded => loaded.Name == file.FileName);
+
 
                         }
                     </div>
@@ -605,6 +616,7 @@
         {
             var progress = new FileUploadProgress(file.Name, file.Size);
             uploadedFiles.Add(progress);
+            loadedFiles.Add(file);
         }
 
         // We don't want to refresh the UI too frequently,
@@ -825,7 +837,13 @@
     }
 
 
-
+    private void RemoveFile(FileUploadProgress file)
+    {
+        var attachment = message.Attachments.First(attachment => attachment.Name == file.FileName);
+        message.Attachments.Remove(attachment);
+        uploadedFiles.Remove(file);
+        StateHasChanged();
+    }
 
     //////////////////////////////////////////////////////////
 
@@ -1255,7 +1273,7 @@
             }
         }
 
-      //  await LoadData();
+        //  await LoadData();
         SelectedCompaniesCount = SelectedCompanies.Count();
         StateHasChanged();
     }
@@ -1294,7 +1312,7 @@
             }
         }
         LoadCategories();
-       // await LoadData();
+        // await LoadData();
         StateHasChanged();
 
     }
@@ -1369,13 +1387,13 @@
             //}
 
         }
-      //  await LoadData();
+        //  await LoadData();
         StateHasChanged();
     }
 
     private void HandleCompanyAll()
     {
-     //   using var context = ContextFactory.CreateDbContext();
+        //   using var context = ContextFactory.CreateDbContext();
         CompanyAll = !CompanyAll;
 
         if (CompanyAll)
@@ -1407,7 +1425,7 @@
                 }
             }
         }
-    //    await LoadData();
+        //    await LoadData();
         SelectedCompaniesCount = SelectedCompanies.Count();
         StateHasChanged();
     }

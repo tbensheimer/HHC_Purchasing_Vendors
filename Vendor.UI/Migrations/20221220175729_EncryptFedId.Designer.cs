@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Vendor.Data.Models;
 
@@ -11,9 +12,10 @@ using Vendor.Data.Models;
 namespace Vendor.UI.Migrations
 {
     [DbContext(typeof(VendorDataDbContext))]
-    partial class VendorDataDbContextModelSnapshot : ModelSnapshot
+    [Migration("20221220175729_EncryptFedId")]
+    partial class EncryptFedId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -697,7 +699,7 @@ namespace Vendor.UI.Migrations
                             Id = 1,
                             Body = "HP please send us some supplies.",
                             Created_By = "Bill",
-                            Date_Sent = new DateTime(2022, 12, 20, 15, 5, 14, 455, DateTimeKind.Local).AddTicks(1030),
+                            Date_Sent = new DateTime(2022, 12, 20, 12, 57, 29, 242, DateTimeKind.Local).AddTicks(6576),
                             Reoccuring_Notification = false,
                             Title = "Need Supplies"
                         },
@@ -706,7 +708,7 @@ namespace Vendor.UI.Migrations
                             Id = 2,
                             Body = "Lambo we need 10 cars by next month. Will pay once delivered.",
                             Created_By = "Bill",
-                            Date_Sent = new DateTime(2022, 12, 20, 15, 5, 14, 455, DateTimeKind.Local).AddTicks(1066),
+                            Date_Sent = new DateTime(2022, 12, 20, 12, 57, 29, 242, DateTimeKind.Local).AddTicks(6615),
                             Days_Reoccuring = 7,
                             Reoccuring_Notification = true,
                             Title = "Need Cars"

@@ -142,10 +142,11 @@
         </div>
 
         <p class="fw-bold mt-3">Categories Saved: @CurrentCategoryCount</p>
-        <button @onclick="() => HandleCategoryClear()" style="align-self: flex-start" class="btn btn-outline-danger btn-sm">Clear Categories</button>
     </div>
 
     <button type="button" @onclick="() => HandleTypesCatsSubmit()" class="save-btn btn btn-success mb-3">Save Types and Changes</button>
+@*    <button type="button" @onclick="() => HandleCategoryClear()" style="align-self: center" class="btn btn-danger mb-3">Clear Categories</button>
+*@
 
     @if (SuccessMessage is not null)
     {
@@ -416,7 +417,7 @@
     {
 
         bool IsSelected = (bool)args.Value;
-       // using var context = ContextFactory.CreateDbContext();
+        // using var context = ContextFactory.CreateDbContext();
         Category = Categories.FirstOrDefault(cat => cat.Id == CatId);
 
         //Category.Is_Checked = !Category.Is_Checked;
@@ -433,9 +434,9 @@
 
         if (!IsSelected)
         {
-                CheckedCategories.RemoveAll(cat => cat.Id == CatId);
+            CheckedCategories.RemoveAll(cat => cat.Id == CatId);
         }
-       // await LoadCategories();
+        // await LoadCategories();
     }
 
     private async Task HandleTypesCatsSubmit()
@@ -444,6 +445,7 @@
 
         if (!CheckedCategories.Any())
         {
+            SuccessMessage = null;
             ErrorMessage = "Need at least one category checked to save changes. Please try again. (Select Other if none of the categories apply)";
             return;
         }
@@ -529,50 +531,56 @@
         return CatQuery;
     }
 
-    private async Task HandleCategoryClear()
-    {
-        using var context = ContextFactory.CreateDbContext();
+    //private async Task HandleCategoryClear()
+    //{
+    //    using var context = ContextFactory.CreateDbContext();
 
+    //    if (!CheckedCategories.Any())
+    //    {
+    //        SuccessMessage = null;
+    //        ErrorMessage = "You're categories is empty, there is nothing to clear. Please start adding categories.";
+    //        return;
+    //    }
 
-        var isOk = await JS.InvokeAsync<bool>("confirm", $"Are you sure you want to reset all Type and Categories from the company? There's no going back.");
+    //    var isOk = await JS.InvokeAsync<bool>("confirm", $"Are you sure you want to reset all Type and Categories from the company? There's no going back.");
 
-        if (isOk)
-        {
-            try
-            {
-                foreach (var cat in Categories)
-                {
-                    //cat.Is_Checked = false;
-                    //context.Update(cat);
-                    //await context.SaveChangesAsync();
-                    CheckedCategories.RemoveAll(check => check.Id == cat.Id);
-                }
-                foreach (var type in Types)
-                {
-                    //type.Is_Checked = false;
-                    //context.Update(type);
-                    //await context.SaveChangesAsync();
-                    CheckedTypes.RemoveAll(type => type.Id == type.Id);
+    //    if (isOk)
+    //    {
+    //        try
+    //        {
+    //            foreach (var cat in Categories)
+    //            {
+    //                //cat.Is_Checked = false;
+    //                //context.Update(cat);
+    //                //await context.SaveChangesAsync();
+    //                CheckedCategories.RemoveAll(check => check.Id == cat.Id);
+    //            }
+    //            foreach (var type in Types)
+    //            {
+    //                //type.Is_Checked = false;
+    //                //context.Update(type);
+    //                //await context.SaveChangesAsync();
+    //                CheckedTypes.RemoveAll(type => type.Id == type.Id);
 
-                }
+    //            }
 
-                foreach (var comp in CurrentCompanyCategories)
-                {
-                    context.Remove(comp);
-                    await context.SaveChangesAsync();
-                }
-
-                await LoadCategories();
-                await LoadData();
-                SuccessMessage = "Company Types and Categories Reset Successfully!";
-            }
-            catch
-            {
-                await LoadData();
-                ErrorMessage = "There was an error while resetting Company Types and Categories. Please try again.";
-            }
-    }
-    }
+    //            foreach (var comp in CurrentCompanyCategories)
+    //            {
+    //                context.Remove(comp);
+    //                await context.SaveChangesAsync();
+    //            }
+                
+    //            await LoadCategories();
+    //            await LoadData();
+    //            SuccessMessage = "Company Types and Categories Reset Successfully!";
+    //        }
+    //        catch
+    //        {
+    //            await LoadData();
+    //            ErrorMessage = "There was an error while resetting Company Types and Categories. Please try again.";
+    //        }
+    //}
+    //}
 
  
 }

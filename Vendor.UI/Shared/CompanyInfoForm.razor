@@ -16,7 +16,7 @@
         <InputText @bind-Value="@Company.Name" class="form-control name mb-2" id="company-name" name="company-name" type="text" />
 
         <label for="id" class="fw-bold">Social Security Number or Federal I.D Number</label>
-        <InputNumber @bind-Value="@Company.Fed_Id_SSN" id="id" class="form-control id mb-2" type="text" name="federal-id-or-ssn-number" />
+        <InputText @bind-Value="@Company.Fed_Id_SSN" id="id" class="form-control id mb-2" type="text" name="federal-id-or-ssn-number" />
 
         <label class="fw-bold" for="supp-cat">Supplier Category</label>
         <InputSelect @bind-Value="@Company.Supplier_Category" name="supplier-category" class="form-select supp-cat gray mb-2" id="supp-cat">

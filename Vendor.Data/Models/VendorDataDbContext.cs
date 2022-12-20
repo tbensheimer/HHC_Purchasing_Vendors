@@ -1,8 +1,15 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using EntityFrameworkCore.EncryptColumn.Extension;
+using EntityFrameworkCore.EncryptColumn.Interfaces;
+using EntityFrameworkCore.EncryptColumn.Util;
+
+
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Tracing;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -10,8 +17,16 @@ namespace Vendor.Data.Models
 {
     public class VendorDataDbContext : DbContext
     {
+
+        private readonly IEncryptionProvider _provider;
+
         public VendorDataDbContext(
-           DbContextOptions<VendorDataDbContext> options) : base(options) { }
+           DbContextOptions<VendorDataDbContext> options) : base(options) {
+  
+
+            this._provider = new GenerateEncryptionProvider("asdfasdfasdfasdf");  //need to create own 128 bit encryption key AND it only encrypts strings
+
+        }
 
         public DbSet<Company> Companies { get; set; } = default!;
         public DbSet<Account> Accounts { get; set; } = default!;
@@ -27,18 +42,27 @@ namespace Vendor.Data.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.UseEncryption(this._provider);
+
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<Company>().HasData(
-                new Company { Id = 1, Name = "HP Inc", Fed_Id_SSN = 444444, Website = "www.HP.com", Diversity_Certification = "None", Supplier_Category = "US Entity", Description_Goods_Services = "Products" },
-                new Company { Id = 2, Name = "Lambo", Fed_Id_SSN = 44454, Website = "www.lambo.com", Diversity_Certification = "DutyCert", Supplier_Category = "Foreign Entity", Description_Goods_Services = "Product cars" },
-                 new Company { Id = 3, Name = "HP Inc", Fed_Id_SSN = 444444, Website = "www.HP.com", Diversity_Certification = "None", Supplier_Category = "US Entity", Description_Goods_Services = "Products" },
-                new Company { Id = 4, Name = "Lambo", Fed_Id_SSN = 44454, Website = "www.lambo.com", Diversity_Certification = "DutyCert", Supplier_Category = "Foreign Entity", Description_Goods_Services = "Product cars" },
-                 new Company { Id = 5, Name = "HP Inc", Fed_Id_SSN = 444444, Website = "www.HP.com", Diversity_Certification = "None", Supplier_Category = "US Entity", Description_Goods_Services = "Products" },
-                new Company { Id = 6, Name = "Lambo", Fed_Id_SSN = 44454, Website = "www.lambo.com", Diversity_Certification = "DutyCert", Supplier_Category = "Foreign Entity", Description_Goods_Services = "Product cars" },
-                 new Company { Id = 7, Name = "HP Inc", Fed_Id_SSN = 444444, Website = "www.HP.com", Diversity_Certification = "None", Supplier_Category = "US Entity", Description_Goods_Services = "Products" },
-                new Company { Id = 8, Name = "Lambo", Fed_Id_SSN = 44454, Website = "www.lambo.com", Diversity_Certification = "DutyCert", Supplier_Category = "Foreign Entity", Description_Goods_Services = "Product cars" }
+                new Company { Id = 1, Name = "HP Inc", Fed_Id_SSN = "444444", Website = "www.HP.com", Diversity_Certification = "None", Supplier_Category = "US Entity", Description_Goods_Services = "Products" },
+                new Company { Id = 2, Name = "Lambo", Fed_Id_SSN = "44454", Website = "www.lambo.com", Diversity_Certification = "DutyCert", Supplier_Category = "Foreign Entity", Description_Goods_Services = "Product cars" },
+                 new Company { Id = 3, Name = "HP Inc", Fed_Id_SSN = "444444", Website = "www.HP.com", Diversity_Certification = "None", Supplier_Category = "US Entity", Description_Goods_Services = "Products" },
+                new Company { Id = 4, Name = "Lambo", Fed_Id_SSN = "44454", Website = "www.lambo.com", Diversity_Certification = "DutyCert", Supplier_Category = "Foreign Entity", Description_Goods_Services = "Product cars" },
+                 new Company { Id = 5, Name = "HP Inc", Fed_Id_SSN = "444444", Website = "www.HP.com", Diversity_Certification = "None", Supplier_Category = "US Entity", Description_Goods_Services = "Products" },
+                new Company { Id = 6, Name = "Lambo", Fed_Id_SSN = "44454", Website = "www.lambo.com", Diversity_Certification = "DutyCert", Supplier_Category = "Foreign Entity", Description_Goods_Services = "Product cars" },
+                 new Company { Id = 7, Name = "HP Inc", Fed_Id_SSN = "444444", Website = "www.HP.com", Diversity_Certification = "None", Supplier_Category = "US Entity", Description_Goods_Services = "Products" },
+                new Company { Id = 8, Name = "Lambo", Fed_Id_SSN = "44454", Website = "www.lambo.com", Diversity_Certification = "DutyCert", Supplier_Category = "Foreign Entity", Description_Goods_Services = "Product cars" }
                 );
+
+            modelBuilder.Entity<Company>().HasData(
+              new Company { Id = 1163, Name = "Bees", Fed_Id_SSN = "444444", Website = "www.HP.com", Diversity_Certification = "None", Supplier_Category = "US Entity", Description_Goods_Services = "Products" }
+             
+              );
+
+
 
             modelBuilder.Entity<Account>().HasData(
                 new Account { Id = 1, CompanyId = 1, Email = "HP@gmail.com", Password = "123456" },

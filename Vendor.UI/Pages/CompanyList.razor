@@ -206,7 +206,6 @@
     }
 
 
-
     private async Task LoadData()
     {
         //if (CurrentPage is null or < 1)
@@ -313,7 +312,7 @@
     private async Task HandleCompanyDisabled(int Id, bool Disabled)
     {
         using var context = ContextFactory.CreateDbContext();
-        Company = await context.Companies.FirstOrDefaultAsync(comp => comp.Id == Id);
+        Company = Companies.FirstOrDefault(comp => comp.Id == Id);
 
         if (Disabled && Company is not null)
         {
@@ -327,7 +326,7 @@
             context.Update(Company);
             await context.SaveChangesAsync();
         }
-
+        StateHasChanged();
     }
 
 }

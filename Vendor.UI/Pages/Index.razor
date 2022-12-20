@@ -1,40 +1,41 @@
 ﻿@page "/"
+@inject IDbContextFactory<VendorDataDbContext> ContextFactory
 
 <PageTitle>Home</PageTitle>
 
 
 <main class="main">
 
-  <h1 class="todo fs-3 fw-bold mt-4 mb-4">Hello Admin. What would you like to do?</h1>
+    <h1 class="todo fs-3 fw-bold mt-4 mb-4">Hello Admin. What would you like to do?</h1>
 
-  <div class="grid mb-4">
+    <div class="grid mb-4">
 
-  <div class="panel notifications-panel">
-    <div class="layout">
-<h2 class="notif-header fs-4 fw-bold title">Notifications</h2>
-<p class="notif-description desc">Send or Manage Notifications</p>
-</div>
-<span class="bell"><i alt="bell icon" class="fa-solid fa-bell fa-2x"></i></span>
-<a href="/notifications" class="stretched-link" ></a>
-  </div>
+        <div class="panel notifications-panel">
+            <div class="layout">
+                <h2 class="notif-header fs-4 fw-bold title">Notifications</h2>
+                <p class="notif-description desc">Send or Manage Notifications</p>
+            </div>
+            <span class="bell"><i alt="bell icon" class="fa-solid fa-bell fa-2x"></i></span>
+            <a href="/notifications" class="stretched-link"></a>
+        </div>
 
-  <div class="panel company-panel">
-    <div class="layout">
-    <h2 class="company-header fs-4 fw-bold title">Companies/Vendors</h2>
-    <p class="company-description desc">Manage companies that have registered</p>
-    </div>
-    <span class="building"><i alt="building icon" class="fa-solid fa-building fa-2x"></i></span>
-    <a href="/companies" class="stretched-link" ></a>
-      </div>
+        <div class="panel company-panel">
+            <div class="layout">
+                <h2 class="company-header fs-4 fw-bold title">Companies/Vendors</h2>
+                <p class="company-description desc">Manage companies that have registered</p>
+            </div>
+            <span class="building"><i alt="building icon" class="fa-solid fa-building fa-2x"></i></span>
+            <a href="/companies" class="stretched-link"></a>
+        </div>
 
-  <div class="panel type-cat-panel">
-    <div class="layout">
-      <h2 class="notif-header fs-4 fw-bold title">Vendor Types/Categories</h2>
-      <p class="notif-description desc">Manage vendor types that companies can subscribe to</p>
-      </div>
-      <span class="briefcase"><i alt="briefcase icon" class="fa-solid fa-briefcase fa-2x"></i></span>
+        <div class="panel type-cat-panel">
+            <div class="layout">
+                <h2 class="notif-header fs-4 fw-bold title">Vendor Types/Categories</h2>
+                <p class="notif-description desc">Manage vendor types that companies can subscribe to</p>
+            </div>
+            <span class="briefcase"><i alt="briefcase icon" class="fa-solid fa-briefcase fa-2x"></i></span>
             <a href="/types-and-categories-list" class="stretched-link"></a>
         </div>
 
-</div>
+    </div>
 </main>

@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Vendor.Data.Models
 {
@@ -9,9 +10,9 @@ namespace Vendor.Data.Models
         [Required]
         [StringLength(500)]
         public string? Type_Name { get; set; } = default!;
-
-        public bool Is_Checked { get; set; }
         public List<Company>? Companies { get; set; }
+        [NotMapped]
+        public bool Is_Checked { get; set; }
 
     }
 }

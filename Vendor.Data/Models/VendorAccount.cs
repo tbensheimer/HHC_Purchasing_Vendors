@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Vendor.Data.Models
 {
-    public class Account
+    public class VendorAccount
     {
         [Required]
          public int Id { get; set; }

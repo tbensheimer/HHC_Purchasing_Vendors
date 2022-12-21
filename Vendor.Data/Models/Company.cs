@@ -37,8 +37,6 @@ namespace Vendor.Data.Models
 
         public bool Is_Deleted { get; set; }
 
-        public bool Is_Checked { get; set; }
-
 
     }
 

@@ -29,7 +29,7 @@ namespace Vendor.Data.Models
         }
 
         public DbSet<Company> Companies { get; set; } = default!;
-        public DbSet<Account> Accounts { get; set; } = default!;
+        public DbSet<VendorAccount> Accounts { get; set; } = default!;
         public DbSet<Address> Addresses { get; set; } = default!;
         public DbSet<Authorized_Contacts> Authorized_Contacts { get; set; } = default!;
         public DbSet<Business_Categories> Business_Categories { get; set; } = default!;
@@ -57,16 +57,10 @@ namespace Vendor.Data.Models
                 new Company { Id = 8, Name = "Lambo", Fed_Id_SSN = "44454", Website = "www.lambo.com", Diversity_Certification = "DutyCert", Supplier_Category = "Foreign Entity", Description_Goods_Services = "Product cars" }
                 );
 
-            modelBuilder.Entity<Company>().HasData(
-              new Company { Id = 1163, Name = "Bees", Fed_Id_SSN = "444444", Website = "www.HP.com", Diversity_Certification = "None", Supplier_Category = "US Entity", Description_Goods_Services = "Products" }
-             
-              );
 
-
-
-            modelBuilder.Entity<Account>().HasData(
-                new Account { Id = 1, CompanyId = 1, Email = "HP@gmail.com", Password = "123456" },
-                new Account { Id = 2, CompanyId = 2, Email = "Lambo@yahoo.com", Password = "1232455"}
+            modelBuilder.Entity<VendorAccount>().HasData(
+                new VendorAccount { Id = 1, CompanyId = 1, Email = "HP@gmail.com", Password = "123456" },
+                new VendorAccount { Id = 2, CompanyId = 2, Email = "Lambo@yahoo.com", Password = "1232455"}
                 );
 
             modelBuilder.Entity<Address>().HasData(
@@ -108,8 +102,8 @@ namespace Vendor.Data.Models
                 );
 
             modelBuilder.Entity<Notifications>().HasData(
-                new Notifications { Id = 1, Title = "Need Supplies", Body = "HP please send us some supplies.", Date_Sent = DateTime.Now, Created_By = "Bill", Reoccuring_Notification = false},
-                new Notifications { Id = 2, Title = "Need Cars", Body = "Lambo we need 10 cars by next month. Will pay once delivered.", Date_Sent = DateTime.Now, Created_By = "Bill", Reoccuring_Notification = true, Days_Reoccuring = 7 }
+                new Notifications { Id = 1, Title = "Need Supplies", Body = "HP please send us some supplies.", Date_Sent = DateTime.Now, Created_By = "Bill"},
+                new Notifications { Id = 2, Title = "Need Cars", Body = "Lambo we need 10 cars by next month. Will pay once delivered.", Date_Sent = DateTime.Now, Created_By = "Bill" }
                 );
 
             modelBuilder.Entity<Notification_Recipient>().HasData(
@@ -117,7 +111,6 @@ namespace Vendor.Data.Models
                 new Notification_Recipient { Id = 2, NotificationsId = 2, CompanyId = 2 }
                 );
         }
-
 
     }
 }

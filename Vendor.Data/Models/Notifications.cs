@@ -16,7 +16,6 @@ namespace Vendor.Data.Models
 
         [StringLength(300)]
         public string? Created_By { get; set; } = default!;
-        public bool? Reoccuring_Notification { get; set; }
-        public int? Days_Reoccuring { get; set; }
+   
     }
 }

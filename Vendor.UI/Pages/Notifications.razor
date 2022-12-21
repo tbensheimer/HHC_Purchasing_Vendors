@@ -365,22 +365,19 @@
                         @foreach (var file in uploadedFiles)
                         {
                             <div style="border: solid black 1px; padding: 5px; margin: 5px; border-radius: 5px; display: flex; justify-content: space-between; align-items: center;">
-                                @if(file.UploadedPercentage == 100)
+                                @if (file.UploadedPercentage == 100)
                                 {
-                                <button style="color: blue; text-decoration: underline;" type="button" class="btn btn-sm btn-light">@file.FileName</button> 
+                                    <button style="width: 25%; color: blue; text-decoration: underline;" type="button" class="btn btn-sm btn-light">@file.FileName</button>
                                 }
                                 else
                                 {
-                                @file.FileName
+                                    @file.FileName
                                 }
                                 <progress value="@file.UploadedBytes" max="@file.Size"></progress>
                                 @file.UploadedPercentage.ToString("F1")%
                                 (@FormatBytes(file.UploadedBytes) / @FormatBytes(file.Size))
                                 <button @onclick="() => RemoveFile(file)" type="button" class="btn btn-sm btn-light"><span><i style="color: gray;" class="fa-solid fa-trash"></i></span></button>
                             </div>
-
-                            var uploadedFile = loadedFiles.FirstOrDefault(loaded => loaded.Name == file.FileName);
-
 
                         }
                     </div>
@@ -417,6 +414,7 @@
                     <tr class="header-row">
                         <th>Subject</th>
                         <th>Content</th>
+                        <th>Attachments</th>
                         <th>Sent To:</th>
                         <th>Date Sent:</th>
                     </tr>
@@ -434,6 +432,7 @@
                                         @((MarkupString)notifs.Body.Substring(0, 15))
                                     </button>
                                 </td>
+                                <td><button class="btn btn-secondary btn-sm">Click to see Attachments (not done)</button></td>
                                 <td>
                                     <button class="btn btn-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#emailRecipients" @onclick="() => ModalShowEmailRecipients(notifs.Id)">Click to see Recipients</button>
                                 </td>
@@ -632,52 +631,32 @@
             foreach (var file in files)
             {
 
-                //     using var ms = new MemoryStream();
-
                 using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
                 while (await stream.ReadAsync(buffer) is int read && read > 0)
                 {
                     uploadedFiles[startIndex].UploadedBytes += read;
-                    // TODO Do something with the file chunk, such as save it
-                    // to a database or a local file system
+                    //    // TODO Do something with the file chunk, such as save it
+                    //    // to a database or a local file system
 
-                    //
                     var readData = buffer.AsMemory().Slice(0, read);
-                    //    await ms.WriteAsync(readData);
 
                 }
-
-                var fileByte = new byte[stream.Length];
-
-                fileContents = new MemoryStream(fileByte);
-                await stream.CopyToAsync(fileContents);
-
-                var bytebuffer = fileContents.ToArray();
-
-                var byteString = Convert.ToBase64String(bytebuffer);
-                var conversion = Convert.FromBase64String(byteString);
-
-                // writer = new StreamWriter(fileContents);
-                //using var writer = new StreamWriter(fileContents);
-
-                //writer.WriteLine("Comma,Separated,Values,...");
-                //writer.Flush();
-
-                //writer.Flush();
-
-                fileContents.Position = 0;
-
-                message.Attachments.Add(new Attachment(fileContents, file.Name));
-
-                //fs.Close();
-                //fs.Dispose();
-                //binaryReader.Close();
 
                 startIndex++;
             }
 
+            foreach (var file in files)
+            {
 
+                MemoryStream ms = new();
 
+                await file.OpenReadStream(1024 * 1024 * 32).CopyToAsync(ms);
+
+                ms.Position = 0;
+                message.Attachments.Add(new Attachment(ms, file.Name));
+
+                startIndex++;
+            }
 
 
         }
@@ -798,6 +777,7 @@
                 Notif = new Data.Models.Notifications();
                 Notif.Title = SubjectLine;
                 Notif.Body = "To Recipients," + QuillContent + "<img width='150' src='logo.PNG' />";
+
                 Notif.Date_Sent = DateTime.Now;
                 Notif.Created_By = "test@hhcorp.org";
 
